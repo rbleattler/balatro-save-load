@@ -24,7 +24,7 @@
     <SolidColorBrush x:Key="ListBoxItemSelectedForegroundBrush" Color="#FFFFFFFF"/>
 
     <!-- CheckBox colors -->
-    <SolidColorBrush x:Key="CheckBoxBackgroundBrush" Color="#FF333337"/>
+    <SolidColorBrush x:Key="CheckBoxBackgroundBrush" Color="DimGray"/>
     <SolidColorBrush x:Key="CheckBoxBorderBrush" Color="#FF555555"/>
     <SolidColorBrush x:Key="CheckBoxForegroundBrush" Color="#FFE8E8E8"/>
 

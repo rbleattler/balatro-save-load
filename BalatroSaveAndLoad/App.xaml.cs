@@ -3,40 +3,52 @@ using System.Data;
 using System.Windows;
 using Microsoft.Win32;
 using System;
+using System.Windows.Threading;
 
-namespace BalatroSaveAndLoad
-{
-    public partial class App : Application
-    {
-        protected override void OnStartup(StartupEventArgs e)
-        {
+namespace BalatroSaveAndLoad {
+    public partial class App : Application {
+        private DispatcherTimer? _themeCheckTimer;
+        private bool? _lastIsDark = null;
+
+        protected override void OnStartup(StartupEventArgs e) {
             base.OnStartup(e);
 
-            // Detect system theme
-            bool isDark = IsSystemInDarkMode();
+            // Detect and apply system theme at startup
+            ApplySystemTheme();
 
-            // Swap theme dictionary
-            var dicts = Resources.MergedDictionaries;
-            dicts.Clear();
-            if (isDark)
-                dicts.Add(new ResourceDictionary { Source = new Uri("Themes/Dark.xaml", UriKind.Relative) });
-            else
-                dicts.Add(new ResourceDictionary { Source = new Uri("Themes/Light.xaml", UriKind.Relative) });
+            // Start a timer to check for theme changes every 2 seconds
+            _themeCheckTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+            _themeCheckTimer.Tick += ThemeCheckTimer_Tick;
+            _themeCheckTimer.Start();
         }
 
-        private static bool IsSystemInDarkMode()
-        {
-            try
-            {
-                using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
-                if (key != null)
-                {
-                    object? value = key.GetValue("AppsUseLightTheme");
-                    if (value is int i)
-                        return i == 0;
-                }
+        private void ThemeCheckTimer_Tick(object? sender, EventArgs e) { ApplySystemTheme(); }
+
+        private void ApplySystemTheme() {
+            var isDark = IsSystemInDarkMode();
+            if (_lastIsDark == isDark)
+                return;
+            _lastIsDark = isDark;
+            var dicts = Resources.MergedDictionaries;
+            dicts.Clear();
+            dicts.Add(
+                      isDark
+                          ? new ResourceDictionary { Source = new Uri("Themes/Dark.xaml", UriKind.Relative) }
+                          : new ResourceDictionary { Source = new Uri("Themes/Light.xaml", UriKind.Relative) }
+                     );
+        }
+
+        private static bool IsSystemInDarkMode() {
+            try {
+                using var key =
+                    Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+                var value = key?.GetValue("AppsUseLightTheme");
+                if (value is int i) return i == 0;
             }
-            catch { }
+            catch {
+                // Handle exceptions if necessary
+            }
+
             return false; // Default to light
         }
     }

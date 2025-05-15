@@ -30,10 +30,9 @@ namespace BalatroSaveAndLoad {
             get => _status;
             set
                 {
-                    if (_status != value) {
-                        _status = value;
-                        OnPropertyChanged();
-                    }
+                    if (_status == value) return;
+                    _status = value;
+                    OnPropertyChanged();
                 }
         }
 
@@ -43,10 +42,9 @@ namespace BalatroSaveAndLoad {
             get => _countdownText;
             set
                 {
-                    if (_countdownText != value) {
-                        _countdownText = value;
-                        OnPropertyChanged();
-                    }
+                    if (_countdownText == value) return;
+                    _countdownText = value;
+                    OnPropertyChanged();
                 }
         }
 
@@ -56,28 +54,27 @@ namespace BalatroSaveAndLoad {
             get => _countdownVisibility;
             set
                 {
-                    if (_countdownVisibility != value) {
-                        _countdownVisibility = value;
-                        OnPropertyChanged();
-                    }
+                    if (_countdownVisibility == value) return;
+                    _countdownVisibility = value;
+                    OnPropertyChanged();
                 }
         }
 
-        private string _directoryPath = Path.Combine(
-                                                     Environment.GetFolderPath(
-                                                                               Environment.SpecialFolder.ApplicationData
-                                                                              ),
-                                                     "BalatroSaveAndLoad"
-                                                    );
+        private readonly string _directoryPath = Path.Combine(
+                                                              Environment.GetFolderPath(
+                                                                   Environment.SpecialFolder.ApplicationData
+                                                                  ),
+                                                              "BalatroSaveAndLoad"
+                                                             );
 
-        private DispatcherTimer _timer = new DispatcherTimer();
-        private DispatcherTimer _statusResetTimer = new DispatcherTimer();
-        private DispatcherTimer _errorCheckTimer = new DispatcherTimer();
-        private DispatcherTimer _countdownTimer = new DispatcherTimer();
-        private DispatcherTimer _cleanupTimer = new DispatcherTimer();
-        private DispatcherTimer _balatroCheckTimer = new DispatcherTimer();
+        private readonly DispatcherTimer _timer = new DispatcherTimer();
+        private readonly DispatcherTimer _statusResetTimer = new DispatcherTimer();
+        private readonly DispatcherTimer _errorCheckTimer = new DispatcherTimer();
+        private readonly DispatcherTimer _countdownTimer = new DispatcherTimer();
+        private readonly DispatcherTimer _cleanupTimer = new DispatcherTimer();
+        private readonly DispatcherTimer _balatroCheckTimer = new DispatcherTimer();
 
-        // Track current error state
+        // Track the current error state
         private bool _hasActiveError = false;
         private string _currentErrorMessage = string.Empty;
         private Func<bool>? _errorConditionChecker = null;
@@ -92,16 +89,15 @@ namespace BalatroSaveAndLoad {
 
         private bool _isBalatroRunning = false;
 
-        public bool IsBalatroRunning {
+        bool IsBalatroRunning {
             get => _isBalatroRunning;
             set
                 {
-                    if (_isBalatroRunning != value) {
-                        _isBalatroRunning = value;
-                        OnPropertyChanged();
-                        OnPropertyChanged(nameof(BalatroRunningStatus));
-                        OnPropertyChanged(nameof(IsSaveEnabled));
-                    }
+                    if (_isBalatroRunning == value) return;
+                    _isBalatroRunning = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(BalatroRunningStatus));
+                    OnPropertyChanged(nameof(IsSaveEnabled));
                 }
         }
 
@@ -109,7 +105,7 @@ namespace BalatroSaveAndLoad {
         public bool IsSaveEnabled => IsBalatroRunning;
 
         private DebugWindow? _debugWindow;
-        private ObservableCollection<string> _debugLog = new ObservableCollection<string>();
+        private readonly ObservableCollection<string> _debugLog = [];
 
         public MainWindow() {
             InitializeComponent();
@@ -128,7 +124,7 @@ namespace BalatroSaveAndLoad {
             _errorCheckTimer.Tick += ErrorCheckTimer_Tick;
             _errorCheckTimer.Start(); // Start the error check timer
 
-            // Configure countdown timer
+            // Configure a countdown timer
             _countdownTimer.Interval = TimeSpan.FromSeconds(1);
             _countdownTimer.Tick += CountdownTimer_Tick;
 
@@ -136,16 +132,16 @@ namespace BalatroSaveAndLoad {
             _cleanupTimer.Interval = TimeSpan.FromHours(1); // Check once per hour
             _cleanupTimer.Tick += CleanupTimer_Tick;
 
-            // Setup Balatro running check timer
+            // Set up Balatro running check timer
             _balatroCheckTimer.Interval = TimeSpan.FromSeconds(2);
             _balatroCheckTimer.Tick += BalatroCheckTimer_Tick;
             _balatroCheckTimer.Start();
 
             LoadList();
 
-            for (int i = 1; i <= 10; i++) {
-                ProfileComboBox.Items.Add(String.Format("Profile {0}", i));
-                MinuteComboBox.Items.Add(String.Format("{0} minutes", i));
+            for (var i = 1; i <= 10; i++) {
+                ProfileComboBox.Items.Add($"Profile {i}");
+                MinuteComboBox.Items.Add($"{i} minutes");
             }
 
             // Setup cleanup options
@@ -171,7 +167,7 @@ namespace BalatroSaveAndLoad {
             UpdateStatusDisplay(false);
         }
 
-        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) {
+        void OnPropertyChanged([CallerMemberName] string? propertyName = null) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
@@ -197,10 +193,9 @@ namespace BalatroSaveAndLoad {
             FlashWindow();
 
             // Reset status after a delay only if no condition checker is provided
-            if (_errorConditionChecker == null) {
-                _statusResetTimer.Stop();
-                _statusResetTimer.Start();
-            }
+            if (_errorConditionChecker != null) return;
+            _statusResetTimer.Stop();
+            _statusResetTimer.Start();
         }
 
         private void SetSuccessStatus(string message) {
@@ -222,42 +217,40 @@ namespace BalatroSaveAndLoad {
             _statusResetTimer.Stop();
 
             // Only reset to "Ready" if there's no active error
-            if (!_hasActiveError) {
-                Status = "Ready";
-                UpdateStatusDisplay(false);
-            }
+            if (_hasActiveError) return;
+            Status = "Ready";
+            UpdateStatusDisplay(false);
         }
 
         private void ErrorCheckTimer_Tick(object? sender, EventArgs e) {
             // Check if there's an active error with a condition checker
-            if (_hasActiveError && _errorConditionChecker != null) {
-                try {
-                    // Check if the error condition is resolved
-                    bool isResolved = _errorConditionChecker();
-                    if (isResolved) {
-                        // Error is resolved, clear error state
-                        _hasActiveError = false;
-                        _currentErrorMessage = string.Empty;
-                        _errorConditionChecker = null;
-                        Status = "Ready";
-                        UpdateStatusDisplay(false);
-                    }
-                }
-                catch {
-                    // If checking causes an exception, keep the error state
-                }
+            if (!_hasActiveError ||
+                _errorConditionChecker == null)
+                return;
+            try {
+                // Check if the error condition is resolved
+                var isResolved = _errorConditionChecker();
+                if (!isResolved) return;
+                // Error is resolved, clear error state
+                _hasActiveError = false;
+                _currentErrorMessage = string.Empty;
+                _errorConditionChecker = null;
+                Status = "Ready";
+                UpdateStatusDisplay(false);
+            }
+            catch {
+                // If checking causes an exception, keep the error state
             }
         }
 
         private void CountdownTimer_Tick(object? sender, EventArgs e) {
-            if (AutoCheckBox.IsChecked == true) {
-                TimeSpan timeLeft = _nextAutoSaveTime - DateTime.Now;
-                if (timeLeft.TotalSeconds <= 0) {
-                    // We've reached the time - timer event will handle the save
-                    // Just update for next interval
-                    UpdateNextAutoSaveTime();
-                } else { UpdateCountdownDisplay(timeLeft); }
-            }
+            if (AutoCheckBox.IsChecked != true) return;
+            var timeLeft = _nextAutoSaveTime - DateTime.Now;
+            if (timeLeft.TotalSeconds <= 0) {
+                // We've reached the time - timer event will handle the save
+                // Just update for next interval
+                UpdateNextAutoSaveTime();
+            } else { UpdateCountdownDisplay(timeLeft); }
         }
 
         private void UpdateCountdownDisplay(TimeSpan timeLeft) {
@@ -282,14 +275,14 @@ namespace BalatroSaveAndLoad {
 
         private static void FlashWindow(Window window) {
             // Get the window handle
-            IntPtr windowHandle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
+            var windowHandle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
             // Flash the window in the taskbar
             FlashWindow(windowHandle, true);
         }
 
         void LoadList() {
             var files = Directory.GetFileSystemEntries(_directoryPath, "*.jkr");
-            var fileNames = files.Select(file => Path.GetFileName(file)).OrderByDescending(file => file);
+            var fileNames = files.Select(Path.GetFileName).OrderByDescending(file => file);
             FileListBox.ItemsSource = fileNames;
             FileListBox.SelectedIndex = -1; // Clear selection
         }
@@ -312,8 +305,8 @@ namespace BalatroSaveAndLoad {
             }
 
             DebugLog("Attempting to save...");
-            var deckNameKey = "[\"BACK\"]={[\"name\"]=\"";
-            var roundKey = "[\"round\"]=";
+            const string deckNameKey = "[\"BACK\"]={[\"name\"]=\"";
+            const string roundKey = "[\"round\"]=";
             var saveFile = GetCurrentSaveFile();
             var profileNumber = ProfileComboBox.SelectedIndex + 1;
             try {
@@ -326,29 +319,24 @@ namespace BalatroSaveAndLoad {
                     return;
                 }
 
-                using (FileStream compressedStream = new FileStream(saveFile, FileMode.Open, FileAccess.Read))
-                    using (MemoryStream outputStream = new MemoryStream())
-                        using (DeflateStream deflateStream =
+                using (var compressedStream = new FileStream(saveFile, FileMode.Open, FileAccess.Read))
+                    using (var outputStream = new MemoryStream())
+                        using (var deflateStream =
                                new DeflateStream(compressedStream, CompressionMode.Decompress)) {
                             deflateStream.CopyTo(outputStream);
-                            byte[] decompressedBytes = outputStream.ToArray();
+                            var decompressedBytes = outputStream.ToArray();
                             var result = Encoding.UTF8.GetString(decompressedBytes);
-                            var deckNameStart = result.IndexOf(deckNameKey) + deckNameKey.Length;
-                            var deckNameEnd = result.IndexOf("\"", deckNameStart);
+                            var deckNameStart = result.IndexOf(deckNameKey, StringComparison.Ordinal) +
+                                                deckNameKey.Length;
+                            var deckNameEnd = result.IndexOf('"', deckNameStart);
                             var deckName = result.Substring(deckNameStart, deckNameEnd - deckNameStart);
-                            var roundStart = result.IndexOf(roundKey) + roundKey.Length;
-                            var roundEnd = result.IndexOf(",", roundStart);
+                            var roundStart = result.IndexOf(roundKey, StringComparison.Ordinal) + roundKey.Length;
+                            var roundEnd = result.IndexOf(',', roundStart);
                             var round = result.Substring(roundStart, roundEnd - roundStart);
                             var time = File.GetLastWriteTime(saveFile);
 
-                            var fileName = String.Format(
-                                                         "P{0} {1:yyyy-MM-dd HH-mm-ss} {2} Round {3}.jkr",
-                                                         profileNumber,
-                                                         time,
-                                                         deckName,
-                                                         round
-                                                        );
-                            string filePath = Path.Combine(_directoryPath, fileName);
+                            var fileName = $"P{profileNumber} {time:yyyy-MM-dd HH-mm-ss} {deckName} Round {round}.jkr";
+                            var filePath = Path.Combine(_directoryPath, fileName);
 
                             if (!File.Exists(filePath)) {
                                 File.Copy(saveFile, filePath, false);
@@ -413,33 +401,39 @@ namespace BalatroSaveAndLoad {
         }
 
         private void Load_Button_Click(object sender, RoutedEventArgs e) {
-            if (FileListBox.SelectedItems.Count == 1) { Load(); } else if (FileListBox.SelectedItems.Count == 0) {
-                SetErrorStatus("Please select a save file to load");
-                DebugLog("Load failed: No save file selected.");
-            } else {
-                SetErrorStatus("Please select only one save file to load");
-                DebugLog("Load failed: Multiple save files selected.");
+            switch (FileListBox.SelectedItems.Count) {
+                case 1: Load(); break;
+                case 0:
+                    SetErrorStatus("Please select a save file to load");
+                    DebugLog("Load failed: No save file selected.");
+                    break;
+                default:
+                    SetErrorStatus("Please select only one save file to load");
+                    DebugLog("Load failed: Multiple save files selected.");
+                    break;
             }
         }
 
         private void FileListBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             LoadButton.IsEnabled = FileListBox.SelectedItems.Count == 1;
 
-            // If error was about needing to select a file, check if it's resolved
-            if (_hasActiveError &&
-                _currentErrorMessage.Contains("select") &&
-                FileListBox.SelectedItems.Count == 1) {
-                _hasActiveError = false;
-                Status = "Ready";
-                UpdateStatusDisplay(false);
-            }
+            // If an error was about needing to select a file, check if it's resolved
+            if (!_hasActiveError ||
+                !_currentErrorMessage.Contains("select") ||
+                FileListBox.SelectedItems.Count != 1)
+                return;
+            _hasActiveError = false;
+            Status = "Ready";
+            UpdateStatusDisplay(false);
         }
 
-        private void CheckBox_Checked(object sender, RoutedEventArgs e) { UpdateAutoSave(); }
+        void CheckBox_Checked(object sender, RoutedEventArgs e) { UpdateAutoSave(); }
+
+        static string FormatMinutesLabel(double minutes) { return Math.Abs(minutes - 1) < 0 ? "minutes" : "minute"; }
 
         void UpdateAutoSave() {
             if (AutoCheckBox.IsChecked == true) {
-                double minutes = GetSelectedMinutes();
+                var minutes = GetSelectedMinutes();
                 if (minutes > 0) {
                     _autoSaveIntervalMinutes = minutes;
                     if (IsBalatroRunning) {
@@ -454,8 +448,9 @@ namespace BalatroSaveAndLoad {
                         CountdownVisibility = Visibility.Collapsed;
                     }
 
-                    SetSuccessStatus($"Auto-save enabled: every {minutes} {(minutes == 1 ? "minute" : "minutes")}");
-                    DebugLog($"Auto-save enabled: every {minutes} {(minutes == 1 ? "minute" : "minutes")}");
+                    var minutesLabel = FormatMinutesLabel(minutes);
+                    SetSuccessStatus($"Auto-save enabled: every {minutes} {minutesLabel}");
+                    DebugLog($"Auto-save enabled: every {minutes} {minutesLabel}");
                 } else {
                     AutoCheckBox.IsChecked = false;
                     _countdownTimer.Stop();
@@ -478,14 +473,14 @@ namespace BalatroSaveAndLoad {
                 MinuteComboBox.SelectedIndex < 10) { return MinuteComboBox.SelectedIndex + 1; }
 
             // Try to parse custom input
-            string input = MinuteComboBox.Text.Trim();
+            var input = MinuteComboBox.Text.Trim();
 
             // Extract number from potential format like "X minutes"
-            Match match = Regex.Match(input, @"^(\d+\.?\d*)\s*(?:minutes?)?$", RegexOptions.IgnoreCase);
+            var match = Regex.Match(input, @"^(\d+\.?\d*)\s*(?:minutes?)?$", RegexOptions.IgnoreCase);
             if (match.Success) {
-                if (double.TryParse(match.Groups[1].Value, out double result) &&
+                if (double.TryParse(match.Groups[1].Value, out var result) &&
                     result > 0) { return result; }
-            } else if (double.TryParse(input, out double directResult) &&
+            } else if (double.TryParse(input, out var directResult) &&
                        directResult > 0) { return directResult; }
 
             return 0; // Invalid input
@@ -494,29 +489,28 @@ namespace BalatroSaveAndLoad {
         private void MinuteComboBox_TextChanged(object sender, TextChangedEventArgs e) {
             if (AutoCheckBox.IsChecked == true) { UpdateAutoSave(); }
 
-            // If there was an error about invalid time interval, check if it's resolved
-            if (_hasActiveError && _currentErrorMessage.Contains("time interval")) {
-                double minutes = GetSelectedMinutes();
-                if (minutes > 0) {
-                    _hasActiveError = false;
-                    Status = "Ready";
-                    UpdateStatusDisplay(false);
-                }
-            }
+            // If there was an error about an invalid time interval, check if it's resolved
+            if (!_hasActiveError ||
+                !_currentErrorMessage.Contains("time interval"))
+                return;
+            var minutes = GetSelectedMinutes();
+            if (!(minutes > 0)) return;
+            _hasActiveError = false;
+            Status = "Ready";
+            UpdateStatusDisplay(false);
         }
 
         private void MinuteComboBox_PreviewTextInput(object sender, TextCompositionEventArgs e) {
             // Allow only digits, decimal point, and backspace
-            Regex regex = new Regex(@"^[0-9\.]+$");
+            var regex = new Regex(@"^[0-9\.]+$");
             e.Handled = !regex.IsMatch(e.Text);
         }
 
         private void MinuteComboBox_KeyDown(object sender, KeyEventArgs e) {
-            if (e.Key == Key.Enter) {
-                // Force update on Enter key
-                UpdateAutoSave();
-                e.Handled = true;
-            }
+            if (e.Key != Key.Enter) return;
+            // Force update on an Enter key
+            UpdateAutoSave();
+            e.Handled = true;
         }
 
         private void Timer_Tick(object? sender, EventArgs e) { Save(); }
@@ -526,7 +520,7 @@ namespace BalatroSaveAndLoad {
         }
 
         private void BalatroCheckTimer_Tick(object? sender, EventArgs e) {
-            bool running = IsBalatroProcessRunning();
+            var running = IsBalatroProcessRunning();
             IsBalatroRunning = running;
 
             // If not running, stop autosave timer and hide countdown
@@ -545,7 +539,7 @@ namespace BalatroSaveAndLoad {
         private bool IsBalatroProcessRunning() {
             try {
                 // Check for process named "balatro" (case-insensitive, without extension)
-                return Process.GetProcessesByName("balatro").Any();
+                return Process.GetProcessesByName("balatro").Length != 0;
             }
             catch { return false; }
         }
@@ -571,21 +565,21 @@ namespace BalatroSaveAndLoad {
         private void DeleteSelectedSaves() {
             var selectedItems = FileListBox.SelectedItems.Cast<string>().ToList();
             if (selectedItems.Count > 0) {
-                string message = selectedItems.Count == 1
-                                     ? $"Are you sure you want to delete the selected save?"
-                                     : $"Are you sure you want to delete {selectedItems.Count} selected saves?";
+                var message = selectedItems.Count == 1
+                                  ? $"Are you sure you want to delete the selected save?"
+                                  : $"Are you sure you want to delete {selectedItems.Count} selected saves?";
 
-                MessageBoxResult result = MessageBox.Show(
-                                                          message,
-                                                          "Confirm Delete",
-                                                          MessageBoxButton.YesNo,
-                                                          MessageBoxImage.Warning
-                                                         );
+                var result = MessageBox.Show(
+                                             message,
+                                             "Confirm Delete",
+                                             MessageBoxButton.YesNo,
+                                             MessageBoxImage.Warning
+                                            );
 
                 if (result == MessageBoxResult.Yes) {
                     try {
-                        foreach (string selectedFile in selectedItems) {
-                            string filePath = Path.Combine(_directoryPath, selectedFile);
+                        foreach (var selectedFile in selectedItems) {
+                            var filePath = Path.Combine(_directoryPath, selectedFile);
                             if (File.Exists(filePath)) {
                                 File.Delete(filePath);
                                 DebugLog($"Deleted save file: {selectedFile}");
@@ -627,14 +621,14 @@ namespace BalatroSaveAndLoad {
                 var files = Directory.GetFiles(_directoryPath, "*.jkr");
                 DebugLog($"Found {files.Length} total save files to check");
 
-                int cleanedCount = 0;
-                int autoSaveCount = 0;
+                var cleanedCount = 0;
+                var autoSaveCount = 0;
 
                 foreach (var file in files) {
                     var fileName = Path.GetFileName(file);
 
                     // Check if this is an auto-save by looking for the pattern
-                    bool isAutoSave = IsAutoSaveFile(fileName);
+                    var isAutoSave = IsAutoSaveFile(fileName);
 
                     if (isAutoSave) {
                         autoSaveCount++;
@@ -687,7 +681,7 @@ namespace BalatroSaveAndLoad {
         private void UpdateAutoClean() {
             if (AutoCleanCheckBox.IsChecked == true) {
                 if (CleanupTimeComboBox.SelectedIndex >= 0 &&
-                    _cleanupOptions.TryGetValue(CleanupTimeComboBox.SelectedIndex, out TimeSpan selectedTimeSpan)) {
+                    _cleanupOptions.TryGetValue(CleanupTimeComboBox.SelectedIndex, out var selectedTimeSpan)) {
                     _cleanupTimeSpan = selectedTimeSpan;
                     _cleanupTimer.Start();
 
@@ -710,8 +704,8 @@ namespace BalatroSaveAndLoad {
 
         // Debug logging helper
         private void DebugLog(string message) {
-            string timestamp = DateTime.Now.ToString("HH:mm:ss");
-            string entry = $"[{timestamp}] {message}";
+            var timestamp = DateTime.Now.ToString("HH:mm:ss");
+            var entry = $"[{timestamp}] {message}";
             _debugLog.Add(entry);
             if (_debugWindow != null) { _debugWindow.AppendLog(entry); }
         }

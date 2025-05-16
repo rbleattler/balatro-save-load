@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:BalatroSaveToolkit.ViewModels"
+             x:Class="BalatroSaveToolkit.Views.LogsPage"
+             Title="Application Logs">
+
+    <ContentPage.BindingContext>
+        <vm:LogsViewModel />
+    </ContentPage.BindingContext>
+
+    <Grid RowDefinitions="Auto,*,Auto"
+          RowSpacing="10"
+          Padding="20">
+
+        <!-- Filter Controls -->
+        <Grid Grid.Row="0" 
+              ColumnDefinitions="Auto,*,Auto,Auto,Auto"
+              ColumnSpacing="10">
+            
+            <Label Text="Filter:" 
+                   VerticalOptions="Center" 
+                   Grid.Column="0" />
+            
+            <Entry Placeholder="Search logs..."
+                   Grid.Column="1"
+                   Text="{Binding SearchText}" />
+            
+            <Picker Title="Level" 
+                    Grid.Column="2"
+                    WidthRequest="120"
+                    ItemsSource="{Binding LogLevels}"
+                    SelectedItem="{Binding SelectedLogLevel}" />
+            
+            <DatePicker Grid.Column="3"
+                        Date="{Binding StartDate}"
+                        Format="d" />
+            
+            <Button Text="Refresh"
+                    Grid.Column="4"
+                    Command="{Binding RefreshCommand}"
+                    Padding="10,5" />
+        </Grid>
+
+        <!-- Logs ListView -->
+        <CollectionView Grid.Row="1"
+                      ItemsSource="{Binding FilteredLogs}"
+                      SelectionMode="Single"
+                      SelectedItem="{Binding SelectedLogItem}"
+                      SelectionChanged="OnLogItemSelected">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="10,5" 
+                          ColumnDefinitions="Auto,Auto,*"
+                          ColumnSpacing="10">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:LogsViewModel}}, Path=ViewLogDetailsCommand}" 
+                                                  CommandParameter="{Binding .}" />
+                        </Grid.GestureRecognizers>
+                        
+                        <Label Text="{Binding Timestamp, StringFormat='{0:MM/dd HH:mm}'}"
+                               FontSize="Small"
+                               VerticalOptions="Center" />
+                        
+                        <Border Grid.Column="1"
+                                StrokeThickness="0"
+                                Padding="5,2">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="3" />
+                            </Border.StrokeShape>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border"
+                                             Binding="{Binding Level}"
+                                             Value="DEBUG">
+                                    <Setter Property="BackgroundColor" Value="Gray" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border"
+                                             Binding="{Binding Level}"
+                                             Value="INFO">
+                                    <Setter Property="BackgroundColor" Value="LightBlue" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border"
+                                             Binding="{Binding Level}"
+                                             Value="WARN">
+                                    <Setter Property="BackgroundColor" Value="Orange" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border"
+                                             Binding="{Binding Level}"
+                                             Value="ERROR">
+                                    <Setter Property="BackgroundColor" Value="Red" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border"
+                                             Binding="{Binding Level}"
+                                             Value="CRITICAL">
+                                    <Setter Property="BackgroundColor" Value="DarkRed" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            
+                            <Label Text="{Binding Level}"
+                                   FontSize="Small"
+                                   FontAttributes="Bold"
+                                   TextColor="White" />
+                        </Border>
+
+                        <VerticalStackLayout Grid.Column="2">
+                            <Label Text="{Binding Source}"
+                                   FontAttributes="Bold" />
+                            <Label Text="{Binding Message}"
+                                   LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                    <Label Text="No log entries found" 
+                           FontSize="Medium"
+                           TextColor="Gray" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+        </CollectionView>
+
+        <!-- Actions -->
+        <StackLayout Grid.Row="2"
+                     Orientation="Horizontal"
+                     HorizontalOptions="End"
+                     Spacing="10">
+            <Button Text="Export Logs"
+                    Command="{Binding ExportLogsCommand}" />
+            <Button Text="Clear Filters"
+                    Command="{Binding ClearFiltersCommand}" />
+        </StackLayout>
+
+    </Grid>
+</ContentPage>

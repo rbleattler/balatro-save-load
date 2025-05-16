@@ -2,51 +2,96 @@ using BalatroSaveToolkit.Services.Interfaces;
 
 namespace BalatroSaveToolkit.Services.Implementations
 {
+    /// <summary>
+    /// Implementation of IFileService that uses the MAUI FileSystem APIs
+    /// with proper error handling
+    /// </summary>
     public class FileService : IFileService
     {
-        public async Task<bool> FileExistsAsync(string filePath)
+        private readonly IErrorHandlingService _errorHandler;
+
+        public FileService(IErrorHandlingService errorHandler)
         {
-            return File.Exists(filePath);
+            _errorHandler = errorHandler;
+        }        public async Task<bool> FileExistsAsync(string filePath)
+        {
+            try
+            {
+                return File.Exists(filePath);
+            }
+            catch (Exception ex)
+            {
+                _errorHandler.HandleException(ex, nameof(FileService), $"Error checking if file exists: {filePath}", ErrorSeverity.Warning, false);
+                return false;
+            }
         }
 
         public async Task<string> GetApplicationDataDirectoryAsync()
         {
-            return FileSystem.AppDataDirectory;
+            try
+            {
+                return FileSystem.AppDataDirectory;
+            }
+            catch (Exception ex)
+            {
+                _errorHandler.HandleException(ex, nameof(FileService), "Error getting application data directory", ErrorSeverity.Error);
+                return Path.GetTempPath(); // Fallback to temp directory
+            }
         }
 
         public async Task<string> ReadTextAsync(string filePath)
         {
-            if (await FileExistsAsync(filePath))
+            try
             {
-                return await File.ReadAllTextAsync(filePath);
+                if (await FileExistsAsync(filePath))
+                {
+                    return await File.ReadAllTextAsync(filePath);
+                }
+                return string.Empty;
             }
-            return string.Empty;
+            catch (Exception ex)
+            {
+                _errorHandler.HandleException(ex, nameof(FileService), $"Error reading file: {filePath}", ErrorSeverity.Error);
+                return string.Empty;
+            }
         }
 
         public async Task WriteTextAsync(string filePath, string content)
         {
-            string directory = Path.GetDirectoryName(filePath);
-            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            try
             {
-                Directory.CreateDirectory(directory);
-            }
+                string directory = Path.GetDirectoryName(filePath);
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
 
-            await File.WriteAllTextAsync(filePath, content);
-        }        public async Task<string> PickFileAsync(string title, string filter)
+                await File.WriteAllTextAsync(filePath, content);
+            }
+            catch (Exception ex)
+            {
+                _errorHandler.HandleException(ex, nameof(FileService), $"Error writing to file: {filePath}", ErrorSeverity.Error);
+                throw; // Rethrow since this is a critical operation
+            }
+        }public async Task<string> PickFileAsync(string title, string filter)
         {
             try
             {
+                // Use FilePicker from MAUI's Microsoft.Maui.Storage namespace
+                var customFileType = new FilePickerFileType(
+                    new Dictionary<DevicePlatform, IEnumerable<string>>
+                    {
+                        { DevicePlatform.WinUI, new[] { filter } },
+                        { DevicePlatform.MacCatalyst, new[] { filter } },
+                        { DevicePlatform.Android, new[] { filter } },
+                        { DevicePlatform.iOS, new[] { filter } }
+                    }
+                );
+
                 var options = new PickOptions
                 {
                     PickerTitle = title,
-                    FileTypes = new FilePickerFileType(
-                        new Dictionary<DevicePlatform, IEnumerable<string>>
-                        {
-                            { DevicePlatform.WinUI, new[] { filter } },
-                            { DevicePlatform.MacCatalyst, new[] { filter } },
-                            { DevicePlatform.Android, new[] { filter } },
-                            { DevicePlatform.iOS, new[] { filter } }
-                        })
+                    FileTypes = customFileType
                 };
 
                 var result = await FilePicker.Default.PickAsync(options);
@@ -54,7 +99,7 @@ namespace BalatroSaveToolkit.Services.Implementations
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"File picking failed: {ex.Message}");
+                _errorHandler.HandleException(ex, nameof(FileService), "Unable to pick a file", ErrorSeverity.Warning);
                 return string.Empty;
             }
         }        public async Task<string> PickFolderAsync(string title)
@@ -64,12 +109,12 @@ namespace BalatroSaveToolkit.Services.Implementations
                 // TODO: Implement platform-specific folder picker (TSK006)
                 // MAUI doesn't have a direct FolderPicker, so we need to use platform-specific implementations
                 // For now, we'll return the app data directory as a fallback
-
+                _errorHandler.LogError(nameof(FileService), "Folder picker not fully implemented yet. Using app data directory instead.", ErrorSeverity.Information);
                 return await GetApplicationDataDirectoryAsync();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Folder picking failed: {ex.Message}");
+                _errorHandler.HandleException(ex, nameof(FileService), "Unable to pick a folder", ErrorSeverity.Warning);
                 return string.Empty;
             }
         }
@@ -80,6 +125,8 @@ namespace BalatroSaveToolkit.Services.Implementations
             {
                 // MAUI doesn't have a FileSavePicker, so we need to use platform-specific implementations
                 // For now, we'll create a file in the app data directory
+                _errorHandler.LogError(nameof(FileService), "Save file picker not fully implemented yet. Using app data directory instead.", ErrorSeverity.Information);
+
                 var appDataDir = await GetApplicationDataDirectoryAsync();
                 string filePath = Path.Combine(appDataDir, suggestedName);
 
@@ -94,7 +141,7 @@ namespace BalatroSaveToolkit.Services.Implementations
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Save file picking failed: {ex.Message}");
+                _errorHandler.HandleException(ex, nameof(FileService), "Unable to create a save file", ErrorSeverity.Warning);
                 return string.Empty;
             }
         }        public async Task CopyFileAsync(string sourcePath, string destinationPath)
@@ -127,7 +174,7 @@ namespace BalatroSaveToolkit.Services.Implementations
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"File copy failed: {ex.Message}");
+                _errorHandler.HandleException(ex, nameof(FileService), $"Failed to copy file from {sourcePath} to {destinationPath}", ErrorSeverity.Error);
                 throw; // Rethrow to let caller handle as appropriate
             }
         }

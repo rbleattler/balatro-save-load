@@ -31,10 +31,12 @@
 
     <FlyoutItem Title="Save Viewer" Icon="save.png" Route="SaveViewer">
         <ShellContent ContentTemplate="{DataTemplate views:SaveViewerPage}" />
+    </FlyoutItem>    <FlyoutItem Title="Settings" Icon="settings.png" Route="Settings">
+        <ShellContent ContentTemplate="{DataTemplate views:SettingsPage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Settings" Icon="settings.png" Route="Settings">
-        <ShellContent ContentTemplate="{DataTemplate views:SettingsPage}" />
+    <FlyoutItem Title="Logs" Icon="debug.png" Route="Logs">
+        <ShellContent ContentTemplate="{DataTemplate views:LogsPage}" />
     </FlyoutItem>
 
     <ShellContent

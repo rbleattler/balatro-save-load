@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+              xmlns:models="clr-namespace:BalatroSaveToolkit.Models"
+              x:Class="BalatroSaveToolkit.Views.LogDetailPopup"
+              CanBeDismissedByTappingOutsideOfPopup="True"
+              Size="500, 400">
+
+    <Grid RowDefinitions="Auto,*,Auto"
+          Padding="20"
+          BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}">
+
+        <!-- Header -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="*,Auto"
+              Margin="0,0,0,10">
+
+            <Label Grid.Column="0"
+                   Text="Log Detail"
+                   FontSize="Large"
+                   FontAttributes="Bold" />
+
+            <Button Grid.Column="1"
+                    Text="✕"
+                    Clicked="OnDismissButtonClicked"
+                    WidthRequest="40"
+                    HeightRequest="40"
+                    Padding="0"
+                    HorizontalOptions="End" />
+        </Grid>
+
+        <!-- Log Details -->
+        <Grid Grid.Row="1"
+              RowDefinitions="Auto,Auto,Auto,*"
+              RowSpacing="10"
+              Padding="5">
+
+            <Grid Grid.Row="0" ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                <Label Text="Timestamp:"
+                       FontAttributes="Bold"
+                       Grid.Column="0" />
+                <Label Text="{Binding Timestamp, StringFormat='{0:yyyy-MM-dd HH:mm:ss.fff}'}"
+                       Grid.Column="1" />
+            </Grid>
+
+            <Grid Grid.Row="1" ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                <Label Text="Level:"
+                       FontAttributes="Bold"
+                       Grid.Column="0" />
+
+                <Border StrokeThickness="0"
+                        Grid.Column="1"
+                        Padding="5,2"
+                        WidthRequest="100"
+                        HorizontalOptions="Start">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="3" />
+                    </Border.StrokeShape>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border"
+                                     Binding="{Binding Level}"
+                                     Value="DEBUG">
+                            <Setter Property="BackgroundColor" Value="Gray" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border"
+                                     Binding="{Binding Level}"
+                                     Value="INFO">
+                            <Setter Property="BackgroundColor" Value="LightBlue" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border"
+                                     Binding="{Binding Level}"
+                                     Value="WARN">
+                            <Setter Property="BackgroundColor" Value="Orange" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border"
+                                     Binding="{Binding Level}"
+                                     Value="ERROR">
+                            <Setter Property="BackgroundColor" Value="Red" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border"
+                                     Binding="{Binding Level}"
+                                     Value="CRITICAL">
+                            <Setter Property="BackgroundColor" Value="DarkRed" />
+                        </DataTrigger>
+                    </Border.Triggers>
+
+                    <Label Text="{Binding Level}"
+                           FontSize="Small"
+                           FontAttributes="Bold"
+                           TextColor="White"
+                           HorizontalOptions="Center" />
+                </Border>
+            </Grid>
+
+            <Grid Grid.Row="2" ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                <Label Text="Source:"
+                       FontAttributes="Bold"
+                       Grid.Column="0" />
+                <Label Text="{Binding Source}"
+                       Grid.Column="1" />
+            </Grid>
+
+            <Grid Grid.Row="3" RowDefinitions="Auto,*" RowSpacing="10">
+                <Label Text="Message:"
+                       FontAttributes="Bold"
+                       Grid.Row="0" />
+
+                <ScrollView Grid.Row="1">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="{Binding Message}" />
+
+                        <Label Text="Details:"
+                               FontAttributes="Bold"
+                               IsVisible="{Binding HasDetails}" />
+
+                        <Frame BorderColor="LightGray"
+                               Padding="10"
+                               BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                               IsVisible="{Binding HasDetails}">
+                            <ScrollView>
+                                <Label Text="{Binding Details}"
+                                       FontFamily="Consolas" />
+                            </ScrollView>
+                        </Frame>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Grid>
+        </Grid>
+
+        <!-- Footer -->
+        <Button Grid.Row="2"
+                Text="Copy to Clipboard"
+                HorizontalOptions="End"
+                Margin="0,10,0,0"
+                Clicked="OnCopyButtonClicked" />
+    </Grid>
+</toolkit:Popup>

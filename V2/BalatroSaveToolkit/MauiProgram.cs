@@ -32,9 +32,16 @@ public static class MauiProgram
 
 		// Register services with dependencies on Log service
 		builder.Services.AddSingleton<Services.Interfaces.IErrorHandlingService, Services.Implementations.ErrorHandlingService>();
-
-		// Register services with dependencies on Error Handling
-		builder.Services.AddSingleton<Services.Interfaces.IFileService, Services.Implementations.FileService>();
+		// Register services with dependencies on Error Handling - Use platform-specific file services
+#if WINDOWS
+        builder.Services.AddSingleton<Services.Interfaces.IFileService, Services.Implementations.Windows.WindowsFileService>();
+#elif MACCATALYST
+        builder.Services.AddSingleton<Services.Interfaces.IFileService, Services.Implementations.MacCatalyst.MacFileService>();
+#elif LINUX
+        builder.Services.AddSingleton<Services.Interfaces.IFileService, Services.Implementations.Linux.LinuxFileService>();
+#else
+        builder.Services.AddSingleton<Services.Interfaces.IFileService, Services.Implementations.FileService>();
+#endif
 
 		// These will need proper implementations later
 		builder.Services.AddSingleton<Services.Interfaces.ISettingsService>(

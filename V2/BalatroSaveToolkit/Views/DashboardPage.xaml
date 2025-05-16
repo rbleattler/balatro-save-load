@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:BalatroSaveToolkit.ViewModels"
+             x:Class="BalatroSaveToolkit.Views.DashboardPage"
+             x:DataType="viewmodels:DashboardViewModel"
+             Title="{Binding Title}">
+    
+    <Grid RowDefinitions="Auto,*">
+        <!-- Header -->
+        <VerticalStackLayout Grid.Row="0" Padding="20" BackgroundColor="{StaticResource Primary}">
+            <Label Text="Balatro Save Toolkit" 
+                   TextColor="White" 
+                   FontSize="24" 
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+            <Label Text="{Binding StatusMessage}"
+                   TextColor="White"
+                   HorizontalOptions="Center" />
+        </VerticalStackLayout>
+        
+        <!-- Main Content -->
+        <ScrollView Grid.Row="1">
+            <Grid RowDefinitions="Auto,Auto,*" 
+                  ColumnDefinitions="*,*" 
+                  Padding="20" 
+                  RowSpacing="20" 
+                  ColumnSpacing="20">
+                
+                <!-- Game Status Card -->
+                <Frame Grid.Row="0" Grid.ColumnSpan="2" 
+                       BorderColor="{StaticResource Primary}" 
+                       CornerRadius="10" 
+                       Padding="15">
+                    <VerticalStackLayout>
+                        <Label Text="Game Status" 
+                               Style="{StaticResource SubHeadline}" />
+                        <Label Text="{Binding GameRunningStatus}" />
+                    </VerticalStackLayout>
+                </Frame>
+                
+                <!-- Save Actions -->
+                <Frame Grid.Row="1" Grid.Column="0" 
+                       BorderColor="{StaticResource Secondary}" 
+                       CornerRadius="10" 
+                       Padding="15">
+                    <VerticalStackLayout>
+                        <Label Text="Save Actions" 
+                               Style="{StaticResource SubHeadline}" />
+                        <Button Text="Backup Current Save" 
+                                Command="{Binding BackupSaveCommand}" 
+                                Margin="0,10,0,0" />
+                        <Button Text="View Saves" 
+                                Command="{Binding ViewSavesCommand}" 
+                                Margin="0,10,0,0" />
+                    </VerticalStackLayout>
+                </Frame>
+                
+                <!-- Load Actions -->
+                <Frame Grid.Row="1" Grid.Column="1" 
+                       BorderColor="{StaticResource Tertiary}" 
+                       CornerRadius="10" 
+                       Padding="15">
+                    <VerticalStackLayout>
+                        <Label Text="Load Actions" 
+                               Style="{StaticResource SubHeadline}" />
+                        <Button Text="Restore Backup" 
+                                Command="{Binding RestoreBackupCommand}" 
+                                Margin="0,10,0,0" />
+                        <Button Text="Load Custom Save" 
+                                Command="{Binding LoadCustomSaveCommand}" 
+                                Margin="0,10,0,0" />
+                    </VerticalStackLayout>
+                </Frame>
+                
+                <!-- Recent Activity -->
+                <Frame Grid.Row="2" Grid.ColumnSpan="2" 
+                       BorderColor="{StaticResource Gray500}" 
+                       CornerRadius="10" 
+                       Padding="15" 
+                       HeightRequest="200">
+                    <VerticalStackLayout>
+                        <Label Text="Recent Activity" 
+                               Style="{StaticResource SubHeadline}" />
+                        <CollectionView ItemsSource="{Binding RecentActivities}">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="Auto,*" Padding="5">
+                                        <Label Grid.Column="0" Text="{Binding Timestamp, StringFormat='{0:MM/dd HH:mm}'}" />
+                                        <Label Grid.Column="1" Text="{Binding Message}" Margin="10,0,0,0" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+        </ScrollView>
+    </Grid>
+    
+</ContentPage>

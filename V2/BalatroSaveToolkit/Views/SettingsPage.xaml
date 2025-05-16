@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:BalatroSaveToolkit.ViewModels"
+             x:Class="BalatroSaveToolkit.Views.SettingsPage"
+             x:DataType="viewmodels:SettingsViewModel"
+             Title="{Binding Title}">
+    
+    <ScrollView>
+        <VerticalStackLayout Padding="25" Spacing="20">
+            <Label Text="Settings" 
+                   Style="{StaticResource Headline}"
+                   HorizontalOptions="Center" />
+
+            <!-- Game Path Configuration -->
+            <Frame BorderColor="{StaticResource Primary}" Padding="20" CornerRadius="8">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Game Configuration" FontAttributes="Bold" FontSize="18" />
+                    
+                    <Label Text="Balatro Game Path" />
+                    <Grid ColumnDefinitions="*, Auto">
+                        <Entry Grid.Column="0" 
+                               Text="{Binding GamePath}" 
+                               IsReadOnly="True" />
+                        <Button Grid.Column="1" 
+                                Text="Browse" 
+                                Command="{Binding BrowseGamePathCommand}"
+                                Margin="5,0,0,0" />
+                    </Grid>
+                    
+                    <Label Text="Saves Directory" />
+                    <Grid ColumnDefinitions="*, Auto">
+                        <Entry Grid.Column="0" 
+                               Text="{Binding SavesPath}" 
+                               IsReadOnly="True" />
+                        <Button Grid.Column="1" 
+                                Text="Browse" 
+                                Command="{Binding BrowseSavesPathCommand}"
+                                Margin="5,0,0,0" />
+                    </Grid>
+                    
+                    <Label Text="Auto-detect Game Process" />
+                    <Switch IsToggled="{Binding AutoDetectGame}" 
+                            HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </Frame>
+            
+            <!-- Backup Configuration -->
+            <Frame BorderColor="{StaticResource Secondary}" Padding="20" CornerRadius="8">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Backup Settings" FontAttributes="Bold" FontSize="18" />
+                    
+                    <Label Text="Backup Directory" />
+                    <Grid ColumnDefinitions="*, Auto">
+                        <Entry Grid.Column="0" 
+                               Text="{Binding BackupPath}" 
+                               IsReadOnly="True" />
+                        <Button Grid.Column="1" 
+                                Text="Browse" 
+                                Command="{Binding BrowseBackupPathCommand}"
+                                Margin="5,0,0,0" />
+                    </Grid>
+                    
+                    <Label Text="Auto-backup on game start" />
+                    <Switch IsToggled="{Binding AutoBackupOnStart}" 
+                            HorizontalOptions="Start" />
+                            
+                    <Label Text="Auto-backup on game close" />
+                    <Switch IsToggled="{Binding AutoBackupOnClose}" 
+                            HorizontalOptions="Start" />
+                    
+                    <Label Text="Maximum backups to keep" />
+                    <HorizontalStackLayout Spacing="10">
+                        <Slider Minimum="1" 
+                                Maximum="100" 
+                                Value="{Binding MaxBackupsToKeep}" 
+                                WidthRequest="200" />
+                        <Label Text="{Binding MaxBackupsToKeep, StringFormat='{0:F0}'}" 
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+            
+            <!-- Application Settings -->
+            <Frame BorderColor="{StaticResource Tertiary}" Padding="20" CornerRadius="8">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Application Settings" FontAttributes="Bold" FontSize="18" />
+                    
+                    <Label Text="Start with Windows" />
+                    <Switch IsToggled="{Binding StartWithWindows}" 
+                            HorizontalOptions="Start" />
+                            
+                    <Label Text="Minimize to tray" />
+                    <Switch IsToggled="{Binding MinimizeToTray}" 
+                            HorizontalOptions="Start" />
+                    
+                    <Label Text="Log Level" />
+                    <Picker ItemsSource="{Binding LogLevels}"
+                            SelectedItem="{Binding SelectedLogLevel}"
+                            HorizontalOptions="Start"
+                            WidthRequest="200" />
+                </VerticalStackLayout>
+            </Frame>
+            
+            <!-- Action Buttons -->
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="20" Margin="0,20,0,0">
+                <Button Text="Save Settings" 
+                        Command="{Binding SaveSettingsCommand}"
+                        BackgroundColor="{StaticResource Primary}"
+                        WidthRequest="150" />
+                <Button Text="Reset Defaults" 
+                        Command="{Binding ResetDefaultsCommand}"
+                        BackgroundColor="{StaticResource Gray500}"
+                        WidthRequest="150" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+    
+</ContentPage>

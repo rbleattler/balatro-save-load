@@ -1,0 +1,14 @@
+{
+  "github.copilot.chat.agent.runTasks": true,
+  "github.copilot.chat.agent.thinkingTool": true,
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "github.copilot.chat.codesearch.enabled": true,
+  "github.copilot.chat.newWorkspaceCreation.enabled": true,
+  "github.copilot.chat.edits.newNotebook.enabled": false,
+  "github.copilot.chat.agent.autoFix": true,
+  "github.copilot.chat.editor.temporalContext.enabled": true,
+  "github.copilot.chat.copilotDebugCommand.enabled": true,
+
+  "github.copilot.advanced.debug.useNodeFetcher": true,
+  "github.copilot.advanced.debug.useNodeFetchFetcher": true,
+}

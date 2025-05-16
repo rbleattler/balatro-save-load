@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:BalatroSaveToolkit.ViewModels"
+             x:Class="BalatroSaveToolkit.Views.SaveViewerPage"
+             x:DataType="viewmodels:SaveViewerViewModel"
+             Title="{Binding Title}">
+    
+    <Grid RowDefinitions="Auto,*" ColumnDefinitions="250,*">
+        <!-- Left Panel - Save File List -->
+        <VerticalStackLayout Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" 
+                             Padding="10" BackgroundColor="{StaticResource Gray100}">
+            <Label Text="Saved Games" FontAttributes="Bold" Margin="0,0,0,10" />
+            
+            <SearchBar Placeholder="Search saves..." 
+                       Text="{Binding SearchQuery}" 
+                       SearchCommand="{Binding SearchCommand}" />
+                       
+            <CollectionView ItemsSource="{Binding SaveFiles}"
+                            SelectedItem="{Binding SelectedSaveFile}"
+                            SelectionMode="Single"
+                            Margin="0,10,0,0">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Margin="0,5" Padding="10" BorderColor="Transparent"
+                               BackgroundColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='{StaticResource Primary};Transparent'}">
+                            <VerticalStackLayout>
+                                <Label Text="{Binding Name}" FontAttributes="Bold" />
+                                <Label Text="{Binding LastModified, StringFormat='{0:g}'}" FontSize="12" />
+                            </VerticalStackLayout>
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:SaveViewerViewModel}}, Path=SelectSaveCommand}"
+                                                      CommandParameter="{Binding .}" />
+                            </Frame.GestureRecognizers>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+        
+        <!-- Top Right - Header Actions -->
+        <Grid Grid.Row="0" Grid.Column="1" Padding="20,10" ColumnDefinitions="*,Auto,Auto,Auto">
+            <Label Grid.Column="0" 
+                   Text="{Binding SelectedSaveFile.Name}" 
+                   FontSize="20" 
+                   FontAttributes="Bold"
+                   VerticalOptions="Center" />
+                   
+            <Button Grid.Column="1" 
+                    Text="Load" 
+                    Command="{Binding LoadSaveCommand}" 
+                    IsEnabled="{Binding IsSaveSelected}"
+                    Margin="5,0" />
+                    
+            <Button Grid.Column="2" 
+                    Text="Delete" 
+                    Command="{Binding DeleteSaveCommand}" 
+                    BackgroundColor="{StaticResource Gray500}"
+                    IsEnabled="{Binding IsSaveSelected}"
+                    Margin="5,0" />
+                    
+            <Button Grid.Column="3" 
+                    Text="Export" 
+                    Command="{Binding ExportSaveCommand}" 
+                    IsEnabled="{Binding IsSaveSelected}"
+                    Margin="5,0" />
+        </Grid>
+        
+        <!-- Bottom Right - Save Data -->
+        <Grid Grid.Row="1" Grid.Column="1" RowDefinitions="*,Auto">
+            <!-- Save Content -->
+            <ScrollView Grid.Row="0" Padding="20,10">
+                <Frame BorderColor="{StaticResource Gray300}" Padding="15" CornerRadius="5">
+                    <VerticalStackLayout>
+                        <Label Text="Save Data" FontAttributes="Bold" FontSize="18" />
+                        <Label Text="{Binding NoSaveSelectedMessage}" IsVisible="{Binding IsNoSaveSelected}" />
+                        <Grid IsVisible="{Binding IsSaveSelected}" RowDefinitions="Auto,Auto,Auto,*">
+                            <!-- Game Stats -->
+                            <VerticalStackLayout Grid.Row="0" Margin="0,10">
+                                <Label Text="Game Statistics" FontAttributes="Bold" />
+                                <Grid ColumnDefinitions="Auto,*,Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="5">
+                                    <Label Grid.Row="0" Grid.Column="0" Text="Run #:" />
+                                    <Label Grid.Row="0" Grid.Column="1" Text="{Binding SaveData.RunNumber}" />
+                                    <Label Grid.Row="0" Grid.Column="2" Text="Chips:" />
+                                    <Label Grid.Row="0" Grid.Column="3" Text="{Binding SaveData.Chips}" />
+                                    
+                                    <Label Grid.Row="1" Grid.Column="0" Text="Level:" />
+                                    <Label Grid.Row="1" Grid.Column="1" Text="{Binding SaveData.Level}" />
+                                    <Label Grid.Row="1" Grid.Column="2" Text="Ante:" />
+                                    <Label Grid.Row="1" Grid.Column="3" Text="{Binding SaveData.Ante}" />
+                                    
+                                    <Label Grid.Row="2" Grid.Column="0" Text="Arcana:" />
+                                    <Label Grid.Row="2" Grid.Column="1" Text="{Binding SaveData.ArcanaUnlocked}" />
+                                    <Label Grid.Row="2" Grid.Column="2" Text="Completed:" />
+                                    <Label Grid.Row="2" Grid.Column="3" Text="{Binding SaveData.IsCompleted}" />
+                                </Grid>
+                            </VerticalStackLayout>
+                            
+                            <!-- Deck Info -->
+                            <VerticalStackLayout Grid.Row="1" Margin="0,10">
+                                <Label Text="Deck Information" FontAttributes="Bold" />
+                                <Label Text="{Binding SaveData.DeckType}" />
+                                <Label Text="{Binding SaveData.DeckDescription}" FontSize="12" />
+                            </VerticalStackLayout>
+                            
+                            <!-- Cards List -->
+                            <VerticalStackLayout Grid.Row="2" Margin="0,10">
+                                <Label Text="Cards in Deck" FontAttributes="Bold" />
+                                <CollectionView ItemsSource="{Binding SaveData.Cards}" HeightRequest="150">
+                                    <CollectionView.ItemsLayout>
+                                        <GridItemsLayout Orientation="Horizontal" Span="5" />
+                                    </CollectionView.ItemsLayout>
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Frame Margin="5" WidthRequest="80" HeightRequest="120" Padding="5" BorderColor="{StaticResource Gray300}">
+                                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                                                    <Label Text="{Binding Name}" HorizontalOptions="Center" />
+                                                    <Label Text="{Binding Rank}" HorizontalOptions="Center" />
+                                                    <Label Text="{Binding Suit}" HorizontalOptions="Center" />
+                                                </VerticalStackLayout>
+                                            </Frame>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </VerticalStackLayout>
+                            
+                            <!-- Raw Data -->
+                            <VerticalStackLayout Grid.Row="3" Margin="0,10">
+                                <Label Text="Raw Save Data" FontAttributes="Bold" />
+                                <Editor Text="{Binding RawSaveData}" 
+                                        IsReadOnly="True" 
+                                        HeightRequest="200" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
+            </ScrollView>
+            
+            <!-- Bottom Actions -->
+            <HorizontalStackLayout Grid.Row="1" 
+                                  HorizontalOptions="End" 
+                                  Padding="20,10" 
+                                  Spacing="10">
+                <Button Text="Edit Data" 
+                        Command="{Binding EditDataCommand}" 
+                        IsEnabled="{Binding IsSaveSelected}" />
+                <Button Text="Compare Saves" 
+                        Command="{Binding CompareSavesCommand}" 
+                        IsEnabled="{Binding IsSaveSelected}" />
+                <Button Text="Close" 
+                        Command="{Binding CloseCommand}" />
+            </HorizontalStackLayout>
+        </Grid>
+    </Grid>
+    
+</ContentPage>

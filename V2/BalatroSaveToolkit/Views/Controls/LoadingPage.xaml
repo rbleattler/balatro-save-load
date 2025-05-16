@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:BalatroSaveToolkit.Views.Controls"
+             x:Class="BalatroSaveToolkit.Views.Controls.LoadingPage"
+             BackgroundColor="#80000000">
+
+    <Grid VerticalOptions="Fill" HorizontalOptions="Fill">
+        <Frame VerticalOptions="Center" 
+               HorizontalOptions="Center" 
+               BackgroundColor="White" 
+               CornerRadius="10" 
+               Padding="30" 
+               BorderColor="{StaticResource Primary}"
+               WidthRequest="300">
+            <VerticalStackLayout Spacing="15" HorizontalOptions="Center">
+                <ActivityIndicator IsRunning="True" 
+                                  Color="{StaticResource Primary}" 
+                                  HeightRequest="50" 
+                                  WidthRequest="50" />
+                <Label x:Name="MessageLabel" 
+                       Text="Loading..." 
+                       HorizontalOptions="Center" 
+                       FontSize="18" />
+            </VerticalStackLayout>
+        </Frame>
+    </Grid>
+    
+</ContentPage>

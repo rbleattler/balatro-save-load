@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="BalatroSaveToolkit.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:BalatroSaveToolkit"
+    xmlns:views="clr-namespace:BalatroSaveToolkit.Views"
+    Title="BalatroSaveToolkit"
+    FlyoutBehavior="Flyout">
+
+    <Shell.FlyoutHeader>
+        <Grid HeightRequest="200" BackgroundColor="{StaticResource Primary}">
+            <Image Source="dotnet_bot.png"
+                   HeightRequest="120"
+                   WidthRequest="120"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center" />
+            <Label Text="Balatro Save Toolkit"
+                   TextColor="White"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   VerticalOptions="End"
+                   Margin="0,0,0,20"/>
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <FlyoutItem Title="Dashboard" Icon="home.png" Route="Dashboard">
+        <ShellContent ContentTemplate="{DataTemplate views:DashboardPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Save Viewer" Icon="save.png" Route="SaveViewer">
+        <ShellContent ContentTemplate="{DataTemplate views:SaveViewerPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Settings" Icon="settings.png" Route="Settings">
+        <ShellContent ContentTemplate="{DataTemplate views:SettingsPage}" />
+    </FlyoutItem>
+
+    <ShellContent
+        Title="Welcome"
+        ContentTemplate="{DataTemplate local:MainPage}"
+        Route="MainPage"
+        FlyoutItemIsVisible="False"/>
+
+    <Shell.FlyoutFooter>
+        <VerticalStackLayout Padding="20">
+            <Label Text="v1.0.0" HorizontalOptions="Center" />
+            <Label Text="© 2025 Balatro Save Toolkit"
+                   HorizontalOptions="Center"
+                   FontSize="12" />
+        </VerticalStackLayout>
+    </Shell.FlyoutFooter>
+
+</Shell>

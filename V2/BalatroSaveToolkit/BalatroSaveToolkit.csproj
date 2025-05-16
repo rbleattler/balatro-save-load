@@ -1,0 +1,94 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">	<PropertyGroup>
+		<!-- For initial development on Windows, just target Windows for now -->
+		<TargetFrameworks>net9.0-windows10.0.19041.0</TargetFrameworks>
+		<!-- Once Windows version is stable, we can uncomment these for cross-platform support -->
+		<!-- <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('osx'))">$(TargetFrameworks);net9.0-maccatalyst</TargetFrameworks> -->
+		<!-- <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net9.0-linux</TargetFrameworks> -->
+
+		<!-- MacCatalyst configuration - will be used later -->
+		<!-- Support both Intel and Apple Silicon -->
+		<RuntimeIdentifiers Condition="$(TargetFramework.Contains('-maccatalyst'))">maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers>
+
+		<OutputType>WinExe</OutputType>
+		<RootNamespace>BalatroSaveToolkit</RootNamespace>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+
+		<!-- Display name -->
+		<ApplicationTitle>Balatro Save Toolkit</ApplicationTitle>
+		<!-- App Identifier -->
+		<ApplicationId>com.balatrosavetoolkit</ApplicationId>
+		<ApplicationIdGuid>9DC15640-0FC6-4EEF-A6C3-2A0619CE3599</ApplicationIdGuid>
+
+		<!-- Assembly info -->
+		<Version>1.0.0</Version>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+		<FileVersion>1.0.0.0</FileVersion>
+		<Company>BalatroSaveToolkit</Company>
+		<Authors>BalatroSaveToolkit Team</Authors>
+		<Copyright>Copyright © 2025</Copyright>
+		<Description>Cross-platform save management tool for Balatro</Description>
+		<NeutralLanguage>en</NeutralLanguage>
+
+		<!-- Versions -->
+		<ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+
+		<!-- Platform-specific configurations -->
+		<!-- Windows configuration -->
+		<WindowsPackageType>None</WindowsPackageType>
+		<UseWinUI>true</UseWinUI>
+		<SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-windows'))">10.0.17763.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$(TargetFramework.Contains('-windows'))">10.0.17763.0</TargetPlatformMinVersion>
+
+		<!-- macOS configuration -->
+		<SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-maccatalyst'))">13.1</SupportedOSPlatformVersion>
+
+		<!-- Linux configuration -->
+		<SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-linux'))">22.04</SupportedOSPlatformVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- App Icon -->
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+
+		<!-- Splash Screen -->
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+
+		<!-- Custom Fonts -->
+		<MauiFont Include="Resources\Fonts\*" />
+
+		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>	<ItemGroup>
+		<!-- Core MAUI packages -->
+		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
+
+		<!-- Community toolkits for MVVM and UI components -->
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="6.1.0" />
+
+		<!-- JSON handling -->
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+
+		<!-- Platform-specific packages -->
+		<PackageReference Include="Microsoft.WindowsAppSdk" Version="1.6.250205002" Condition="$(TargetFramework.Contains('-windows'))" />
+
+		<!-- Testing frameworks -->
+		<PackageReference Include="FluentAssertions" Version="6.12.0" Condition="$(Configuration) == 'Debug'" />
+
+		<!-- Logging framework -->
+		<PackageReference Include="Serilog" Version="3.1.1" />
+		<PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+	</ItemGroup>
+
+</Project>

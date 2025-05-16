@@ -102,10 +102,10 @@ namespace BalatroSaveAndLoad {
         }
 
         public string BalatroRunningStatus => IsBalatroRunning ? "Balatro: Running" : "Balatro: Not Running";
-        public bool IsSaveEnabled => IsBalatroRunning;
-
-        private DebugWindow? _debugWindow;
+        public bool IsSaveEnabled => IsBalatroRunning;        private DebugWindow? _debugWindow;
         private readonly ObservableCollection<string> _debugLog = [];
+        private JsonViewerWindow? _jsonViewerWindow;
+        private string _currentJsonContent = "";
 
         public MainWindow() {
             InitializeComponent();
@@ -323,9 +323,15 @@ namespace BalatroSaveAndLoad {
                     using (var outputStream = new MemoryStream())
                         using (var deflateStream =
                                new DeflateStream(compressedStream, CompressionMode.Decompress)) {
-                            deflateStream.CopyTo(outputStream);
-                            var decompressedBytes = outputStream.ToArray();
+                            deflateStream.CopyTo(outputStream);                            var decompressedBytes = outputStream.ToArray();
                             var result = Encoding.UTF8.GetString(decompressedBytes);
+
+                            // Update the current JSON content and the JSON viewer window if it's open
+                            _currentJsonContent = result;
+                            if (_jsonViewerWindow != null) {
+                                _jsonViewerWindow.UpdateJsonContent(result);
+                            }
+
                             var deckNameStart = result.IndexOf(deckNameKey, StringComparison.Ordinal) +
                                                 deckNameKey.Length;
                             var deckNameEnd = result.IndexOf('"', deckNameStart);
@@ -382,9 +388,28 @@ namespace BalatroSaveAndLoad {
                                   );
                     DebugLog($"Load failed: File does not exist: {selectedItem}");
                     return;
+                }                File.Copy(filePath, saveFile, true);
+
+                // After loading, read the file content to show in the JSON viewer
+                try {
+                    using (var compressedStream = new FileStream(saveFile, FileMode.Open, FileAccess.Read))
+                    using (var outputStream = new MemoryStream())
+                    using (var deflateStream = new DeflateStream(compressedStream, CompressionMode.Decompress)) {
+                        deflateStream.CopyTo(outputStream);
+                        var decompressedBytes = outputStream.ToArray();
+                        var decompressedContent = Encoding.UTF8.GetString(decompressedBytes);
+
+                        // Update the current JSON content and the JSON viewer window if it's open
+                        _currentJsonContent = decompressedContent;
+                        if (_jsonViewerWindow != null) {
+                            _jsonViewerWindow.UpdateJsonContent(decompressedContent);
+                        }
+                    }
+                }
+                catch (Exception ex) {
+                    DebugLog($"Warning: Could not read JSON content: {ex.Message}");
                 }
 
-                File.Copy(filePath, saveFile, true);
                 SetSuccessStatus($"Loaded {selectedItem}");
                 DebugLog($"Loaded {selectedItem}");
             }
@@ -746,6 +771,48 @@ namespace BalatroSaveAndLoad {
         private void DebugWindow_Closed(object? sender, EventArgs e) {
             ShowDebugWindowCheckBox.IsChecked = false;
             _debugWindow = null;
+        }
+
+        // JSON viewer checkbox handlers
+        private void ShowJsonViewerCheckBox_Checked(object sender, RoutedEventArgs e) {
+            if (_jsonViewerWindow == null) {
+                _jsonViewerWindow = new JsonViewerWindow();
+                _jsonViewerWindow.Owner = this;
+                _jsonViewerWindow.SetJsonContent(_currentJsonContent);
+                _jsonViewerWindow.Closed += JsonViewerWindow_Closed;
+                _jsonViewerWindow.Show();
+            } else {
+                _jsonViewerWindow.Show();
+                _jsonViewerWindow.Activate();
+            }
+        }
+
+        private void ShowJsonViewerCheckBox_Unchecked(object sender, RoutedEventArgs e) {
+            if (_jsonViewerWindow != null) {
+                _jsonViewerWindow.Close();
+                _jsonViewerWindow = null;
+            }
+        }
+
+        private void JsonViewerWindow_Closed(object? sender, EventArgs e) {
+            _jsonViewerWindow = null;
+            ShowJsonViewerCheckBox.IsChecked = false;
+        }
+
+        protected override void OnClosing(CancelEventArgs e) {
+            base.OnClosing(e);
+
+            // Close the JSON viewer window if it's open
+            if (_jsonViewerWindow != null) {
+                _jsonViewerWindow.Close();
+                _jsonViewerWindow = null;
+            }
+
+            // Close the debug window if it's open
+            if (_debugWindow != null) {
+                _debugWindow.Close();
+                _debugWindow = null;
+            }
         }
     }
 }

@@ -213,6 +213,17 @@
                           Background="{DynamicResource CheckBoxBackgroundBrush}"
                           BorderBrush="{DynamicResource CheckBoxBorderBrush}"
                           Foreground="{DynamicResource CheckBoxForegroundBrush}" />
+                <CheckBox Grid.Row="1" Grid.Column="0"
+                          Name="ShowJsonViewerCheckBox"
+                          Content="JSON View"
+                          Margin="80,0,10,42"
+                          VerticalAlignment="Bottom"
+                          HorizontalAlignment="Left"
+                          Checked="ShowJsonViewerCheckBox_Checked"
+                          Unchecked="ShowJsonViewerCheckBox_Unchecked"
+                          Background="{DynamicResource CheckBoxBackgroundBrush}"
+                          BorderBrush="{DynamicResource CheckBoxBorderBrush}"
+                          Foreground="{DynamicResource CheckBoxForegroundBrush}" />
 
                 <!-- StatusBar (row 2, spans all columns) -->
                 <StatusBar Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5"

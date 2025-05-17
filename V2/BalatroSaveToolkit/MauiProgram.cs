@@ -35,12 +35,36 @@ public static class MauiProgram
 		// Register services with dependencies on Error Handling - Use platform-specific file services
 #if WINDOWS
         builder.Services.AddSingleton<Services.Interfaces.IFileService, Services.Implementations.Windows.WindowsFileService>();
+        builder.Services.AddSingleton<Services.Interfaces.IPathProvider, Services.Implementations.Windows.WindowsPathProvider>();
 #elif MACCATALYST
         builder.Services.AddSingleton<Services.Interfaces.IFileService, Services.Implementations.MacCatalyst.MacFileService>();
+        // TODO: Add MacOS path provider when implemented
+        // For now, use Windows implementation with a warning since BasePathProvider is abstract
+        builder.Services.AddSingleton<Services.Interfaces.IPathProvider>(serviceProvider => {
+            var logger = serviceProvider.GetRequiredService<Services.Interfaces.ILogService>();
+            var errorHandler = serviceProvider.GetRequiredService<Services.Interfaces.IErrorHandlingService>();
+            logger.LogWarning("MauiProgram", "Using WindowsPathProvider on MacCatalyst - this is temporary until MacPathProvider is implemented");
+            return new Services.Implementations.Windows.WindowsPathProvider(logger, errorHandler);
+        });
 #elif LINUX
         builder.Services.AddSingleton<Services.Interfaces.IFileService, Services.Implementations.Linux.LinuxFileService>();
+        // TODO: Add Linux path provider when implemented
+        // For now, use Windows implementation with a warning since BasePathProvider is abstract
+        builder.Services.AddSingleton<Services.Interfaces.IPathProvider>(serviceProvider => {
+            var logger = serviceProvider.GetRequiredService<Services.Interfaces.ILogService>();
+            var errorHandler = serviceProvider.GetRequiredService<Services.Interfaces.IErrorHandlingService>();
+            logger.LogWarning("MauiProgram", "Using WindowsPathProvider on Linux - this is temporary until LinuxPathProvider is implemented");
+            return new Services.Implementations.Windows.WindowsPathProvider(logger, errorHandler);
+        });
 #else
         builder.Services.AddSingleton<Services.Interfaces.IFileService, Services.Implementations.FileService>();
+        // Default path provider for other platforms - use Windows implementation temporarily
+        builder.Services.AddSingleton<Services.Interfaces.IPathProvider>(serviceProvider => {
+            var logger = serviceProvider.GetRequiredService<Services.Interfaces.ILogService>();
+            var errorHandler = serviceProvider.GetRequiredService<Services.Interfaces.IErrorHandlingService>();
+            logger.LogWarning("MauiProgram", "Using WindowsPathProvider on unknown platform - this is temporary until platform-specific providers are implemented");
+            return new Services.Implementations.Windows.WindowsPathProvider(logger, errorHandler);
+        });
 #endif
 
 		// These will need proper implementations later

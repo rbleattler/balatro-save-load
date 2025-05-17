@@ -29,7 +29,7 @@ As a developer, I need a robust and cross-platform file system service that can 
 
 - [x] [TSK012 - Create IFileSystemService Interface](../closed/TSK012-Create-IFileSystemService-Interface.md)
 - [x] [TSK013 - Create Base FileSystemService Implementation](../closed/TSK013-Create-Base-FileSystemService-Implementation.md)
-- [ ] [TSK014 - Implement Windows FileSystemService](../backlog/TSK014-Implement-Windows-FileSystemService.md)
+- [x] [TSK014 - Document Interface Method Behaviors](../closed/TSK014-Document-Interface-Method-Behaviors.md)
 - [ ] [TSK015 - Implement macOS FileSystemService](../backlog/TSK015-Implement-macOS-FileSystemService.md)
 - [ ] [TSK016 - Implement Linux FileSystemService](../backlog/TSK016-Implement-Linux-FileSystemService.md)
 - [ ] [TSK017 - Create Tests for FileSystemService](../backlog/TSK017-Create-Tests-for-FileSystemService.md)
@@ -43,4 +43,4 @@ As a developer, I need a robust and cross-platform file system service that can 
 
 ## Status
 
-In Progress - 2 of 6 tasks completed
+In Progress - 3 of 6 tasks completed

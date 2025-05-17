@@ -31,13 +31,13 @@ As a developer, I need to create platform-specific file path providers that can 
 ## Tasks
 
 - ✅ TSK015: Create Windows path provider implementation (Completed)
-- TSK016: Create macOS path provider implementation
-- TSK017: Create Linux path provider implementation
+- ✅ TSK016: Create macOS path provider implementation (Completed)
+- ✅ TSK017: Create Linux path provider implementation (Completed)
 - TSK018: Create path provider unit tests
 
 ## Implementation Progress
 
-1/4 tasks completed
+3/4 tasks completed
 
 ## Technical Notes
 

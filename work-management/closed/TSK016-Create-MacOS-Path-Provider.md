@@ -2,7 +2,7 @@
 
 ## Parent User Story
 
-- [US005 - Create Platform-Specific File Path Providers](US005-Create-Platform-Specific-File-Path-Providers.md)
+- [US005 - Create Platform-Specific File Path Providers](../open/US005-Create-Platform-Specific-File-Path-Providers.md)
 
 ## Assigned To
 
@@ -15,6 +15,10 @@ High (1)
 ## Estimated Hours
 
 4
+
+## Status
+
+Completed
 
 ## Description
 
@@ -56,6 +60,24 @@ Create a macOS-specific implementation of the file path provider that correctly 
 
 - TSK012: Create IFileSystemService interface with core file operations
 
+## Implementation Details
+
+Implemented a MacPathProvider class that:
+- Properly resolves Balatro save locations on macOS (~/Library/Application Support/Balatro)
+- Supports Steam installation detection via common installation paths
+- Normalizes macOS paths and handles Unicode normalization (NFD)
+- Provides macOS-specific application data folder handling
+- Includes detection of resource forks and extended attributes
+- Correctly handles macOS path conventions (forward slashes, tilde expansion)
+- Provides robust error handling and logging
+
+The implementation includes:
+- Proper handling of macOS Library folder structure
+- Steam game detection for both standard and Steam Cloud saves
+- Unicode normalization for proper file path handling on macOS (NFD normalization)
+- Path normalization for consistent handling
+- Proper exception handling with fallbacks
+
 ## Notes
 
-macOS path handling has several unique aspects, including the use of the Library folder, Unicode normalization differences, and resource forks. The implementation should handle all these macOS-specific aspects while presenting a consistent API to the rest of the application.
+macOS path handling has several unique aspects, including the use of the Library folder, Unicode normalization differences, and resource forks. The implementation handles all these macOS-specific aspects while presenting a consistent API to the rest of the application.

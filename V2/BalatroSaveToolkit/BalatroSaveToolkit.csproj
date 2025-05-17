@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">	<PropertyGroup>
 		<!-- For initial development on Windows, just target Windows for now -->
-		<TargetFrameworks>net9.0-windows10.0.19041.0</TargetFrameworks>
+		<TargetFrameworks>net9.0</TargetFrameworks>
 		<!-- Once Windows version is stable, we can uncomment these for cross-platform support -->
 		<!-- <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('osx'))">$(TargetFrameworks);net9.0-maccatalyst</TargetFrameworks> -->
 		<!-- <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net9.0-linux</TargetFrameworks> -->

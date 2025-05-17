@@ -1,5 +1,9 @@
 # Balatro Save and Load Tool - Migration Project
 
+# Shells
+
+When working on windows, always assume you're in a pwsh (powershell) terminal if you need to run commands. Non-powershell commands cannot be guaranteed to work.
+
 ## Project Overview
 
 This repository contains a migration project to convert the Balatro Save and Load Tool from WPF to .NET MAUI. The goal is to make the application cross-platform (Windows, macOS, Linux) while improving its architecture, modularity, and user experience.

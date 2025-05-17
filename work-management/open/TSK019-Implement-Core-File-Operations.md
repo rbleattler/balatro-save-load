@@ -1,8 +1,10 @@
 # Task: TSK019 - Implement Core File Operation Methods
 
+**Status: In Progress**
+
 ## Parent User Story
 
-- [US006 - Implement File Operations Abstraction](US006-Implement-File-Operations-Abstraction.md)
+- [US006 - Implement File Operations Abstraction](../open/US006-Implement-File-Operations-Abstraction.md)
 
 ## Assigned To
 

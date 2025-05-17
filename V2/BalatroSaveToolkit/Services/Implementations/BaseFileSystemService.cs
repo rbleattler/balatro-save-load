@@ -49,18 +49,24 @@ namespace BalatroSaveToolkit.Services.Implementations
                 _errorHandler.HandleException(ex, LogTag, $"Error checking if file exists: {path}", ErrorSeverity.Warning, false);
                 return false;
             }
-        }
-
-        /// <inheritdoc />
+        }        /// <inheritdoc />
         public virtual async Task<string> ReadTextAsync(string path, Encoding? encoding = null)
         {
             try
             {
                 if (await FileExistsAsync(path))
                 {
-                    return encoding != null
-                        ? await File.ReadAllTextAsync(path, encoding)
-                        : await File.ReadAllTextAsync(path);
+                    // If encoding is provided, use it directly
+                    if (encoding != null)
+                    {
+                        return await File.ReadAllTextAsync(path, encoding);
+                    }
+
+                    // Otherwise, try to detect encoding
+                    encoding = await DetectFileEncodingAsync(path);
+
+                    // Use detected encoding or fall back to UTF-8
+                    return await File.ReadAllTextAsync(path, encoding ?? Encoding.UTF8);
                 }
 
                 throw new FileNotFoundException($"File not found: {path}", path);
@@ -80,6 +86,153 @@ namespace BalatroSaveToolkit.Services.Implementations
                 _errorHandler.HandleException(ex, LogTag, $"Error reading file: {path}", ErrorSeverity.Error, false);
                 throw new FileSystemException($"Error reading file: {path}", ex);
             }
+        }
+
+        /// <summary>
+        /// Attempts to detect the encoding of a text file by analyzing its contents.
+        /// </summary>
+        /// <param name="path">The path of the file to analyze.</param>
+        /// <returns>The detected encoding, or null if detection failed.</returns>        protected virtual async Task<Encoding?> DetectFileEncodingAsync(string path)
+        {
+            try
+            {
+                // Read the BOM (Byte Order Mark) to detect standard encodings
+                using FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+
+                if (fs.Length >= 2)
+                {
+                    byte[] bom = new byte[Math.Min(4, (int)fs.Length)];
+                    int bytesRead = await fs.ReadAsync(bom, 0, bom.Length);
+
+                    // Reset position to start
+                    fs.Position = 0;
+
+                    // Check for BOM markers
+                    if (bytesRead >= 3 && bom[0] == 0xEF && bom[1] == 0xBB && bom[2] == 0xBF)
+                        return Encoding.UTF8; // UTF-8 with BOM
+
+                    if (bytesRead >= 2 && bom[0] == 0xFE && bom[1] == 0xFF)
+                        return Encoding.BigEndianUnicode; // UTF-16 BE
+
+                    if (bytesRead >= 2 && bom[0] == 0xFF && bom[1] == 0xFE)
+                    {
+                        // Could be UTF-16 LE or UTF-32 LE
+                        if (bytesRead >= 4 && bom[2] == 0x00 && bom[3] == 0x00)
+                            return Encoding.UTF32;
+                        else
+                            return Encoding.Unicode; // UTF-16 LE
+                    }
+
+                    if (bytesRead >= 4 && bom[0] == 0x00 && bom[1] == 0x00 && bom[2] == 0xFE && bom[3] == 0xFF)
+                        return Encoding.GetEncoding("utf-32BE"); // UTF-32 BE
+                }
+
+                // If no BOM, analyze content
+                const int sampleSize = 4096; // Reasonable sample size
+                byte[] buffer = new byte[Math.Min(sampleSize, (int)fs.Length)];
+                int sampleBytesRead = await fs.ReadAsync(buffer, 0, buffer.Length);
+
+                // Adjust buffer to actual bytes read
+                if (sampleBytesRead < buffer.Length)
+                {
+                    Array.Resize(ref buffer, sampleBytesRead);
+                }
+
+                // Check for nulls (suggesting binary or UTF-16/UTF-32)
+                bool hasNulls = buffer.Any(b => b == 0);
+                if (hasNulls)
+                {
+                    // Check for UTF-16 LE pattern (most common on Windows)
+                    if (buffer.Length >= 2 &&
+                        buffer.Where((b, i) => i % 2 == 0).All(b => b != 0) &&
+                        buffer.Where((b, i) => i % 2 == 1).Any(b => b == 0))
+                        return Encoding.Unicode;
+
+                    // Could be binary, just return null and let caller decide
+                    return null;
+                }
+
+                // Check for UTF-8 without BOM
+                if (IsValidUtf8(buffer))
+                    return new UTF8Encoding(false); // UTF-8 without BOM
+
+                // If all else fails, try to determine based on platform
+                if (OperatingSystem.IsWindows())
+                    return Encoding.GetEncoding(1252); // Windows default
+                else
+                    return Encoding.UTF8; // Most likely on *nix systems
+            }
+            catch (Exception ex)
+            {
+                _errorHandler.HandleException(ex, LogTag, $"Error detecting file encoding: {path}", ErrorSeverity.Warning, false);
+                return null; // Default to null, letting the caller decide the fallback
+            }
+        }
+
+        /// <summary>
+        /// Determines if a byte array contains valid UTF-8 encoded text.
+        /// </summary>
+        /// <param name="buffer">The byte array to check.</param>
+        /// <returns>True if the data appears to be valid UTF-8; otherwise, false.</returns>
+        private bool IsValidUtf8(byte[] buffer)
+        {
+            int i = 0;
+
+            while (i < buffer.Length)
+            {
+                if (buffer[i] <= 0x7F) // 1-byte sequence
+                {
+                    i++;
+                }
+                else if (buffer[i] >= 0xC2 && buffer[i] <= 0xDF) // 2-byte sequence
+                {
+                    if (i + 1 >= buffer.Length || (buffer[i + 1] & 0xC0) != 0x80)
+                        return false;
+                    i += 2;
+                }
+                else if (buffer[i] == 0xE0) // 3-byte sequence (special case)
+                {
+                    if (i + 2 >= buffer.Length ||
+                        (buffer[i + 1] & 0xC0) != 0x80 ||
+                        buffer[i + 1] < 0xA0 || // Additional check for overlong sequences
+                        (buffer[i + 2] & 0xC0) != 0x80)
+                        return false;
+                    i += 3;
+                }
+                else if (buffer[i] >= 0xE1 && buffer[i] <= 0xEF) // 3-byte sequence
+                {
+                    if (i + 2 >= buffer.Length ||
+                        (buffer[i + 1] & 0xC0) != 0x80 ||
+                        (buffer[i + 2] & 0xC0) != 0x80)
+                        return false;
+                    i += 3;
+                }
+                else if (buffer[i] == 0xF0) // 4-byte sequence (special case)
+                {
+                    if (i + 3 >= buffer.Length ||
+                        (buffer[i + 1] & 0xC0) != 0x80 ||
+                        buffer[i + 1] < 0x90 || // Additional check for overlong sequences
+                        (buffer[i + 2] & 0xC0) != 0x80 ||
+                        (buffer[i + 3] & 0xC0) != 0x80)
+                        return false;
+                    i += 4;
+                }
+                else if (buffer[i] >= 0xF1 && buffer[i] <= 0xF4) // 4-byte sequence
+                {
+                    if (i + 3 >= buffer.Length ||
+                        (buffer[i + 1] & 0xC0) != 0x80 ||
+                        (buffer[i + 2] & 0xC0) != 0x80 ||
+                        (buffer[i + 3] & 0xC0) != 0x80)
+                        return false;
+                    i += 4;
+                }
+                else // Invalid UTF-8 lead byte
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <inheritdoc />
@@ -343,6 +496,62 @@ namespace BalatroSaveToolkit.Services.Implementations
         }
 
         /// <inheritdoc />
+        public virtual async Task RenameFileAsync(string path, string newName)
+        {
+            try
+            {
+                if (!await FileExistsAsync(path))
+                {
+                    throw new FileNotFoundException($"File not found: {path}", path);
+                }
+
+                // Validate the new name
+                if (string.IsNullOrWhiteSpace(newName))
+                {
+                    throw new ArgumentException("New filename cannot be empty or whitespace.", nameof(newName));
+                }
+
+                if (newName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+                {
+                    throw new InvalidFileNameException(newName, $"The filename '{newName}' contains invalid characters.");
+                }
+
+                // Get the directory and create the new path
+                string? directory = GetDirectoryName(path);
+                string newPath = string.IsNullOrEmpty(directory) ? newName : Path.Combine(directory, newName);
+
+                // Check if destination already exists
+                if (await FileExistsAsync(newPath))
+                {
+                    throw new FileAlreadyExistsException(newPath, $"A file with the name '{newName}' already exists in the directory.");
+                }
+
+                // Rename (move) the file
+                await MoveFileAsync(path, newPath, false);
+            }
+            catch (FileNotFoundException ex)
+            {
+                _errorHandler.HandleException(ex, LogTag, $"Source file not found: {path}", ErrorSeverity.Warning, false);
+                throw;
+            }
+            catch (InvalidFileNameException ex)
+            {
+                _errorHandler.HandleException(ex, LogTag, ex.Message, ErrorSeverity.Warning, false);
+                throw;
+            }
+            catch (FileAlreadyExistsException ex)
+            {
+                _errorHandler.HandleException(ex, LogTag, ex.Message, ErrorSeverity.Warning, false);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _errorHandler.HandleException(ex, LogTag, $"Error renaming file: {path} to {newName}", ErrorSeverity.Error, false);
+                throw new FileSystemException($"Error renaming file: {path} to {newName}", ex);
+            }
+        }
+
+        /// <inheritdoc />
         public virtual async Task DeleteFileAsync(string path)
         {
             try
@@ -484,6 +693,168 @@ namespace BalatroSaveToolkit.Services.Implementations
             {
                 _errorHandler.HandleException(ex, LogTag, $"Error creating file: {path}", ErrorSeverity.Error, false);
                 throw new FileSystemException($"Error creating file: {path}", ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public virtual async Task<(bool CanRead, bool CanWrite, bool CanExecute)> CheckFileAccessAsync(string path)
+        {
+            try
+            {
+                if (!await FileExistsAsync(path))
+                {
+                    throw new FileNotFoundException($"File not found: {path}", path);
+                }
+
+                bool canRead = false;
+                bool canWrite = false;
+                bool canExecute = false;
+
+                await Task.Run(() =>
+                {
+                    try
+                    {
+                        // Check read access
+                        using (FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        {
+                            canRead = true;
+                        }
+                    }
+                    catch
+                    {
+                        canRead = false;
+                    }
+
+                    try
+                    {
+                        // Check write access by opening for write but don't actually modify the file
+                        using (FileStream fs = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
+                        {
+                            canWrite = true;
+                        }
+                    }
+                    catch
+                    {
+                        canWrite = false;
+                    }
+
+                    // Check execute permissions (platform-specific)
+                    canExecute = IsFileExecutable(path);
+                });
+
+                return (canRead, canWrite, canExecute);
+            }
+            catch (FileNotFoundException ex)
+            {
+                _errorHandler.HandleException(ex, LogTag, $"File not found: {path}", ErrorSeverity.Warning, false);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _errorHandler.HandleException(ex, LogTag, $"Error checking file access: {path}", ErrorSeverity.Warning, false);
+                throw new FileAccessException(path, $"Error checking file access: {path}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Determines if a file is executable based on platform-specific criteria.
+        /// This is a basic implementation that can be overridden in platform-specific classes.
+        /// </summary>
+        /// <param name="path">The path to the file to check.</param>
+        /// <returns>True if the file is executable; otherwise, false.</returns>
+        protected virtual bool IsFileExecutable(string path)
+        {
+            // Default implementation based on extension (Windows-centric)
+            string extension = Path.GetExtension(path).ToLowerInvariant();
+            return extension == ".exe" || extension == ".bat" || extension == ".cmd" || extension == ".com";
+
+            // Note: Platform-specific implementations should override this
+            // For Unix-based systems, check file permissions
+        }
+
+        /// <inheritdoc />
+        public virtual async Task<Version> GetFileVersionAsync(string path)
+        {
+            try
+            {
+                if (!await FileExistsAsync(path))
+                {
+                    throw new FileNotFoundException($"File not found: {path}", path);
+                }
+
+                // Read first 100 bytes to try to detect save file format and version
+                // This implementation focuses on Balatro save files
+                byte[] header = new byte[Math.Min(100, (int)(await GetFileInfoAsync(path)).Length)];
+
+                using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    await fs.ReadAsync(header, 0, header.Length);
+                }
+
+                // Try to extract version information based on file format and known patterns
+                string content = System.Text.Encoding.UTF8.GetString(header);
+
+                // For Balatro saves, look for version information pattern
+                // This is a simplified approach - actual implementation should use proper parsers
+
+                // First try to find explicit version tag
+                var versionMatch = System.Text.RegularExpressions.Regex.Match(content, @"version["":]?\s*[""']?(\d+)\.(\d+)\.?(\d*)[""']?");
+                if (versionMatch.Success)
+                {
+                    int major = int.Parse(versionMatch.Groups[1].Value);
+                    int minor = int.Parse(versionMatch.Groups[2].Value);
+                    int build = versionMatch.Groups[3].Success ? int.Parse(versionMatch.Groups[3].Value) : 0;
+
+                    return new Version(major, minor, build);
+                }
+
+                // For JSON files, try to parse and look for version fields
+                if (content.Trim().StartsWith("{") && content.Contains("\""))
+                {
+                    // Look for common version patterns in JSON
+                    versionMatch = System.Text.RegularExpressions.Regex.Match(content, @"""(?:version|v|game_version)""(?:\s*)?:(?:\s*)?""?(\d+)\.(\d+)\.?(\d*)""?");
+                    if (versionMatch.Success)
+                    {
+                        int major = int.Parse(versionMatch.Groups[1].Value);
+                        int minor = int.Parse(versionMatch.Groups[2].Value);
+                        int build = versionMatch.Groups[3].Success && !string.IsNullOrEmpty(versionMatch.Groups[3].Value)
+                            ? int.Parse(versionMatch.Groups[3].Value)
+                            : 0;
+
+                        return new Version(major, minor, build);
+                    }
+                }
+
+                // For executable files or DLLs on Windows, get file version info
+                if (OperatingSystem.IsWindows() &&
+                    (Path.GetExtension(path).Equals(".exe", StringComparison.OrdinalIgnoreCase) ||
+                     Path.GetExtension(path).Equals(".dll", StringComparison.OrdinalIgnoreCase)))
+                {
+                    var versionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(path);
+                    return new Version(versionInfo.FileMajorPart, versionInfo.FileMinorPart,
+                        versionInfo.FileBuildPart, versionInfo.FilePrivatePart);
+                }
+
+                // Default to file modification time as a fallback version
+                var fileInfo = await GetFileInfoAsync(path);
+                var modTime = fileInfo.LastWriteTime;
+                return new Version(modTime.Year - 2000, modTime.Month, modTime.Day,
+                    modTime.Hour * 100 + modTime.Minute);
+            }
+            catch (FileNotFoundException ex)
+            {
+                _errorHandler.HandleException(ex, LogTag, $"File not found: {path}", ErrorSeverity.Warning, false);
+                throw;
+            }
+            catch (FileAccessException ex)
+            {
+                _errorHandler.HandleException(ex, LogTag, $"Cannot access file: {path}", ErrorSeverity.Warning, false);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _errorHandler.HandleException(ex, LogTag, $"Error getting file version: {path}", ErrorSeverity.Error, false);
+                throw new FileSystemException($"Error getting file version: {path}", ex);
             }
         }
 

@@ -15,8 +15,8 @@ Create a platform-agnostic file system service that handles file operations cons
 ## User Stories
 
 - [In Progress] US004: Implement IFileSystemService Interface (3/6 tasks completed)
-- [In Progress] US005: Create Platform-Specific File Path Providers (3/4 tasks completed)
-- US006: Implement File Operations Abstraction
+- [Completed] US005: Create Platform-Specific File Path Providers
+- [In Progress] US006: Implement File Operations Abstraction (0/4 tasks completed)
 - US007: Create File Monitoring Service
 
 ## Technical Details
@@ -49,6 +49,9 @@ Create a platform-agnostic file system service that handles file operations cons
 - [x] TSK014: Document Interface Method Behaviors - COMPLETED
 - [x] TSK015: Create Windows Path Provider implementation - COMPLETED
 - [x] TSK016: Create macOS path provider implementation - COMPLETED
+- [x] TSK017: Create Linux path provider implementation - COMPLETED
+- [x] TSK018: Create Path Provider Unit Tests - COMPLETED
+- [ ] TSK019: Implement Core File Operation Methods - IN PROGRESS
 - [x] TSK017: Create Linux path provider implementation - COMPLETED
 - [ ] TSK018: Create path provider unit tests
 - [ ] TSK019: Implement macOS FileSystemService

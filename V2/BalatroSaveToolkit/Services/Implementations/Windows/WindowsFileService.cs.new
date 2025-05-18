@@ -1,0 +1,37 @@
+using BalatroSaveToolkit.Services.Interfaces;
+using System.Runtime.InteropServices;
+
+namespace BalatroSaveToolkit.Services.Implementations.Windows
+{
+    /// <summary>
+    /// Windows-specific implementation of IFileService
+    /// </summary>
+    public class WindowsFileService : FileService
+    {
+        // Keep the error handler from the base class
+        public WindowsFileService(ILogService logger, IErrorHandlingService errorHandler) : base(logger, errorHandler)
+        {
+        }
+
+        // TODO: Add Windows-specific implementation with proper WinUI references
+        // This temporary implementation just calls the base class methods
+
+        /// <summary>
+        /// Pick a folder using the Windows folder picker
+        /// </summary>
+        public override async Task<string> PickFolderAsync(string title)
+        {
+            // Temporary implementation until Windows.Storage references are fixed
+            return await base.PickFolderAsync(title);
+        }
+
+        /// <summary>
+        /// Pick a save file location using the Windows file save picker
+        /// </summary>
+        public override async Task<string> PickSaveFileAsync(string title, string suggestedName, string filter)
+        {
+            // Temporary implementation until Windows.Storage references are fixed
+            return await base.PickSaveFileAsync(title, suggestedName, filter);
+        }
+    }
+}

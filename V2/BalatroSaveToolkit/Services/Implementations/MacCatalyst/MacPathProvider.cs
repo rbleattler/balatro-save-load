@@ -204,7 +204,7 @@ namespace BalatroSaveToolkit.Services.Implementations.MacCatalyst
             catch (Exception ex)
             {
                 _errorHandler.HandleException(ex, nameof(MacPathProvider),
-                    "Error searching for Steam installation", ErrorSeverity.Debug, false);
+                    "Error searching for Steam installation", ErrorSeverity.Information, false);
                 return Task.FromResult<string?>(null);
             }
         }
@@ -235,7 +235,7 @@ namespace BalatroSaveToolkit.Services.Implementations.MacCatalyst
             catch (Exception ex)
             {
                 _errorHandler.HandleException(ex, nameof(MacPathProvider),
-                    $"Error checking if directory is a Steam installation: {directory}", ErrorSeverity.Debug, false);
+                    $"Error checking if directory is a Steam installation: {directory}", ErrorSeverity.Information, false);
                 return false;
             }
         }
@@ -360,7 +360,7 @@ namespace BalatroSaveToolkit.Services.Implementations.MacCatalyst
             catch (Exception ex)
             {
                 _errorHandler.HandleException(ex, nameof(MacPathProvider),
-                    $"Error normalizing macOS path: {path}", ErrorSeverity.Debug, false);
+                    $"Error normalizing macOS path: {path}", ErrorSeverity.Information, false);
                 return path; // Return original path if normalization fails
             }
         }
@@ -401,7 +401,7 @@ namespace BalatroSaveToolkit.Services.Implementations.MacCatalyst
             catch (Exception ex)
             {
                 _errorHandler.HandleException(ex, nameof(MacPathProvider),
-                    $"Error checking resource fork: {path}", ErrorSeverity.Debug, false);
+                    $"Error checking resource fork: {path}", ErrorSeverity.Information, false);
                 return false;
             }
         }

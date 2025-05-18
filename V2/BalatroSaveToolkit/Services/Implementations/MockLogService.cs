@@ -41,9 +41,19 @@ namespace BalatroSaveToolkit.Services.Implementations
         public void LogWarning(string source, string message, string? details = null)
         {
             AddLogEntry("WARN", source, message, details);
+        }        public void LogError(string source, string message, string? details = null, Exception? exception = null)
+        {
+            string fullDetails = details ?? string.Empty;
+            if (exception != null)
+            {
+                fullDetails = string.IsNullOrEmpty(fullDetails)
+                    ? $"Exception: {exception.GetType().Name}\nMessage: {exception.Message}\nStack: {exception.StackTrace}"
+                    : $"{fullDetails}\nException: {exception.GetType().Name}\nMessage: {exception.Message}\nStack: {exception.StackTrace}";
+            }
+            AddLogEntry("ERROR", source, message, fullDetails);
         }
 
-        public void LogError(string source, string message, string? details = null, Exception? exception = null)
+        public void LogCritical(string source, string message, string? details = null, Exception? exception = null)
         {
             string fullDetails = details ?? string.Empty;
             if (exception != null)

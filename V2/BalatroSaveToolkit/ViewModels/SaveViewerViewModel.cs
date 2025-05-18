@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using BalatroSaveToolkit.Models;
+using BalatroSaveToolkit.Extensions;
 using BalatroSaveToolkit.Services.Interfaces;
 
 namespace BalatroSaveToolkit.ViewModels

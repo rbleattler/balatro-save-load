@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Storage;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -22,7 +22,6 @@ public static class MauiProgram
 			});
 
 		// Register services in the correct order to handle dependencies
-
 		// Register storage services
 		builder.Services.AddSingleton<IFileSaver>(FileSaver.Default);
 		builder.Services.AddSingleton<IFolderPicker>(FolderPicker.Default);
@@ -32,11 +31,15 @@ public static class MauiProgram
 
 		// Register services with dependencies on Log service
 		builder.Services.AddSingleton<Services.Interfaces.IErrorHandlingService, Services.Implementations.ErrorHandlingService>();
+
+		// Register the FileSystemService
+		builder.Services.AddSingleton<Services.Interfaces.IFileSystemService, Services.Implementations.FileSystemServiceV2>();
 		// Register services with dependencies on Error Handling - Use platform-specific file services
 #if WINDOWS
         builder.Services.AddSingleton<Services.Interfaces.IFileService, Services.Implementations.Windows.WindowsFileService>();
         builder.Services.AddSingleton<Services.Interfaces.IPathProvider, Services.Implementations.Windows.WindowsPathProvider>();
-#elif MACCATALYST        builder.Services.AddSingleton<Services.Interfaces.IFileService, Services.Implementations.MacCatalyst.MacFileService>();
+#elif MACCATALYST
+        builder.Services.AddSingleton<Services.Interfaces.IFileService, Services.Implementations.MacCatalyst.MacFileService>();
         builder.Services.AddSingleton<Services.Interfaces.IPathProvider, Services.Implementations.MacCatalyst.MacPathProvider>();
 #elif LINUX
         builder.Services.AddSingleton<Services.Interfaces.IFileService, Services.Implementations.Linux.LinuxFileService>();
@@ -51,6 +54,9 @@ public static class MauiProgram
             return new Services.Implementations.Windows.WindowsPathProvider(logger, errorHandler);
         });
 #endif
+
+        // Register the new simplified file system service
+        builder.Services.AddSingleton<Services.Interfaces.IFileSystemService, Services.Implementations.FileSystemService>();
 
 		// These will need proper implementations later
 		builder.Services.AddSingleton<Services.Interfaces.ISettingsService>(
@@ -78,7 +84,6 @@ public static class MauiProgram
 #if DEBUG
 		builder.Logging.AddDebug();
 #endif
-
 		return builder.Build();
 	}
 }

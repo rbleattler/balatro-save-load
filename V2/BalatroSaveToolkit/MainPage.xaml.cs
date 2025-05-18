@@ -1,4 +1,4 @@
-﻿using BalatroSaveToolkit.ViewModels;
+using BalatroSaveToolkit.ViewModels;
 
 namespace BalatroSaveToolkit;
 

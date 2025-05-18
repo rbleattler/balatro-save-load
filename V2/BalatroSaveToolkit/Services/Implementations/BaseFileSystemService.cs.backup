@@ -16,10 +16,12 @@ namespace BalatroSaveToolkit.Services.Implementations
         protected readonly IErrorHandlingService _errorHandler;
 
         // Track file monitoring registrations
-        private readonly Dictionary<string, FileSystemWatcher> _watchers = new();        /// <summary>
+        private readonly Dictionary<string, FileSystemWatcher> _watchers = new();
+
+        /// <summary>
         /// Event raised when a monitored file or directory changes.
         /// </summary>
-        public event EventHandler<BalatroSaveToolkit.Services.Interfaces.FileSystemEventArgs>? FileChanged;
+        public event EventHandler<FileSystemEventArgs>? FileChanged;
 
         /// <summary>
         /// Initializes a new instance of BaseFileSystemService.
@@ -47,9 +49,7 @@ namespace BalatroSaveToolkit.Services.Implementations
                 _errorHandler.HandleException(ex, LogTag, $"Error checking if file exists: {path}", ErrorSeverity.Warning, false);
                 return false;
             }
-        }
-
-        /// <inheritdoc />
+        }        /// <inheritdoc />
         public virtual async Task<string> ReadTextAsync(string path, Encoding? encoding = null)
         {
             try
@@ -92,8 +92,7 @@ namespace BalatroSaveToolkit.Services.Implementations
         /// Attempts to detect the encoding of a text file by analyzing its contents.
         /// </summary>
         /// <param name="path">The path of the file to analyze.</param>
-        /// <returns>The detected encoding, or null if detection failed.</returns>
-        protected virtual async Task<Encoding?> DetectFileEncodingAsync(string path)
+        /// <returns>The detected encoding, or null if detection failed.</returns>        protected virtual async Task<Encoding?> DetectFileEncodingAsync(string path)
         {
             try
             {
@@ -514,7 +513,7 @@ namespace BalatroSaveToolkit.Services.Implementations
 
                 if (newName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
                 {
-                    throw new InvalidOperationException($"The filename '{newName}' contains invalid characters.");
+                    throw new InvalidFileNameException(newName, $"The filename '{newName}' contains invalid characters.");
                 }
 
                 // Get the directory and create the new path
@@ -535,12 +534,7 @@ namespace BalatroSaveToolkit.Services.Implementations
                 _errorHandler.HandleException(ex, LogTag, $"Source file not found: {path}", ErrorSeverity.Warning, false);
                 throw;
             }
-            catch (ArgumentException ex)
-            {
-                _errorHandler.HandleException(ex, LogTag, ex.Message, ErrorSeverity.Warning, false);
-                throw;
-            }
-            catch (InvalidOperationException ex)
+            catch (InvalidFileNameException ex)
             {
                 _errorHandler.HandleException(ex, LogTag, ex.Message, ErrorSeverity.Warning, false);
                 throw;
@@ -1433,8 +1427,9 @@ namespace BalatroSaveToolkit.Services.Implementations
         protected virtual void OnFileChanged(string path, FileSystemChangeType changeType, DateTime changeTime)
         {
             try
-            {                _logService.LogDebug(LogTag, $"File changed: {path}, Type: {changeType}, Time: {changeTime}");
-                FileChanged?.Invoke(this, new BalatroSaveToolkit.Services.Interfaces.FileSystemEventArgs(path, changeType, changeTime));
+            {
+                _logService.LogDebug(LogTag, $"File changed: {path}, Type: {changeType}, Time: {changeTime}");
+                FileChanged?.Invoke(this, new FileSystemEventArgs(path, changeType, changeTime));
             }
             catch (Exception ex)
             {

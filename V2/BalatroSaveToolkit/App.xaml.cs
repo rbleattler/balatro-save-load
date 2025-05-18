@@ -1,4 +1,4 @@
-﻿using BalatroSaveToolkit.Services.Implementations;
+using BalatroSaveToolkit.Services.Implementations;
 using BalatroSaveToolkit.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 

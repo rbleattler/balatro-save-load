@@ -50,22 +50,19 @@ namespace BalatroSaveToolkit.Services.Implementations
                 }
 
                 // Construct log file path
-                string logFilePath = Path.Combine(logDirectory, LogFileName);
-                _logFilePath = logFilePath;
-
+                string logFilePath = Path.Combine(logDirectory, LogFileName);                _logFilePath = logFilePath;
                 // Configure Serilog
                 _logger = new LoggerConfiguration()
                     .MinimumLevel.Debug()
                     .Enrich.WithProperty("Application", "BalatroSaveToolkit")
                     .Enrich.WithProperty("Version", GetAppVersion())
-                    .WriteTo.Debug()
                     .WriteTo.File(
                         logFilePath,
                         rollingInterval: RollingInterval.Day,
                         fileSizeLimitBytes: 10 * 1024 * 1024, // 10 MB max file size
                         retainedFileCountLimit: 10, // Keep 10 most recent files
                         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}")
-                    .WriteTo.File(new JsonFormatter(), 
+                    .WriteTo.File(new JsonFormatter(),
                         Path.Combine(logDirectory, "app_log.json"),
                         rollingInterval: RollingInterval.Day)
                     .CreateLogger();
@@ -147,14 +144,14 @@ namespace BalatroSaveToolkit.Services.Implementations
                     if (File.Exists(_logFilePath))
                     {
                         var fileEntries = await ParseLogFileAsync(start, end);
-                        
+
                         // Merge file entries with cached entries, removing duplicates
                         var allEntries = new HashSet<ActivityLogItem>(fileEntries);
                         foreach (var entry in cachedEntries)
                         {
                             allEntries.Add(entry);
                         }
-                        
+
                         return allEntries
                             .OrderByDescending(log => log.Timestamp)
                             .ToList();
@@ -163,7 +160,7 @@ namespace BalatroSaveToolkit.Services.Implementations
                 catch (Exception ex)
                 {
                     // Log the error but don't propagate it - just return whatever we have in memory
-                    AddLog(LogEventLevel.Error, nameof(LogService), 
+                    AddLog(LogEventLevel.Error, nameof(LogService),
                         "Failed to read logs from file", $"Error: {ex.Message}", ex);
                 }
             }
@@ -182,10 +179,10 @@ namespace BalatroSaveToolkit.Services.Implementations
                     await _fileService.CopyFileAsync(_logFilePath, filePath);
                     return true;
                 }
-                
+
                 // If no log file exists, export what we have in memory
                 var recentLogs = await GetRecentActivitiesAsync(MaxCachedLogs);
-                
+
                 if (recentLogs.Count > 0)
                 {
                     var sb = new StringBuilder();
@@ -197,16 +194,16 @@ namespace BalatroSaveToolkit.Services.Implementations
                             sb.AppendLine($"    Details: {log.Details}");
                         }
                     }
-                    
+
                     await _fileService.WriteTextAsync(filePath, sb.ToString());
                     return true;
                 }
-                
+
                 return false;
             }
             catch (Exception ex)
             {
-                AddLog(LogEventLevel.Error, nameof(LogService), 
+                AddLog(LogEventLevel.Error, nameof(LogService),
                     "Failed to export logs", $"Target file: {filePath}, Error: {ex.Message}", ex);
                 return false;
             }
@@ -218,7 +215,7 @@ namespace BalatroSaveToolkit.Services.Implementations
         private async Task<List<ActivityLogItem>> ParseLogFileAsync(DateTime start, DateTime end)
         {
             var entries = new List<ActivityLogItem>();
-            
+
             try
             {
                 if (File.Exists(_logFilePath))
@@ -226,7 +223,7 @@ namespace BalatroSaveToolkit.Services.Implementations
                     // Read the file line by line
                     var lines = await File.ReadAllLinesAsync(_logFilePath);
                     ActivityLogItem? currentEntry = null;
-                    
+
                     foreach (var line in lines)
                     {
                         // Check if this line is a new log entry (starts with timestamp)
@@ -238,10 +235,10 @@ namespace BalatroSaveToolkit.Services.Implementations
                                 entries.Add(currentEntry);
                                 currentEntry = null;
                             }
-                            
+
                             // Parse the new entry
                             currentEntry = ParseLogLine(line);
-                            
+
                             // Skip if outside date range
                             if (currentEntry != null && (currentEntry.Timestamp < start || currentEntry.Timestamp > end))
                             {
@@ -257,7 +254,7 @@ namespace BalatroSaveToolkit.Services.Implementations
                                 : $"{currentEntry.Details}{Environment.NewLine}{line.Trim()}";
                         }
                     }
-                    
+
                     // Add the last entry if it exists
                     if (currentEntry != null)
                     {
@@ -269,10 +266,10 @@ namespace BalatroSaveToolkit.Services.Implementations
             {
                 System.Diagnostics.Debug.WriteLine($"Error parsing log file: {ex.Message}");
             }
-            
+
             return entries;
         }
-        
+
         /// <summary>
         /// Parse a single log line into an ActivityLogItem
         /// </summary>
@@ -283,29 +280,29 @@ namespace BalatroSaveToolkit.Services.Implementations
                 // Expected format: 2025-05-16 12:34:56.789 [INFO] [Source] Message
                 var timestampEnd = line.IndexOf(' ', 20); // Find end of timestamp
                 if (timestampEnd < 0) return null;
-                
+
                 var timestamp = DateTime.Parse(line.Substring(0, timestampEnd));
-                
+
                 // Extract level between first [] brackets
                 var levelStart = line.IndexOf('[', timestampEnd) + 1;
                 var levelEnd = line.IndexOf(']', levelStart);
                 if (levelStart < 0 || levelEnd < 0) return null;
-                
+
                 var level = line.Substring(levelStart, levelEnd - levelStart).Trim();
-                
+
                 // Extract source between second [] brackets
                 var sourceStart = line.IndexOf('[', levelEnd) + 1;
                 var sourceEnd = line.IndexOf(']', sourceStart);
                 if (sourceStart < 0 || sourceEnd < 0) return null;
-                
+
                 var source = line.Substring(sourceStart, sourceEnd - sourceStart).Trim();
-                
+
                 // Everything after the second ] is the message
                 var messageStart = line.IndexOf(' ', sourceEnd);
                 if (messageStart < 0) return null;
-                
+
                 var message = line.Substring(messageStart).Trim();
-                
+
                 return new ActivityLogItem(timestamp, level, source, message);
             }
             catch
@@ -313,7 +310,7 @@ namespace BalatroSaveToolkit.Services.Implementations
                 return null; // Skip malformed lines
             }
         }
-        
+
         /// <summary>
         /// Add a log entry with the specified level
         /// </summary>
@@ -330,7 +327,7 @@ namespace BalatroSaveToolkit.Services.Implementations
                 LogEventLevel.Fatal => "CRITICAL",
                 _ => "INFO"
             };
-            
+
             // Create activity log item for our cache
             var logEntry = new ActivityLogItem(
                 DateTime.Now,
@@ -339,13 +336,13 @@ namespace BalatroSaveToolkit.Services.Implementations
                 message,
                 details
             );
-            
+
             // Add to in-memory queue
             _recentLogs.Enqueue(logEntry);
-            
+
             // Trim the queue if it exceeds the limit
             while (_recentLogs.Count > MaxCachedLogs && _recentLogs.TryDequeue(out _)) { }
-            
+
             // Log to Serilog
             if (_logger != null)
             {
@@ -357,10 +354,10 @@ namespace BalatroSaveToolkit.Services.Implementations
                         ? exception.ToString()
                         : $"{fullDetails}{Environment.NewLine}{exception}";
                 }
-                
+
                 // Log to file with source context for better filtering
                 var contextLogger = _logger.ForContext("SourceContext", source);
-                
+
                 switch (level)
                 {
                     case LogEventLevel.Verbose:
@@ -388,17 +385,47 @@ namespace BalatroSaveToolkit.Services.Implementations
                 // Fallback to debug output if logger is not initialized
                 var logMessage = $"[{logEntry.Timestamp:yyyy-MM-dd HH:mm:ss.fff}] [{logLevel}] [{source}] {message}";
                 System.Diagnostics.Debug.WriteLine(logMessage);
-                
+
                 if (!string.IsNullOrEmpty(details))
                 {
                     System.Diagnostics.Debug.WriteLine($"   Details: {details}");
                 }
-                
+
                 if (exception != null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"   Exception: {exception}");
-                }
+                    System.Diagnostics.Debug.WriteLine($"   Exception: {exception}");                }
             }
+        }
+    }
+}
+
+// Extension methods to maintain backward compatibility with viewmodel calls
+namespace BalatroSaveToolkit.Extensions
+{
+    public static class LogServiceExtensions
+    {
+        public static Task LogInfoAsync(this ILogService logService, string message)
+        {
+            logService.LogInfo("Application", message);
+            return Task.CompletedTask;
+        }
+
+        public static Task LogErrorAsync(this ILogService logService, string message, Exception? exception = null)
+        {
+            logService.LogError("Application", message, null, exception);
+            return Task.CompletedTask;
+        }
+
+        public static Task LogWarningAsync(this ILogService logService, string message)
+        {
+            logService.LogWarning("Application", message);
+            return Task.CompletedTask;
+        }
+
+        public static Task LogDebugAsync(this ILogService logService, string message)
+        {
+            logService.LogDebug("Application", message);
+            return Task.CompletedTask;
         }
     }
 }

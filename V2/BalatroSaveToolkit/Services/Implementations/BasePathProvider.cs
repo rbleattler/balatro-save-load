@@ -320,7 +320,7 @@ namespace BalatroSaveToolkit.Services.Implementations
             }
             catch (Exception ex)
             {
-                _errorHandler.HandleException(ex, nameof(BasePathProvider), $"Error checking Balatro save file: {path}", ErrorSeverity.Debug, false);
+                _errorHandler.HandleException(ex, nameof(BasePathProvider), $"Error checking Balatro save file: {path}", ErrorSeverity.Information, false);
                 return false; // If we get any error, assume it's not a valid save file
             }
         }

@@ -202,7 +202,7 @@ namespace BalatroSaveToolkit.Services.Implementations.Windows
             catch (Exception ex)
             {
                 _errorHandler.HandleException(ex, nameof(WindowsPathProvider),
-                    "Error reading Steam path from registry", ErrorSeverity.Debug, false);
+                    "Error reading Steam path from registry", ErrorSeverity.Information, false);
                 return Task.FromResult<string?>(null);
             }
         }
@@ -287,7 +287,7 @@ namespace BalatroSaveToolkit.Services.Implementations.Windows
             catch (Exception ex)
             {
                 _errorHandler.HandleException(ex, nameof(WindowsPathProvider),
-                    $"Error normalizing Windows path: {path}", ErrorSeverity.Debug, false);
+                    $"Error normalizing Windows path: {path}", ErrorSeverity.Information, false);
                 return path; // Return original path if normalization fails
             }
         }
@@ -315,7 +315,7 @@ namespace BalatroSaveToolkit.Services.Implementations.Windows
             catch (Exception ex)
             {
                 _errorHandler.HandleException(ex, nameof(WindowsPathProvider),
-                    $"Error checking if path is on removable drive: {path}", ErrorSeverity.Debug, false);
+                    $"Error checking if path is on removable drive: {path}", ErrorSeverity.Information, false);
                 return false;
             }
         }

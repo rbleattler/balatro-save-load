@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using BalatroSaveToolkit.Models;
+using BalatroSaveToolkit.Extensions;
 using BalatroSaveToolkit.Services.Interfaces;
 
 namespace BalatroSaveToolkit.ViewModels
@@ -11,34 +12,34 @@ namespace BalatroSaveToolkit.ViewModels
         private readonly ISettingsService _settingsService;
         private readonly IFileService _fileService;
         private readonly ILogService _logService;
-        
+
         [ObservableProperty]
         private string _gamePath;
-        
+
         [ObservableProperty]
         private string _savesPath;
-        
+
         [ObservableProperty]
         private string _backupPath;
-        
+
         [ObservableProperty]
         private bool _autoDetectGame;
-        
+
         [ObservableProperty]
         private bool _autoBackupOnStart;
-        
+
         [ObservableProperty]
         private bool _autoBackupOnClose;
-        
+
         [ObservableProperty]
         private int _maxBackupsToKeep;
-        
+
         [ObservableProperty]
         private bool _startWithWindows;
-        
+
         [ObservableProperty]
         private bool _minimizeToTray;
-        
+
         [ObservableProperty]
         private ObservableCollection<string> _logLevels = new ObservableCollection<string>
         {
@@ -47,10 +48,10 @@ namespace BalatroSaveToolkit.ViewModels
             "Warning",
             "Error"
         };
-        
+
         [ObservableProperty]
         private string _selectedLogLevel;
-        
+
         public SettingsViewModel(
             ISettingsService settingsService,
             IFileService fileService,
@@ -59,14 +60,14 @@ namespace BalatroSaveToolkit.ViewModels
             _settingsService = settingsService;
             _fileService = fileService;
             _logService = logService;
-            
+
             Title = "Settings";
         }
-        
+
         public async Task LoadSettingsAsync()
         {
             var settings = await _settingsService.GetSettingsAsync();
-            
+
             GamePath = settings.GamePath;
             SavesPath = settings.SavesPath;
             BackupPath = settings.BackupPath;
@@ -78,7 +79,7 @@ namespace BalatroSaveToolkit.ViewModels
             MinimizeToTray = settings.MinimizeToTray;
             SelectedLogLevel = settings.LogLevel;
         }
-        
+
         [RelayCommand]
         private async Task BrowseGamePathAsync()
         {
@@ -88,7 +89,7 @@ namespace BalatroSaveToolkit.ViewModels
                 GamePath = path;
             }
         }
-        
+
         [RelayCommand]
         private async Task BrowseSavesPathAsync()
         {
@@ -98,7 +99,7 @@ namespace BalatroSaveToolkit.ViewModels
                 SavesPath = path;
             }
         }
-        
+
         [RelayCommand]
         private async Task BrowseBackupPathAsync()
         {
@@ -108,7 +109,7 @@ namespace BalatroSaveToolkit.ViewModels
                 BackupPath = path;
             }
         }
-        
+
         [RelayCommand]
         private async Task SaveSettingsAsync()
         {
@@ -127,33 +128,31 @@ namespace BalatroSaveToolkit.ViewModels
                     MinimizeToTray = MinimizeToTray,
                     LogLevel = SelectedLogLevel
                 };
-                
-                await _settingsService.SaveSettingsAsync(settings);
-                await _logService.LogInfoAsync("Settings saved successfully");
-                
+                  await _settingsService.SaveSettingsAsync(settings);
+                _logService.LogInfo(nameof(SettingsViewModel), "Settings saved successfully");
+
                 // Show confirmation
                 await Shell.Current.DisplayAlert("Settings", "Settings saved successfully", "OK");
-            }
-            catch (Exception ex)
+            }            catch (Exception ex)
             {
-                await _logService.LogErrorAsync("Failed to save settings", ex);
+                _logService.LogError(nameof(SettingsViewModel), "Failed to save settings", null, ex);
                 await Shell.Current.DisplayAlert("Error", "Failed to save settings: " + ex.Message, "OK");
             }
         }
-        
+
         [RelayCommand]
         private async Task ResetDefaultsAsync()
         {
             bool confirm = await Shell.Current.DisplayAlert(
-                "Reset Settings", 
-                "Are you sure you want to reset all settings to default values?", 
+                "Reset Settings",
+                "Are you sure you want to reset all settings to default values?",
                 "Yes", "No");
-                
+
             if (confirm)
             {
                 await _settingsService.ResetToDefaultsAsync();
                 await LoadSettingsAsync();
-                await _logService.LogInfoAsync("Settings reset to defaults");
+                _logService.LogInfo(nameof(SettingsViewModel), "Settings reset to defaults");
             }
         }
     }

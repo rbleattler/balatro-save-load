@@ -266,9 +266,8 @@ namespace BalatroSaveToolkit.Services.Implementations.Linux
                 return Task.FromResult<string?>(null);
             }
             catch (Exception ex)
-            {
-                _errorHandler.HandleException(ex, nameof(LinuxPathProvider),
-                    "Error searching for Steam installation", ErrorSeverity.Debug, false);
+            {                _errorHandler.HandleException(ex, nameof(LinuxPathProvider),
+                    "Error searching for Steam installation", ErrorSeverity.Information, false);
                 return Task.FromResult<string?>(null);
             }
         }
@@ -297,7 +296,7 @@ namespace BalatroSaveToolkit.Services.Implementations.Linux
             catch (Exception ex)
             {
                 _errorHandler.HandleException(ex, nameof(LinuxPathProvider),
-                    $"Error checking if directory is a Steam installation: {directory}", ErrorSeverity.Debug, false);
+                    $"Error checking if directory is a Steam installation: {directory}", ErrorSeverity.Information, false);
                 return false;
             }
         }
@@ -511,7 +510,7 @@ namespace BalatroSaveToolkit.Services.Implementations.Linux
             catch (Exception ex)
             {
                 _errorHandler.HandleException(ex, nameof(LinuxPathProvider),
-                    $"Error normalizing Linux path: {path}", ErrorSeverity.Debug, false);
+                    $"Error normalizing Linux path: {path}", ErrorSeverity.Information, false);
                 return path; // Return original path if normalization fails
             }
         }
@@ -534,7 +533,7 @@ namespace BalatroSaveToolkit.Services.Implementations.Linux
             catch (Exception ex)
             {
                 _errorHandler.HandleException(ex, nameof(LinuxPathProvider),
-                    $"Error checking if path is a symbolic link: {path}", ErrorSeverity.Debug, false);
+                    $"Error checking if path is a symbolic link: {path}", ErrorSeverity.Information, false);
                 return false;
             }
         }

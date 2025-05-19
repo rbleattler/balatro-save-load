@@ -135,7 +135,7 @@ namespace BalatroSaveToolkit.Core.Commands
         Action<T> execute,
         IObservable<bool>? canExecute = null)
     {
-      return new ReactiveCommandWrapper<T, Unit>(ReactiveCommand.Create<T>(
+      return new ReactiveCommandWrapper<T, Unit>(ReactiveCommand.Create<T, Unit>(
           param =>
           {
             execute(param);

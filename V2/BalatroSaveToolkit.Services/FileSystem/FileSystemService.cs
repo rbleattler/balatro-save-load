@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using BalatroSaveToolkit.Core.Services;
 
@@ -12,10 +13,10 @@ namespace BalatroSaveToolkit.Services.FileSystem
     public abstract class FileSystemService : IFileSystemService
     {
         private const string APP_DIRECTORY_NAME = "BalatroSaveAndLoad";
-        
+
         /// <inheritdoc/>
         public string ApplicationDataDirectory { get; }
-        
+
         /// <inheritdoc/>
         public abstract string BalatroSaveDirectory { get; }
 
@@ -27,7 +28,7 @@ namespace BalatroSaveToolkit.Services.FileSystem
             ApplicationDataDirectory = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 APP_DIRECTORY_NAME);
-            
+
             Directory.CreateDirectory(ApplicationDataDirectory);
         }
 
@@ -62,7 +63,7 @@ namespace BalatroSaveToolkit.Services.FileSystem
 
             var pattern = $"profile{profileNumber}_*.userdata";
             var files = directory.GetFiles(pattern);
-            
+
             foreach (var file in files)
             {
                 try
@@ -75,10 +76,10 @@ namespace BalatroSaveToolkit.Services.FileSystem
                     }
 
                     if (!DateTime.TryParseExact(
-                        $"{nameParts[1]}_{nameParts[2]}", 
-                        "yyyyMMdd_HHmmss", 
-                        null, 
-                        System.Globalization.DateTimeStyles.None, 
+                        $"{nameParts[1]}_{nameParts[2]}",
+                        "yyyyMMdd_HHmmss",
+                        null,
+                        System.Globalization.DateTimeStyles.None,
                         out var timestamp))
                     {
                         continue;
@@ -101,7 +102,7 @@ namespace BalatroSaveToolkit.Services.FileSystem
 
             // Sort by timestamp (newest first)
             result.Sort((a, b) => b.Timestamp.CompareTo(a.Timestamp));
-            
+
             return await Task.FromResult(result);
         }
 
@@ -162,7 +163,7 @@ namespace BalatroSaveToolkit.Services.FileSystem
         {
             var cutoffDate = DateTime.Now - maxAge;
             var directory = new DirectoryInfo(ApplicationDataDirectory);
-            
+
             if (!directory.Exists)
             {
                 return;
@@ -181,10 +182,10 @@ namespace BalatroSaveToolkit.Services.FileSystem
                     }
 
                     if (!DateTime.TryParseExact(
-                        $"{nameParts[1]}_{nameParts[2]}", 
-                        "yyyyMMdd_HHmmss", 
-                        null, 
-                        System.Globalization.DateTimeStyles.None, 
+                        $"{nameParts[1]}_{nameParts[2]}",
+                        "yyyyMMdd_HHmmss",
+                        null,
+                        System.Globalization.DateTimeStyles.None,
                         out var timestamp))
                     {
                         continue;
@@ -239,5 +240,65 @@ namespace BalatroSaveToolkit.Services.FileSystem
 
         /// <inheritdoc/>
         public abstract void StopFileWatcher();
+
+        /// <inheritdoc/>
+        public async Task<List<string>> GetSavedBackupFilesAsync()
+        {
+            var directory = new DirectoryInfo(ApplicationDataDirectory);
+            if (!directory.Exists)
+            {
+                return new List<string>();
+            }
+            var files = directory.GetFiles("profile*_*.userdata");
+            return files.Select(f => f.FullName).ToList();
+        }
+
+        /// <inheritdoc/>
+        public async Task<string> SaveBackupAsync(int profileNumber)
+        {
+            var backupPath = GetBackupFilePath(profileNumber, DateTime.Now);
+            var currentPath = GetCurrentSaveFilePath(profileNumber);
+            if (!File.Exists(currentPath))
+            {
+                throw new FileNotFoundException("Save file not found", currentPath);
+            }
+            var data = await File.ReadAllBytesAsync(currentPath);
+            await File.WriteAllBytesAsync(backupPath, data);
+            return backupPath;
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> LoadBackupAsync(string backupFilePath, int profileNumber)
+        {
+            if (!File.Exists(backupFilePath))
+            {
+                return false;
+            }
+            var data = await File.ReadAllBytesAsync(backupFilePath);
+            var currentPath = GetCurrentSaveFilePath(profileNumber);
+            await File.WriteAllBytesAsync(currentPath, data);
+            return true;
+        }
+
+        /// <inheritdoc/>
+        public void OpenSaveDirectory()
+        {
+            if (Directory.Exists(ApplicationDataDirectory))
+            {
+                // Open the application data folder
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = ApplicationDataDirectory,
+                    UseShellExecute = true,
+                    Verb = "open"
+                });
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<string> GetSaveFileContentAsync(string filePath)
+        {
+            return await File.ReadAllTextAsync(filePath);
+        }
     }
 }

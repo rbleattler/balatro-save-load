@@ -17,7 +17,7 @@ namespace BalatroSaveToolkit.Services.Settings
         private SettingsModel _currentSettings;
 
         /// <inheritdoc/>
-        public bool AutoSaveEnabled 
+        public bool AutoSaveEnabled
         {
             get => _currentSettings.AutoSaveEnabled;
             set
@@ -28,7 +28,7 @@ namespace BalatroSaveToolkit.Services.Settings
         }
 
         /// <inheritdoc/>
-        public double AutoSaveIntervalMinutes 
+        public double AutoSaveIntervalMinutes
         {
             get => _currentSettings.AutoSaveIntervalMinutes;
             set
@@ -39,7 +39,7 @@ namespace BalatroSaveToolkit.Services.Settings
         }
 
         /// <inheritdoc/>
-        public int SelectedProfileNumber 
+        public int SelectedProfileNumber
         {
             get => _currentSettings.SelectedProfileNumber;
             set
@@ -54,7 +54,7 @@ namespace BalatroSaveToolkit.Services.Settings
         }
 
         /// <inheritdoc/>
-        public TimeSpan CleanupTimeSpan 
+        public TimeSpan CleanupTimeSpan
         {
             get => _currentSettings.CleanupTimeSpan;
             set
@@ -65,7 +65,7 @@ namespace BalatroSaveToolkit.Services.Settings
         }
 
         /// <inheritdoc/>
-        public bool UseSystemTheme 
+        public bool UseSystemTheme
         {
             get => _currentSettings.UseSystemTheme;
             set
@@ -76,7 +76,7 @@ namespace BalatroSaveToolkit.Services.Settings
         }
 
         /// <inheritdoc/>
-        public bool UseDarkTheme 
+        public bool UseDarkTheme
         {
             get => _currentSettings.UseDarkTheme;
             set
@@ -122,6 +122,19 @@ namespace BalatroSaveToolkit.Services.Settings
             await SaveSettingsAsync();
         }
 
+        /// <inheritdoc/>
+        public Task LoadAsync()
+        {
+            _currentSettings = LoadSettingsSync();
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc/>
+        public Task SaveAsync()
+        {
+            return SaveSettingsAsync();
+        }
+
         private SettingsModel LoadSettingsSync()
         {
             try
@@ -152,7 +165,7 @@ namespace BalatroSaveToolkit.Services.Settings
                 {
                     WriteIndented = true
                 };
-                
+
                 string json = JsonSerializer.Serialize(_currentSettings, options);
                 await File.WriteAllTextAsync(_settingsFilePath, json);
             }

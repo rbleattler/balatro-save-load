@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AnalysisMode>All</AnalysisMode>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn> <!-- Disable XML comment warnings -->
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <Authors>Balatro Save and Load Team</Authors>
+    <Company>Balatro Save and Load Team</Company>
+    <Product>Balatro Save Toolkit</Product>
+    <Copyright>Copyright © 2025</Copyright>
+  </PropertyGroup>
+</Project>

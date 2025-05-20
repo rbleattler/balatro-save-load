@@ -10,7 +10,10 @@ using BalatroSaveToolkit.Core.Services;
 using BalatroSaveToolkit.Core.ViewModels;
 using BalatroSaveToolkit.Services;
 using BalatroSaveToolkit.Services.FileSystem;
+using BalatroSaveToolkit.Services.Game;
 using BalatroSaveToolkit.Services.Settings;
+using BalatroSaveToolkit.Services.Theme;
+using BalatroSaveToolkit.Theme;
 using BalatroSaveToolkit.ViewModels;
 using BalatroSaveToolkit.Views;
 using ReactiveUI;
@@ -33,6 +36,21 @@ internal partial class App : Application
         // Register ReactiveUI activation handlers
         RegisterActivationHandlers();
 
+        // Initialize theme resources
+        ThemeManager.Initialize(this);        // Setup theme service and apply initial theme
+        var themeService = Locator.Current.GetService<IThemeService>();
+        if (themeService != null)
+        {
+            themeService.Initialize();
+            themeService.ThemeChanged += (sender, theme) =>
+            {
+                ThemeManager.ApplyTheme(this, theme == Avalonia.Styling.ThemeVariant.Dark);
+            };
+
+            // Apply initial theme
+            ThemeManager.ApplyTheme(this, themeService.CurrentTheme == Avalonia.Styling.ThemeVariant.Dark);
+        }
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit
@@ -48,29 +66,46 @@ internal partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
-    }
-
-    private static void ConfigureServices()
+    }    private static void ConfigureServices()
     {
         // Create services
         var viewStackService = new ViewStackService();
         var navigationService = new NavigationService(viewStackService);
         var fileSystemService = FileSystemServiceFactory.Create();
         var settingsService = new SettingsService(fileSystemService);
+        var themeService = new ThemeService(settingsService);
+        var gameProcessService = new GameProcessService();
 
         // Register services
-        Locator.CurrentMutable.RegisterConstant(fileSystemService, typeof(IFileSystemService));
-        Locator.CurrentMutable.RegisterConstant(settingsService, typeof(ISettingsService));
-        Locator.CurrentMutable.RegisterConstant(viewStackService, typeof(IViewStackService));
-        Locator.CurrentMutable.RegisterConstant(navigationService, typeof(INavigationService));
+        Locator.CurrentMutable.RegisterConstant<IFileSystemService>(fileSystemService);
+        Locator.CurrentMutable.RegisterConstant<ISettingsService>(settingsService);
+        Locator.CurrentMutable.RegisterConstant<IViewStackService>(viewStackService);
+        Locator.CurrentMutable.RegisterConstant<INavigationService>(navigationService);
+        Locator.CurrentMutable.RegisterConstant<IThemeService>(themeService);
+        Locator.CurrentMutable.RegisterConstant<IGameProcessService>(gameProcessService);
 
         // Create host screen for routing
         var hostScreen = new HostScreen();
-        Locator.CurrentMutable.RegisterConstant(hostScreen, typeof(IScreen));
-
-        // Register ViewModels
+        Locator.CurrentMutable.RegisterConstant<IScreen>(hostScreen);        // Register ViewModels
         Locator.CurrentMutable.Register(() => new MainWindowViewModel());
-        Locator.CurrentMutable.Register(() => new DashboardViewModel(Locator.Current.GetService<IScreen>()));
+
+        // Use null checks to avoid possible null reference exceptions
+        Locator.CurrentMutable.Register(() => {
+            var screen = Locator.Current.GetService<IScreen>();
+            return screen != null
+                ? new DashboardViewModel(screen)
+                : new DashboardViewModel(new HostScreen());
+        });
+
+        Locator.CurrentMutable.Register(() => {
+            var themeService = Locator.Current.GetService<IThemeService>();
+            var settingsService = Locator.Current.GetService<ISettingsService>();
+
+            if (themeService != null && settingsService != null)
+                return new ThemeSettingsViewModel(themeService, settingsService);
+
+            throw new InvalidOperationException("Required services not available for ThemeSettingsViewModel");
+        });
 
         // Register view-viewmodel mappings
         RegisterViewMappings();
@@ -79,16 +114,13 @@ internal partial class App : Application
     private static void RegisterActivationHandlers()
     {
         // This allows ReactiveUI to properly activate views
-        Locator.CurrentMutable.RegisterConstant(
-            new AvaloniaActivationForViewFetcher(),
-            typeof(IActivationForViewFetcher));
-    }
-
-    private static void RegisterViewMappings()
+        Locator.CurrentMutable.RegisterConstant<IActivationForViewFetcher>(new AvaloniaActivationForViewFetcher());
+    }    private static void RegisterViewMappings()
     {
         // Register views with their view models
         Locator.CurrentMutable.Register(() => new MainWindow(), typeof(IViewFor<MainWindowViewModel>));
         Locator.CurrentMutable.Register(() => new DashboardView(), typeof(IViewFor<DashboardViewModel>));
+        Locator.CurrentMutable.Register(() => new ThemeSettingsView(), typeof(IViewFor<ThemeSettingsViewModel>));
     }
 
     private static void DisableAvaloniaDataAnnotationValidation()

@@ -25,28 +25,36 @@
 - Interface defined and implemented
 - JSON-based settings storage implemented
 
-### Theme Service
+### Theme Service ✓
 - Interface defined
-- Implementation pending
+- Implementation complete
+- Platform-specific theme detection implemented for Windows, macOS and Linux
+- Theme resource dictionaries created for Avalonia
+- Theme system integration with application
 
-### Game Process Service
+### Game Process Service ✓
 - Interface defined
-- Implementation pending
+- Implementation complete
+- Platform-specific process detection implemented for Windows, macOS and Linux
+- Process change events implemented
 
 ## Next Steps
 
-1. Implement the ThemeService
-2. Implement the GameProcessService
-3. Begin UI migration once core services are complete
+1. Begin UI migration now that core services are complete
+2. Set up navigation between views
+3. Implement game save and load functionality
 
 ## Work Item Status
 
 ### Closed Items
 - EP001 (in progress)
 - FT001 (in progress)
+- FT002 ✓
 - US001 (in progress)
 - US005 ✓
 - US006 ✓
+- US007 ✓
+- US008 ✓
 - TSK001 ✓
 - TSK017 ✓
 - TSK018 ✓
@@ -54,11 +62,19 @@
 - TSK020 ✓
 - TSK021 ✓
 - TSK022 ✓
+- TSK023 ✓
+- TSK024 ✓
+- TSK025 ✓
+- TSK026 ✓
+- TSK029 ✓
+- TSK030 ✓
+- TSK031 ✓
+- TSK032 ✓
 
 ### Current Tasks
-- Continue implementation of service layer
 - Update US001 once all related tasks are complete
-- Focus on US007 (Theme Service) next
+- Begin UI migration (next priority)
+- Prepare for implementing save/load functionality
 
 ## Notes
 - All implementations have been made cross-platform

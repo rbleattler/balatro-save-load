@@ -4,14 +4,16 @@
 As a developer, I want to implement a game process service so that the application can detect if Balatro is running across different operating systems.
 
 ## Tasks
-- TSK029: Create IGameProcessService interface
-- TSK030: Implement Windows-specific process detection
-- TSK031: Implement macOS-specific process detection
-- TSK032: Implement Linux-specific process detection
+- TSK029: Create IGameProcessService interface (Completed)
+- TSK030: Implement Windows-specific process detection (Completed)
+- TSK031: Implement macOS-specific process detection (Completed)
+- TSK032: Implement Linux-specific process detection (Completed)
 
 ## Status
-- **Current State**: Backlog
+- **Current State**: Closed
 - **Priority**: High (4)
+- **Start Date**: 2025-05-19
+- **Completion Date**: 2025-05-19
 
 ## Parent Work Item
 - FT002: Core Services Implementation

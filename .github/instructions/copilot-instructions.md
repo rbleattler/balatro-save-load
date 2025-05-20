@@ -6,7 +6,11 @@ This repository contains a migration project to convert the Balatro Save and Loa
 
 All work is handled via the work management system. Always refer to the work items for the latest status and details. Always work on the next most relevant and important work item. If you are unsure what to work on next, ask.
 
-**Important**: Always read `progress-summary.md` before starting any work to understand the current project state. After making substantial changes or completing work items, update `progress-summary.md` so the next contributor can easily pick up where you left off.
+## Required Workflow
+
+**CRITICAL**: You MUST read `progress-summary.md` before starting any work to understand the current project state.
+
+**MANDATORY**: After making substantial changes or completing work items, you MUST update `progress-summary.md` so the next contributor can easily pick up where you left off. This file serves as the primary handoff document between different contributors.
 
 ## Work Management System
 

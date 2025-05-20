@@ -1,0 +1,75 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Base colors -->
+    <Color x:Key="WindowBackgroundColor">#FFFEFEFE</Color>
+    <Color x:Key="TextForegroundColor">#FF000000</Color>
+    <Color x:Key="TitleBarBackgroundColor">#FFFEFEFE</Color>
+    <Color x:Key="TitleBarForegroundColor">#FF000000</Color>
+    
+    <!-- Control colors -->
+    <Color x:Key="ControlBackgroundColor">#FFF5F5F5</Color>
+    <Color x:Key="ControlBorderColor">#FFAAAAAA</Color>
+    <Color x:Key="ControlForegroundColor">#FF000000</Color>
+    
+    <!-- Button colors -->
+    <Color x:Key="ButtonBackgroundColor">#FFF0F0F0</Color>
+    <Color x:Key="ButtonBorderColor">#FFABADB3</Color>
+    <Color x:Key="ButtonForegroundColor">#FF000000</Color>
+    <Color x:Key="ButtonHoverBackgroundColor">#FFE5E5E5</Color>
+    <Color x:Key="ButtonHoverBorderColor">#FF7EB4EA</Color>
+    <Color x:Key="ButtonPressedBackgroundColor">#FFCCE4FC</Color>
+    <Color x:Key="ButtonPressedBorderColor">#FF569DE5</Color>
+    
+    <!-- ComboBox colors -->
+    <Color x:Key="ComboBoxBackgroundColor">#FFFFFFFF</Color>
+    <Color x:Key="ComboBoxBorderColor">#FFABADB3</Color>
+    <Color x:Key="ComboBoxForegroundColor">#FF000000</Color>
+    <Color x:Key="ComboBoxHighlightColor">#FFE5E5E5</Color>
+    
+    <!-- Status bar colors -->
+    <Color x:Key="StatusBarBackgroundColor">#FFD3D3D3</Color>
+    <Color x:Key="StatusBarForegroundColor">#FF000000</Color>
+    
+    <!-- List/Grid colors -->
+    <Color x:Key="ListBackgroundColor">#FFFFFFFF</Color>
+    <Color x:Key="ListForegroundColor">#FF000000</Color>
+    <Color x:Key="ListHeaderBackgroundColor">#FFF0F0F0</Color>
+    <Color x:Key="ListHeaderForegroundColor">#FF000000</Color>
+    <Color x:Key="ListAlternatingRowBackgroundColor">#FFF8F8F8</Color>
+    <Color x:Key="ListSelectedItemBackgroundColor">#FF5294E2</Color>
+    <Color x:Key="ListSelectedItemForegroundColor">#FFFFFFFF</Color>
+
+    <!-- Brushes derived from colors -->
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}"/>
+    <SolidColorBrush x:Key="TextForegroundBrush" Color="{StaticResource TextForegroundColor}"/>
+    <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="{StaticResource TitleBarBackgroundColor}"/>
+    <SolidColorBrush x:Key="TitleBarForegroundBrush" Color="{StaticResource TitleBarForegroundColor}"/>
+    
+    <SolidColorBrush x:Key="ControlBackgroundBrush" Color="{StaticResource ControlBackgroundColor}"/>
+    <SolidColorBrush x:Key="ControlBorderBrush" Color="{StaticResource ControlBorderColor}"/>
+    <SolidColorBrush x:Key="ControlForegroundBrush" Color="{StaticResource ControlForegroundColor}"/>
+    
+    <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="{StaticResource ButtonBackgroundColor}"/>
+    <SolidColorBrush x:Key="ButtonBorderBrush" Color="{StaticResource ButtonBorderColor}"/>
+    <SolidColorBrush x:Key="ButtonForegroundBrush" Color="{StaticResource ButtonForegroundColor}"/>
+    <SolidColorBrush x:Key="ButtonHoverBackgroundBrush" Color="{StaticResource ButtonHoverBackgroundColor}"/>
+    <SolidColorBrush x:Key="ButtonHoverBorderBrush" Color="{StaticResource ButtonHoverBorderColor}"/>
+    <SolidColorBrush x:Key="ButtonPressedBackgroundBrush" Color="{StaticResource ButtonPressedBackgroundColor}"/>
+    <SolidColorBrush x:Key="ButtonPressedBorderBrush" Color="{StaticResource ButtonPressedBorderColor}"/>
+    
+    <SolidColorBrush x:Key="ComboBoxBackgroundBrush" Color="{StaticResource ComboBoxBackgroundColor}"/>
+    <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="{StaticResource ComboBoxBorderColor}"/>
+    <SolidColorBrush x:Key="ComboBoxForegroundBrush" Color="{StaticResource ComboBoxForegroundColor}"/>
+    <SolidColorBrush x:Key="ComboBoxHighlightBrush" Color="{StaticResource ComboBoxHighlightColor}"/>
+    
+    <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="{StaticResource StatusBarBackgroundColor}"/>
+    <SolidColorBrush x:Key="StatusBarForegroundBrush" Color="{StaticResource StatusBarForegroundColor}"/>
+    
+    <SolidColorBrush x:Key="ListBackgroundBrush" Color="{StaticResource ListBackgroundColor}"/>
+    <SolidColorBrush x:Key="ListForegroundBrush" Color="{StaticResource ListForegroundColor}"/>
+    <SolidColorBrush x:Key="ListHeaderBackgroundBrush" Color="{StaticResource ListHeaderBackgroundColor}"/>
+    <SolidColorBrush x:Key="ListHeaderForegroundBrush" Color="{StaticResource ListHeaderForegroundColor}"/>
+    <SolidColorBrush x:Key="ListAlternatingRowBackgroundBrush" Color="{StaticResource ListAlternatingRowBackgroundColor}"/>
+    <SolidColorBrush x:Key="ListSelectedItemBackgroundBrush" Color="{StaticResource ListSelectedItemBackgroundColor}"/>
+    <SolidColorBrush x:Key="ListSelectedItemForegroundBrush" Color="{StaticResource ListSelectedItemForegroundColor}"/>
+</ResourceDictionary>

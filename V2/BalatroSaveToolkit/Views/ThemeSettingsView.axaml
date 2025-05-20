@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:BalatroSaveToolkit.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
+             x:Class="BalatroSaveToolkit.Views.ThemeSettingsView">
+
+  <Design.DataContext>
+    <vm:ThemeSettingsViewModel />
+  </Design.DataContext>
+
+  <Border Padding="20">
+    <StackPanel Spacing="15">
+      <TextBlock Text="Theme Settings" FontSize="20" FontWeight="Bold" />
+
+      <CheckBox IsChecked="{Binding FollowSystemTheme}"
+                Content="Follow system theme" />
+
+      <Grid IsEnabled="{Binding !FollowSystemTheme}">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <RadioButton GroupName="ThemeChoice"
+                     Content="Light Theme"
+                     IsChecked="{Binding !UseDarkTheme}"
+                     Grid.Column="0" />
+
+        <RadioButton GroupName="ThemeChoice"
+                     Content="Dark Theme"
+                     IsChecked="{Binding UseDarkTheme}"
+                     Grid.Column="1" />
+      </Grid>
+
+      <Button Content="Apply Theme"
+              Command="{Binding ApplyThemeCommand}"
+              HorizontalAlignment="Left"
+              Padding="12,6" />
+    </StackPanel>
+  </Border>
+</UserControl>

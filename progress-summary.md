@@ -21,8 +21,6 @@
 - Defined ISettingsService interface
 - Implemented JSON-based settings storage and retrieval
 
-## In Progress
-
 ### Settings Service ✓
 
 - Interface defined and implemented
@@ -43,10 +41,20 @@
 - Platform-specific process detection implemented for Windows, macOS and Linux
 - Process change events implemented
 
+### Navigation Service ✓
+
+- Interface defined (INavigationService)
+- Implementation complete using ReactiveUI routing
+- ViewModelBase created for routable ViewModels
+- MainViewModel screen host implemented
+- ViewLocator for mapping ViewModels to Views
+- Sample ViewModels created (HomeViewModel, SettingsViewModel)
+- DI registration extension methods
+
 ## Next Steps
 
-1. Begin UI migration now that core services are complete
-2. Set up navigation between views
+1. Implement the UI shell views using Avalonia
+2. Create the main application layout
 3. Implement game save and load functionality
 
 ## Work Item Status
@@ -76,14 +84,17 @@
 - TSK030 ✓
 - TSK031 ✓
 - TSK032 ✓
+- TSK006 ✓ (Navigation Service Implementation)
+- TSK007 ✓ (Command Infrastructure)
 
 ### Current Tasks
 
 - Update US001 once all related tasks are complete
-- Begin UI migration (next priority)
+- Begin UI views implementation (next priority)
 - Prepare for implementing save/load functionality
 
 ## Notes
 
 - All implementations have been made cross-platform
 - FileSystemService handles platform-specific paths and behaviors
+- Navigation system implemented using ReactiveUI routing

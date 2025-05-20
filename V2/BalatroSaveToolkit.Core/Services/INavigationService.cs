@@ -1,39 +1,43 @@
 using System;
 using System.Threading.Tasks;
-using BalatroSaveToolkit.Core.ViewModels;
+using ReactiveUI;
 
 namespace BalatroSaveToolkit.Core.Services
 {
     /// <summary>
-    /// Interface for navigation service.
+    /// Interface for navigation service that provides navigation between views in the application
     /// </summary>
     public interface INavigationService
     {
         /// <summary>
-        /// Navigates to a view for the specified view model type.
+        /// Navigate to a ViewModel of type TViewModel
         /// </summary>
-        /// <typeparam name="TViewModel">The type of view model to navigate to.</typeparam>
-        /// <param name="parameter">Optional parameter to pass to the view model.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        Task NavigateToAsync<TViewModel>(object? parameter = null) where TViewModel : PageViewModelBase;
+        /// <typeparam name="TViewModel">Type of ViewModel to navigate to</typeparam>
+        /// <param name="parameter">Optional parameter to pass to the ViewModel</param>
+        /// <returns>Task representing the navigation operation</returns>
+        Task NavigateToAsync<TViewModel>(object? parameter = null)
+            where TViewModel : class, IRoutableViewModel;
 
         /// <summary>
-        /// Navigates back to the previous view.
+        /// Navigate back to the previous view
         /// </summary>
-        /// <returns>A task that represents the asynchronous operation.</returns>
+        /// <returns>Task representing the navigation operation</returns>
         Task NavigateBackAsync();
-        
-        /// <summary>
-        /// Registers a view model factory for a view model type.
-        /// </summary>
-        /// <typeparam name="TViewModel">The type of view model to register.</typeparam>
-        /// <param name="factory">The factory function that creates the view model.</param>
-        void RegisterViewModel<TViewModel>(Func<object?, TViewModel> factory) where TViewModel : PageViewModelBase;
 
         /// <summary>
-        /// Navigates to the initial view.
+        /// Clear navigation history
         /// </summary>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        Task NavigateToInitialViewAsync();
+        /// <returns>Task representing the operation</returns>
+        Task ClearHistoryAsync();
+
+        /// <summary>
+        /// Observable for the current ViewModel
+        /// </summary>
+        IObservable<IRoutableViewModel> CurrentViewModel { get; }
+
+        /// <summary>
+        /// Observable that indicates whether back navigation is available
+        /// </summary>
+        IObservable<bool> CanNavigateBack { get; }
     }
 }

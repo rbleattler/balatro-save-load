@@ -9,7 +9,8 @@
 .NOTES
     Consider running Consolidate-WorkItems.ps1 afterward to merge work items with the same ID but different names
 #>
-
+[CmdletBinding()]
+param()
 # Get the script directory and work-management paths
 $ScriptDir = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
 $WorkMgmtDir = Split-Path -Path $ScriptDir -Parent
@@ -45,8 +46,10 @@ foreach ($itemId in $backlogItems) {
     if ($openExists -or $closedExists) {
         # Find all matching files in backlog
         $filesToRemove = Get-ChildItem -Path $BacklogDir -Filter "$itemId*.md" -File -ErrorAction SilentlyContinue
+        Write-Verbose "Found $($filesToRemove.Count) files to remove."
 
         foreach ($file in $filesToRemove) {
+            Write-Verbose "Removing $($file.Name) from backlog."
             if ($openExists) {
                 Write-Host "Work item $itemId is in OPEN directory. Removing $($file.Name) from backlog."
             } else {

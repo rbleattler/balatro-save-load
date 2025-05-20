@@ -1,10 +1,25 @@
+#requires -Modules PSMarkdown
 <#
 .SYNOPSIS
-    Find duplicates by ID and/or name
+    Finds duplicate work items by ID and/or name in the work-management system.
 .DESCRIPTION
-    This script finds duplicate work items in the work-management structure by comparing ID and name of all work items to find similar work items. It outputs a report of matches & suspected matches
+    This script scans all work item markdown files in the backlog, open, and closed directories of the work-management system. It compares work items by ID and by name (using a similarity algorithm) to detect duplicates or near-duplicates. Optionally, it can compare file contents for further similarity analysis. The script outputs a report of matches and suspected matches, with options for table, grid view, or markdown output.
+.PARAMETER CompareContents
+    If specified, also compares the contents of files for similarity (not just names).
+.PARAMETER OutTable
+    If specified, outputs the results as a formatted table.
+.PARAMETER OutGridView
+    If specified, outputs the results in a grid view window (requires GUI).
+.PARAMETER OutMarkdown
+    If specified, outputs the results as a markdown file (duplicates.md).
 .EXAMPLE
     .\Find-Duplicates.ps1
+    Runs the script and outputs duplicate work items to the console.
+.EXAMPLE
+    .\Find-Duplicates.ps1 -CompareContents -OutTable
+    Runs the script, compares file contents, and outputs results as a table.
+.NOTES
+    Requires the Get-Similarity.ps1 script in the same directory. Uses Levenshtein distance for similarity. Designed for use in the Balatro Save and Load Tool work-management system.
 #>
 [CmdletBinding()]
 param (
@@ -19,61 +34,11 @@ begin {
     $BacklogDir = Join-Path -Path $WorkMgmtDir -ChildPath "backlog"
     $OpenDir = Join-Path -Path $WorkMgmtDir -ChildPath "open"
     $ClosedDir = Join-Path -Path $WorkMgmtDir -ChildPath "closed"
-    function Get-Similarity {
-        <#
-        .SYNOPSIS
-        Calculates the similarity between two strings using the Levenshtein distance algorithm.
-
-        .DESCRIPTION
-        This function computes the similarity score between two input strings based on the Levenshtein distance.
-        The Levenshtein distance represents the minimum number of single-character edits required to change one string into the other.
-        The similarity score is calculated as 1 - (Levenshtein Distance / Length of the longer string).
-
-        .PARAMETER String1
-        The first string to compare.
-
-        .PARAMETER String2
-        The second string to compare.
-
-        .EXAMPLE
-        Get-Similarity -String1 "kitten" -String2 "sitting"
-
-        Returns a similarity score between the strings "kitten" and "sitting".
-
-        .NOTES
-        The function uses dynamic programming to efficiently calculate the Levenshtein distance.
-        #>
-        param (
-            [string]$String1,
-            [string]$String2
-        )
-        $Distance = 0
-        $Matrix = @(, @()) * ($String1.Length + 1)
-        for ($i = 0; $i -le $String1.Length; $i++) {
-            $Matrix[$i] = @()
-            for ($j = 0; $j -le $String2.Length; $j++) {
-                $Matrix[$i] += 0
-            }
-        }
-
-        for ($i = 0; $i -le $String1.Length; $i++) {
-            $Matrix[$i][0] = $i
-        }
-
-        for ($j = 0; $j -le $String2.Length; $j++) {
-            $Matrix[0][$j] = $j
-        }
-
-        for ($i = 1; $i -le $String1.Length; $i++) {
-            for ($j = 1; $j -le $String2.Length; $j++) {
-                $Cost = if ($String1[$i - 1] -eq $String2[$j - 1]) { 0 } else { 1 }
-                $Matrix[$i][$j] = [Math]::Min($Matrix[$i - 1][$j] + 1, [Math]::Min($Matrix[$i][$j - 1] + 1, $Matrix[$i - 1][$j - 1] + $Cost))
-            }
-        }
-
-        $Distance = $Matrix[$String1.Length][$String2.Length]
-        $MaxLength = [Math]::Max($String1.Length, $String2.Length)
-        return 1 - ($Distance / $MaxLength)
+    . $PSScriptRoot\Get-Similarity.ps1
+    # Load the Get-Similarity function from the script
+    if (-not (Get-Command -Name Get-Similarity -ErrorAction SilentlyContinue)) {
+        Write-Error "Get-Similarity function not found. Please ensure it is defined in the script."
+        return
     }
 }
 process {
@@ -191,8 +156,7 @@ end {
         $duplicates | Out-GridView
     } elseif ($OutMarkdown) {
         $duplicates | ConvertTo-Markdown | Out-File -FilePath "duplicates.md"
-    }
-    else {
+    } else {
         $duplicates
     }
 

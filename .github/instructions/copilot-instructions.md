@@ -2,15 +2,33 @@
 
 ## Project Overview
 
-This repository contains a migration project to convert the Balatro Save and Load Tool from WPF to Avalonia. The goal is to make the application cross-platform (Windows, macOS, Linux) while improving its architecture, modularity, and user experience.
+This repository contains a migration project to convert the Balatro Save and Load Tool from WPF to Avalonia, making the application cross-platform (Windows, macOS, Linux) while improving its architecture and user experience.
 
-All work is handled via the work management system. Always refer to the work items for the latest status and details. Always work on the next most relevant and important work item. If you are unsure what to work on next, ask.
+## Project Structure
 
-## Rules
+- `/V2/` - Contains the Avalonia implementation (active development)
+- `/work-management/` - Work tracking system with tasks, user stories, and progress summaries
+- `/docs/` - Project documentation
 
-- Always check the documentation and existing code before implementing new features or services.
-- Follow the established architectural patterns and practices documented here.
-- Update the documentation when adding significant features or making architectural changes.
-- Explain what you are doing and why before you start working on a task.
-- Read the other instructions files in the `.github/instructions` directory for more information on how to work with this project.
-- Read the documentation in the `docs` directory for more information on the architecture and design of the project.
+## Technical Stack
+
+- **UI Framework**: Avalonia UI (cross-platform)
+- **Architecture**: MVVM with ReactiveUI
+- **DI Container**: Splat
+- **Target Platforms**: Windows, macOS, Linux
+
+## Work Management System
+
+All work is handled via the work management system using hierarchical items (Epics, Features, User Stories, Tasks). Always work on the highest priority tasks as indicated in the progress summary.
+
+## Rules for Contributors
+
+1. **FIRST STEP**: Read `work-management/progress-summary.md` before starting any work to understand the current state
+2. Follow established architectural patterns (MVVM, ReactiveUI routing, Dependency Injection)
+3. Keep UI and business logic separated
+4. Implement platform-specific code through abstraction layers
+5. Write cross-platform compatible code
+6. Update documentation when adding features or making architectural changes
+7. Use the scripts in `V2/scripts` for building and testing
+
+**MANDATORY**: After completing work items, update `work-management/progress-summary.md` with your changes so the next contributor can continue seamlessly.

@@ -1,15 +1,10 @@
----
-applyTo: '**'
----
-# Required Workflow
+# Build and Testing
 
-**CRITICAL**: You MUST read `progress-summary.md` before starting any work to understand the current project state.
+The project includes a PowerShell script called `localbuild.ps1`, which can be used to build the solution and capture output for analysis.
 
-**MANDATORY**: After making substantial changes or completing work items, you MUST update `progress-summary.md` so the next contributor can easily pick up where you left off. This file serves as the primary handoff document between different contributors.
+## CRITICAL
 
-## Build and Testing
-
-The project includes a PowerShell script called `localbuild.ps1` in the `V2/scripts` directory, which can be used to build the solution and capture output for analysis.
+DO NOT UPDATE THE `localbuild.ps1` SCRIPT UNLESS YOU ARE INSTRUCTED TO DO SO.
 
 ### Using the Build Script
 

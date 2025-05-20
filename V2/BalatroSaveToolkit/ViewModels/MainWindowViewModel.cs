@@ -1,21 +1,77 @@
 ﻿using System;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia.Styling;
 using BalatroSaveToolkit.Core.Services;
 using BalatroSaveToolkit.Core.ViewModels;
 using ReactiveUI;
+using Splat;
 
 namespace BalatroSaveToolkit.ViewModels
-{    /// <summary>
-     /// ViewModel for the main window.
-     /// </summary>
-  internal class MainWindowViewModel : ViewModelBase, IScreen
+{
+    /// <summary>
+    /// ViewModel for the main window.
+    /// </summary>
+    internal class MainWindowViewModel : ReactiveObject, IScreen, IActivatableViewModel
     {
+        private readonly IThemeService? _themeService;
+        private readonly IGameProcessService? _gameProcessService;
+        private readonly IFileSystemService? _fileSystemService;
+        private readonly ISettingsService? _settingsService;
+
         private string _windowTitle = "Balatro Save Toolkit";
         private bool _isGameRunning;
-        private readonly RoutingState _router;
+        private RoutingState _router;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainWindowViewModel"/> class.
+        /// </summary>
+        public MainWindowViewModel()
+        {
+            // Initialize services from service locator
+            _themeService = Locator.Current.GetService<IThemeService>();
+            _gameProcessService = Locator.Current.GetService<IGameProcessService>();
+            _fileSystemService = Locator.Current.GetService<IFileSystemService>();
+            _settingsService = Locator.Current.GetService<ISettingsService>();
+
+            // Initialize the router
+            _router = new RoutingState();
+            Activator = new ViewModelActivator();
+
+            // Initialize commands
+            ToggleThemeCommand = ReactiveCommand.Create(ToggleTheme);
+            NavigateToSettingsCommand = ReactiveCommand.Create(NavigateToSettings);
+            NavigateToHomeCommand = ReactiveCommand.Create(NavigateToHome);
+            NavigateBackCommand = ReactiveCommand.CreateFromObservable(
+                () => Router.NavigateBack,
+                Router.NavigationStack.WhenAnyValue(x => x.Count).Select(count => count > 0));
+
+            // Configure activation
+            this.WhenActivated(disposables =>
+            {
+                // Register for cleanup
+                Disposable.Create(() => { /* Cleanup when deactivated */ })
+                    .DisposeWith(disposables);
+
+                // Subscribe to Balatro process status changes
+                if (_gameProcessService != null)
+                {
+                    _gameProcessService.BalatroProcessStatusChanged += (sender, isRunning) =>
+                    {
+                        IsGameRunning = isRunning;
+                    };
+
+                    // Start the process check
+                    _gameProcessService.StartProcessCheck();
+                }
+
+                // Navigate to Dashboard as the initial view
+                NavigateToHome();
+            });
+        }
 
         /// <summary>
         /// Gets the window title.
@@ -23,16 +79,16 @@ namespace BalatroSaveToolkit.ViewModels
         public string WindowTitle
         {
             get => _windowTitle;
-            private set => SetProperty(ref _windowTitle, value);
+            private set => this.RaiseAndSetIfChanged(ref _windowTitle, value);
         }
 
         /// <summary>
-        /// Gets a value indicating whether the game is running.
+        /// Gets or sets a value indicating whether the game is running.
         /// </summary>
         public bool IsGameRunning
         {
             get => _isGameRunning;
-            private set => SetProperty(ref _isGameRunning, value);
+            private set => this.RaiseAndSetIfChanged(ref _isGameRunning, value);
         }
 
         /// <summary>
@@ -41,19 +97,24 @@ namespace BalatroSaveToolkit.ViewModels
         public RoutingState Router => _router;
 
         /// <summary>
+        /// Gets the view model activator.
+        /// </summary>
+        public ViewModelActivator Activator { get; }
+
+        /// <summary>
         /// Gets the command to toggle the theme.
         /// </summary>
         public ICommand ToggleThemeCommand { get; }
 
         /// <summary>
-        /// Gets the command to open the settings dialog.
+        /// Gets the command to navigate to settings.
         /// </summary>
-        public ICommand OpenSettingsCommand { get; }
+        public ICommand NavigateToSettingsCommand { get; }
 
         /// <summary>
-        /// Gets the command to open the about dialog.
+        /// Gets the command to navigate to the home/dashboard view.
         /// </summary>
-        public ICommand OpenAboutCommand { get; }
+        public ICommand NavigateToHomeCommand { get; }
 
         /// <summary>
         /// Gets the command to navigate back.
@@ -61,55 +122,45 @@ namespace BalatroSaveToolkit.ViewModels
         public ICommand NavigateBackCommand { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MainWindowViewModel"/> class.
+        /// Toggles between dark and light themes.
         /// </summary>
-        public MainWindowViewModel()
+        private void ToggleTheme()
         {
-            // Initialize the router
-            _router = new RoutingState();
-
-            // Initialize commands
-            ToggleThemeCommand = CreateCommand(() => ToggleTheme());            OpenSettingsCommand = CreateCommand(() => OpenSettings());
-            OpenAboutCommand = CreateCommand(() => OpenAbout());
-            NavigateBackCommand = ReactiveCommand.CreateFromObservable(
-                () => Router.NavigateBack,
-                Router.NavigationStack.WhenAnyValue(x => x.Count).Select(count => count > 0));            // Configure the activator for ReactiveUI
-            this.WhenActivated(disposables =>
+            if (_themeService != null)
             {
-                // Register the activation items that need to be cleaned up
-                Disposable.Create(() => { /* Cleanup when deactivated */ })
-                    .DisposeWith(disposables);
+                bool isDark = _themeService.CurrentTheme.Key == ThemeVariant.Dark.Key;
+                _themeService.SetTheme(!isDark);
 
-                // Navigate to Dashboard as the initial view
-                Router.Navigate.Execute(new DashboardViewModel(this))
-                    .Subscribe()
-                    .DisposeWith(disposables);
-            });
+                // Update settings if available
+                if (_settingsService != null)
+                {
+                    // Since we don't have direct access to SaveSettings, let's use a common approach
+                    // of setting properties which should trigger save on property change
+                    _settingsService.UseDarkTheme = !isDark;
+                    _settingsService.UseSystemTheme = false;
+                }
+            }
         }
 
         /// <summary>
-        /// Initializes the ViewModel.
+        /// Navigates to the settings view.
         /// </summary>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        public static async Task InitializeAsync()
+        private void NavigateToSettings()
         {
-            // Initialize resources, check game status, etc.
-            await Task.CompletedTask;
+            if (_themeService != null && _settingsService != null)
+            {
+                var settingsViewModel = new ThemeSettingsViewModel(_themeService, _settingsService);
+                Router.Navigate.Execute(settingsViewModel);
+            }
         }
 
-        private static void ToggleTheme()
+        /// <summary>
+        /// Navigates to the dashboard/home view.
+        /// </summary>
+        private void NavigateToHome()
         {
-            // Toggle theme logic will be implemented later
-        }
-
-        private static void OpenSettings()
-        {
-            // Open settings dialog logic will be implemented later
-        }
-
-        private static void OpenAbout()
-        {
-            // Open about dialog logic will be implemented later
+            var dashboardViewModel = new DashboardViewModel(this);
+            Router.Navigate.Execute(dashboardViewModel);
         }
     }
 }

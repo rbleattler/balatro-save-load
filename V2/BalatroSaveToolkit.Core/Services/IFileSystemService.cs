@@ -35,6 +35,21 @@ namespace BalatroSaveToolkit.Core.Services
         Task<List<string>> GetSavedBackupFilesAsync();
 
         /// <summary>
+        /// Creates a backup of the current save file.
+        /// </summary>
+        /// <param name="profileNumber">The profile number to backup.</param>
+        /// <returns>The path to the created backup file.</returns>
+        string BackupSaveFile(int profileNumber);
+
+        /// <summary>
+        /// Restores a save file from a backup.
+        /// </summary>
+        /// <param name="backupFilePath">The path to the backup file.</param>
+        /// <param name="profileNumber">The profile number to restore to.</param>
+        /// <returns>True if successful, false otherwise.</returns>
+        bool RestoreSaveFile(string backupFilePath, int profileNumber);
+
+        /// <summary>
         /// Saves the current Balatro save file to a backup.
         /// </summary>
         /// <param name="profileNumber">The profile number (1-based).</param>

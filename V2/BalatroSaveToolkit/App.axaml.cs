@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
@@ -11,6 +12,8 @@ using BalatroSaveToolkit.Core.ViewModels;
 using BalatroSaveToolkit.Services;
 using BalatroSaveToolkit.Services.FileSystem;
 using BalatroSaveToolkit.Services.Game;
+using BalatroSaveToolkit.Services.Logging;
+using BalatroSaveToolkit.Services.Notifications;
 using BalatroSaveToolkit.Services.Settings;
 using BalatroSaveToolkit.Services.Theme;
 using BalatroSaveToolkit.Theme;
@@ -73,6 +76,8 @@ internal partial class App : Application
         var settingsService = new SettingsService(fileSystemService);
         var themeService = new ThemeService(settingsService);
         var gameProcessService = new GameProcessService();
+        var loggingService = new Services.Logging.LoggingService();
+        var notificationService = new Services.Notifications.NotificationService();
 
         // Register services
         Locator.CurrentMutable.RegisterConstant<IFileSystemService>(fileSystemService);
@@ -81,6 +86,8 @@ internal partial class App : Application
         Locator.CurrentMutable.RegisterConstant<INavigationService>(navigationService);
         Locator.CurrentMutable.RegisterConstant<IThemeService>(themeService);
         Locator.CurrentMutable.RegisterConstant<IGameProcessService>(gameProcessService);
+        Locator.CurrentMutable.RegisterConstant<ILoggingService>(loggingService);
+        Locator.CurrentMutable.RegisterConstant<INotificationService>(notificationService);
 
         // Create host screen for routing
         var hostScreen = new HostScreen();
@@ -119,8 +126,7 @@ internal partial class App : Application
         Locator.CurrentMutable.Register(() => new MainWindow(), typeof(IViewFor<MainWindowViewModel>));
         Locator.CurrentMutable.Register(() => new DashboardView(), typeof(IViewFor<DashboardViewModel>));
         Locator.CurrentMutable.Register(() => new ThemeSettingsView(), typeof(IViewFor<ThemeSettingsViewModel>));
-    }
-
+    }    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "We know this code uses reflection")]
     private static void DisableAvaloniaDataAnnotationValidation()
     {
         // Get plugins to remove

@@ -1,9 +1,6 @@
----
-applyTo: '**'
----
 # Work Management System
 
-### Work Item Hierarchy
+## Work Item Hierarchy
 
 The project uses a hierarchical work management system with the following levels:
 
@@ -12,7 +9,7 @@ The project uses a hierarchical work management system with the following levels
 3. **User Story (US###)** - Implementable requirements that deliver value
 4. **Task (TSK###)** - Individual, actionable items that complete a user story
 
-### Work Item Status
+## Work Item Status
 
 Work items move through three states:
 
@@ -20,7 +17,7 @@ Work items move through three states:
 2. **Open** - Currently being worked on
 3. **Closed** - Completed and verified
 
-### File Naming Convention
+## File Naming Convention
 
 All work items are stored as Markdown files following this pattern:
 
@@ -38,13 +35,13 @@ The project includes scripts to help manage work items efficiently. These script
 - **`new_work_item.sh`** / **`New-WorkItem.ps1`**: Creates new work items with proper formatting and automatically assigns the next available ID.
   - Usage:
 
-    ```
+    ```sh
     ./new_work_item.sh -t Task -n "Add Packages" -p US001 -d "Add Avalonia packages to project" -a "All packages installed" -a "References updated"
     ```
 
   - PowerShell:
 
-    ```
+    ```pwsh
     .\New-WorkItem.ps1 -Type Task -Title "Add Packages" -Parent US001 -Description "Add Avalonia packages to project" -AcceptanceCriteria "All packages installed", "References updated"
     ```
 

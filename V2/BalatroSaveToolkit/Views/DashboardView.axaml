@@ -3,32 +3,102 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:BalatroSaveToolkit.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="BalatroSaveToolkit.Views.DashboardView"
              x:DataType="vm:DashboardViewModel">
 
-    <Grid Margin="20">
-        <StackPanel>
-            <TextBlock Text="Dashboard" FontSize="32" FontWeight="Bold" Margin="0,0,0,20"/>
+    <Design.DataContext>
+        <vm:DashboardViewModel />
+    </Design.DataContext>
 
-            <Border Background="#3a3a3a" Padding="15" CornerRadius="5" Margin="0,0,0,20">
-                <StackPanel>
-                    <TextBlock Text="Game Status" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
-                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Status:" Margin="0,0,10,0"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Running" Foreground="LightGreen"/>
+    <Grid Margin="20" RowDefinitions="Auto,*">
+        <TextBlock Grid.Row="0" Text="Dashboard" FontSize="32" FontWeight="Bold" Margin="0,0,0,20"/>
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Version:" Margin="0,5,10,0"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="1.0.3f" Margin="0,5,0,0"/>
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="20">
+                <!-- Game Status Panel -->
+                <Border Classes="CardBorder" Padding="15" CornerRadius="5">
+                    <StackPanel>
+                        <TextBlock Text="Game Status" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Status:" Margin="0,0,10,0"/>
+                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                                <Ellipse Width="10" Height="10" Fill="{Binding IsGameRunning, Converter={StaticResource BoolToColorConverter}}"
+                                         VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding IsGameRunning, Converter={StaticResource GameStatusConverter}}"
+                                         Foreground="{Binding IsGameRunning, Converter={StaticResource BoolToColorConverter}}"/>
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Version:" Margin="0,5,10,0"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding GameVersion}" Margin="0,5,0,0"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Save Files Panel -->
+                <Border Classes="CardBorder" Padding="15" CornerRadius="5">
+                    <Grid RowDefinitions="Auto,Auto,*,Auto">
+                        <TextBlock Grid.Row="0" Text="Save Files" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                        <!-- Toolbar -->
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+                            <Button Content="Refresh" Command="{Binding RefreshSaveFilesCommand}">
+                                <Button.Content>
+                                    <StackPanel Orientation="Horizontal" Spacing="5">
+                                        <PathIcon Data="{StaticResource RefreshIcon}"/>
+                                        <TextBlock Text="Refresh"/>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
+                            <Button Command="{Binding CreateBackupCommand}" IsEnabled="{Binding IsGameRunning}">
+                                <Button.Content>
+                                    <StackPanel Orientation="Horizontal" Spacing="5">
+                                        <PathIcon Data="{StaticResource BackupIcon}"/>
+                                        <TextBlock Text="Create Backup"/>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
+                        </StackPanel>
+
+                        <!-- Save Files List -->
+                        <ListBox Grid.Row="2"
+                                 ItemsSource="{Binding SaveFiles}"
+                                 SelectedItem="{Binding SelectedSaveFile}"
+                                 MinHeight="200" MaxHeight="350">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="Auto,*,Auto">
+                                        <PathIcon Grid.Column="0" Data="{StaticResource SaveFileIcon}" Margin="0,0,10,0"/>
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="15">
+                                                <TextBlock Text="{Binding FormattedFileSize}" Opacity="0.7" FontSize="12"/>
+                                                <TextBlock Text="{Binding Timestamp, StringFormat={}{0:yyyy-MM-dd HH:mm}}" Opacity="0.7" FontSize="12"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <!-- Actions for selected save -->
+                        <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="10" Margin="0,10,0,0">
+                            <Button Command="{Binding LoadSaveCommand}"
+                                    IsEnabled="{Binding SelectedSaveFile, Converter={StaticResource NotNullConverter}}">
+                                <Button.Content>
+                                    <StackPanel Orientation="Horizontal" Spacing="5">
+                                        <PathIcon Data="{StaticResource LoadIcon}"/>
+                                        <TextBlock Text="Load Selected Save"/>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
+                        </StackPanel>
                     </Grid>
-                </StackPanel>
-            </Border>
-
-            <Border Background="#3a3a3a" Padding="15" CornerRadius="5">
-                <StackPanel>
-                    <TextBlock Text="Save Files" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
-                    <Button Content="Browse Save Files" Margin="0,0,0,10"/>
-                    <ListBox Height="150">
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
                         <ListBoxItem>save_1.lua</ListBoxItem>
                         <ListBoxItem>save_2.lua</ListBoxItem>
                         <ListBoxItem>save_3.lua</ListBoxItem>

@@ -3,12 +3,29 @@
              xmlns:rxui="using:Avalonia.ReactiveUI"
              x:Class="BalatroSaveToolkit.App"
              xmlns:local="using:BalatroSaveToolkit"
+             xmlns:converters="using:BalatroSaveToolkit.Converters"
              RequestedThemeVariant="Default">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
         <local:ViewLocator/>
-    </Application.DataTemplates>    <Application.Styles>
+    </Application.DataTemplates>
+
+    <Application.Resources>
+        <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+        <converters:GameStatusConverter x:Key="GameStatusConverter"/>
+        <converters:NotNullConverter x:Key="NotNullConverter"/>
+
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://BalatroSaveToolkit/Resources/IconResources.axaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <Application.Styles>
         <FluentTheme />
+
+        <StyleInclude Source="avares://BalatroSaveToolkit/Styles/CommonStyles.axaml"/>
     </Application.Styles>
 </Application>

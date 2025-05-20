@@ -2,6 +2,7 @@ using System;
 using System.Reactive;
 using BalatroSaveToolkit.Core.Services;
 using ReactiveUI;
+using Avalonia.Styling;
 
 namespace BalatroSaveToolkit.ViewModels
 {
@@ -50,26 +51,46 @@ namespace BalatroSaveToolkit.ViewModels
 
             // Initialize from settings
             _useDarkTheme = _settingsService.UseDarkTheme;
-            _followSystemTheme = _settingsService.UseSystemTheme;
+            _followSystemTheme = _settingsService.UseSystemTheme;            // Create commands with return value - ReactiveUI requires Unit.Default as a return value
+            ApplyThemeCommand = ReactiveCommand.Create(() =>
+            {
+                ApplyTheme();
+                return Unit.Default;
+            });
 
-            // Create commands
-            ApplyThemeCommand = ReactiveCommand.Create(ApplyTheme);
-
-            // Monitor property changes to apply theme changes immediately
+            // Monitor property changes but don't auto-apply
             this.WhenAnyValue(x => x.UseDarkTheme)
-                .Subscribe(_ => ApplyTheme());
+                .Subscribe(value =>
+                {
+                    _settingsService.UseDarkTheme = value;
+                });
 
             this.WhenAnyValue(x => x.FollowSystemTheme)
-                .Subscribe(_ => ApplyTheme());
-        }
-
-        private void ApplyTheme()
+                .Subscribe(value =>
+                {
+                    _settingsService.UseSystemTheme = value;
+                });
+        }        private void ApplyTheme()
         {
-            _themeService.SetFollowSystemTheme(_followSystemTheme);
-
-            if (!_followSystemTheme)
+            try
             {
-                _themeService.SetTheme(_useDarkTheme);
+                if (_followSystemTheme)
+                {
+                    _themeService.SetFollowSystemTheme(true);
+                }
+                else
+                {
+                    _themeService.SetFollowSystemTheme(false);
+                    _themeService.SetTheme(_useDarkTheme);
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Theme operation error: {ex.Message}");
+            }
+            catch (ArgumentException ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Theme argument error: {ex.Message}");
             }
         }
     }

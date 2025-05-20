@@ -4,7 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:BalatroSaveToolkit.ViewModels"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
-             x:Class="BalatroSaveToolkit.Views.ThemeSettingsView">
+             x:Class="BalatroSaveToolkit.Views.ThemeSettingsView"
+             x:DataType="vm:ThemeSettingsViewModel">
 
   <Design.DataContext>
     <vm:ThemeSettingsViewModel />

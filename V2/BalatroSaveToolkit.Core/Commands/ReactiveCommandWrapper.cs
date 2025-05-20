@@ -3,6 +3,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Diagnostics;
 using ReactiveUI;
 
 namespace BalatroSaveToolkit.Core.Commands
@@ -82,7 +83,59 @@ namespace BalatroSaveToolkit.Core.Commands
     /// <returns>true if this command can be executed; otherwise, false.</returns>
     public bool CanExecute(object? parameter)
     {
-      return _command.CanExecute.FirstAsync().Wait();
+      try
+      {
+        // If parameter is null and TParam is Unit (command takes no parameters), check with default
+        if (parameter == null && typeof(TParam) == typeof(Unit))
+        {
+          return _command.CanExecute.FirstAsync().Wait();
+        }
+
+        // Otherwise, try to cast to the expected type if available
+        if (parameter is TParam)
+        {
+          return _command.CanExecute.FirstAsync().Wait();
+        }
+
+        // Log the type mismatch and return false for incompatible parameter types
+        Debug.WriteLine($"Parameter type mismatch in CanExecute. Expected {typeof(TParam).Name}, got {parameter?.GetType().Name ?? "null"}");
+        return false;
+      }
+      catch (InvalidOperationException ex)
+      {
+        // Log operation errors but don't crash
+        Debug.WriteLine($"Operation error in CanExecute: {ex.Message}");
+        return false;
+      }
+      catch (ArgumentException ex)
+      {
+        // Log argument errors but don't crash
+        Debug.WriteLine($"Argument error in CanExecute: {ex.Message}");
+        return false;
+      }
+    }
+
+    /// <summary>
+    /// Determines whether the command can execute in its current state asynchronously.
+    /// </summary>
+    /// <param name="param">Data used by the command.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a value indicating whether the command can execute.</returns>
+    public async Task<bool> CanExecuteAsync(TParam param)
+    {
+      try
+      {
+        return await _command.CanExecute.FirstAsync();
+      }
+      catch (InvalidOperationException ex)
+      {
+        Debug.WriteLine($"Operation error in CanExecuteAsync: {ex.Message}");
+        return false;
+      }
+      catch (ArgumentException ex)
+      {
+        Debug.WriteLine($"Argument error in CanExecuteAsync: {ex.Message}");
+        return false;
+      }
     }
 
   /// <summary>
@@ -91,7 +144,42 @@ namespace BalatroSaveToolkit.Core.Commands
   /// <param name="parameter">Data used by the command. If the command does not require data, this object can be set to null.</param>
   public void Execute(object? parameter)
   {
-    _command.Execute((TParam)parameter!).Subscribe();
+    try
+    {
+      // If parameter is null and TParam is Unit (command takes no parameters), execute with default
+      if (parameter == null && typeof(TParam) == typeof(Unit))
+      {
+        _command.Execute(default!).Subscribe();
+        return;
+      }
+
+      // Otherwise, try to cast to the expected type if available
+      if (parameter is TParam typedParam)
+      {
+        _command.Execute(typedParam).Subscribe();
+      }
+      else if (parameter == null)
+      {
+        // Handle null parameter with more diagnostics
+        Debug.WriteLine($"Warning: Null parameter passed to command expecting {typeof(TParam).Name}");
+        _command.Execute(default!).Subscribe();
+      }
+      else
+      {
+        // Log the type mismatch but don't throw (for stability)
+        Debug.WriteLine($"Parameter type mismatch. Expected {typeof(TParam).Name}, got {parameter.GetType().Name}");
+      }
+    }
+    catch (InvalidOperationException ex)
+    {
+      // Log but don't crash the application
+      Debug.WriteLine($"Operation error executing command: {ex.Message}");
+    }
+    catch (ArgumentException ex)
+    {
+      // Log but don't crash the application
+      Debug.WriteLine($"Argument error executing command: {ex.Message}");
+    }
   }
 
     /// <summary>
@@ -100,7 +188,17 @@ namespace BalatroSaveToolkit.Core.Commands
     /// <param name="wrapper">The wrapper to convert.</param>
     public static implicit operator ReactiveCommand<TParam, TResult>(ReactiveCommandWrapper<TParam, TResult> wrapper)
     {
-      return wrapper.Command;
+      // Operators should not throw exceptions, so we return null if wrapper is null
+      return wrapper?._command!;
+    }
+
+    /// <summary>
+    /// Converts this wrapper to its underlying ReactiveCommand.
+    /// </summary>
+    /// <returns>The underlying ReactiveCommand.</returns>
+    public ReactiveCommand<TParam, TResult> ToReactiveCommand()
+    {
+      return _command;
     }
   }
 

@@ -34,9 +34,7 @@ internal partial class App : Application
         ConfigureServices();
 
         // Register ReactiveUI activation handlers
-        RegisterActivationHandlers();
-
-        // Initialize theme resources
+        RegisterActivationHandlers();        // Initialize theme resources
         ThemeManager.Initialize(this);        // Setup theme service and apply initial theme
         var themeService = Locator.Current.GetService<IThemeService>();
         if (themeService != null)

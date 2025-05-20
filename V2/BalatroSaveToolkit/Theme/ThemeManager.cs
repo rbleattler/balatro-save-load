@@ -2,7 +2,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
-using BalatroSaveToolkit.Core.Services;
+using System;
+using System.Diagnostics;
 
 namespace BalatroSaveToolkit.Theme
 {
@@ -12,23 +13,35 @@ namespace BalatroSaveToolkit.Theme
     public static class ThemeManager
     {
         private static ResourceDictionary? _lightTheme;
-        private static ResourceDictionary? _darkTheme;
-
-        /// <summary>
+        private static ResourceDictionary? _darkTheme;        /// <summary>
         /// Initializes theme resources.
         /// </summary>
         /// <param name="application">The application instance.</param>
         public static void Initialize(Application application)
         {
-            _lightTheme = new ResourceDictionary
+            ArgumentNullException.ThrowIfNull(application, nameof(application));
+
+            try
             {
-                Source = new Uri("avares://BalatroSaveToolkit/Themes/LightTheme.axaml")
-            };
-            
-            _darkTheme = new ResourceDictionary
+                Debug.WriteLine("Initializing theme resources");
+                  // Load the theme resources directly using AvaloniaXamlLoader
+                _lightTheme = AvaloniaXamlLoader.Load(new Uri("avares://BalatroSaveToolkit/Theme/LightTheme.axaml")) as ResourceDictionary;
+                Debug.WriteLine($"Light theme loaded: {_lightTheme != null}");
+
+                _darkTheme = AvaloniaXamlLoader.Load(new Uri("avares://BalatroSaveToolkit/Theme/DarkTheme.axaml")) as ResourceDictionary;
+                Debug.WriteLine($"Dark theme loaded: {_darkTheme != null}");
+
+                if (_lightTheme == null || _darkTheme == null)
+                {
+                    throw new InvalidOperationException("Failed to load theme resources");
+                }
+            }
+            catch (Exception ex)
             {
-                Source = new Uri("avares://BalatroSaveToolkit/Themes/DarkTheme.axaml")
-            };
+                Debug.WriteLine($"Error initializing themes: {ex.Message}");
+                Debug.WriteLine(ex.StackTrace);
+                throw; // Rethrow to make initialization issues visible
+            }
         }
 
         /// <summary>
@@ -38,18 +51,47 @@ namespace BalatroSaveToolkit.Theme
         /// <param name="isDarkTheme">Whether to apply the dark theme.</param>
         public static void ApplyTheme(Application application, bool isDarkTheme)
         {
-            var resources = application.Resources;
-            resources.MergedDictionaries.Clear();
-            
-            if (isDarkTheme)
+            if (application == null)
+                return;            try
             {
-                resources.MergedDictionaries.Add(_darkTheme!);
-                application.RequestedThemeVariant = ThemeVariant.Dark;
+                Debug.WriteLine($"Applying theme: {(isDarkTheme ? "Dark" : "Light")}");
+
+                // Check if themes are initialized
+                if (_lightTheme == null || _darkTheme == null)
+                {
+                    Debug.WriteLine("Themes are not initialized properly!");
+                    return;
+                }
+
+                // Get the application's merged dictionaries
+                var resources = application.Resources;
+                resources.MergedDictionaries.Clear();
+
+                // Apply the selected theme
+                if (isDarkTheme)
+                {
+                    Debug.WriteLine("Adding dark theme to resources");
+                    resources.MergedDictionaries.Add(_darkTheme);
+                    application.RequestedThemeVariant = ThemeVariant.Dark;
+                }
+                else
+                {
+                    Debug.WriteLine("Adding light theme to resources");
+                    resources.MergedDictionaries.Add(_lightTheme);
+                    application.RequestedThemeVariant = ThemeVariant.Light;
+                }
             }
-            else
+            catch (InvalidOperationException ex)
             {
-                resources.MergedDictionaries.Add(_lightTheme!);
-                application.RequestedThemeVariant = ThemeVariant.Light;
+                Debug.WriteLine($"Invalid operation in theme application: {ex.Message}");
+                Debug.WriteLine(ex.StackTrace);
+                // Don't rethrow - we want the app to continue even if theme fails
+            }
+            catch (ArgumentException ex)
+            {
+                Debug.WriteLine($"Invalid argument in theme application: {ex.Message}");
+                Debug.WriteLine(ex.StackTrace);
+                // Don't rethrow - we want the app to continue even if theme fails
             }
         }
     }

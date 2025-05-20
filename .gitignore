@@ -4,6 +4,9 @@
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
 InnoSetup/Output
+**\build_output.txt
+**\errors.txt
+**\warnings.txt
 
 # User-specific files
 *.rsuser

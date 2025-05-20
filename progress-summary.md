@@ -3,12 +3,14 @@
 ## Completed Work
 
 ### Setup and Infrastructure
+
 - Created solution structure with proper projects
 - Configured Avalonia references
 - Set up framework for cross-platform targeting
 - Configured ReactiveUI integration
 
 ### Core Services
+
 - Defined IFileSystemService interface and implementation
 - Implemented platform-specific FileSystemService classes for:
   - Windows
@@ -22,10 +24,12 @@
 ## In Progress
 
 ### Settings Service ✓
+
 - Interface defined and implemented
 - JSON-based settings storage implemented
 
 ### Theme Service ✓
+
 - Interface defined
 - Implementation complete
 - Platform-specific theme detection implemented for Windows, macOS and Linux
@@ -33,6 +37,7 @@
 - Theme system integration with application
 
 ### Game Process Service ✓
+
 - Interface defined
 - Implementation complete
 - Platform-specific process detection implemented for Windows, macOS and Linux
@@ -47,6 +52,7 @@
 ## Work Item Status
 
 ### Closed Items
+
 - EP001 (in progress)
 - FT001 (in progress)
 - FT002 ✓
@@ -72,10 +78,12 @@
 - TSK032 ✓
 
 ### Current Tasks
+
 - Update US001 once all related tasks are complete
 - Begin UI migration (next priority)
 - Prepare for implementing save/load functionality
 
 ## Notes
+
 - All implementations have been made cross-platform
 - FileSystemService handles platform-specific paths and behaviors

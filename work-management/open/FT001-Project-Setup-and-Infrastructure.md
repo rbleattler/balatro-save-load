@@ -37,3 +37,4 @@ Set up the new Avalonia project structure and implement the core infrastructure 
 
 ## Dependencies
 - None (this is a prerequisite for other features)
+

@@ -58,7 +58,7 @@ The current application is a WPF-based tool with the following characteristics:
 
 The new solution will adopt a modular architecture:
 
-```
+```plaintext
 V2/
   BalatroSaveToolkit.sln
   BalatroSaveToolkit/                 # Core project (UI + application logic)

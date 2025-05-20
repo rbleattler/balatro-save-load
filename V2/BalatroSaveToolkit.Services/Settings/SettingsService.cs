@@ -175,7 +175,7 @@ namespace BalatroSaveToolkit.Services.Settings
             }
         }
 
-        private SettingsModel CreateDefaultSettings()
+        private static SettingsModel CreateDefaultSettings()
         {
             return new SettingsModel
             {

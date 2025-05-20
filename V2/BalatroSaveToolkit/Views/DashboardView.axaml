@@ -1,0 +1,41 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:BalatroSaveToolkit.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="BalatroSaveToolkit.Views.DashboardView"
+             x:DataType="vm:DashboardViewModel">
+
+    <Grid Margin="20">
+        <StackPanel>
+            <TextBlock Text="Dashboard" FontSize="32" FontWeight="Bold" Margin="0,0,0,20"/>
+
+            <Border Background="#3a3a3a" Padding="15" CornerRadius="5" Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Game Status" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Status:" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Running" Foreground="LightGreen"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Version:" Margin="0,5,10,0"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="1.0.3f" Margin="0,5,0,0"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Background="#3a3a3a" Padding="15" CornerRadius="5">
+                <StackPanel>
+                    <TextBlock Text="Save Files" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+                    <Button Content="Browse Save Files" Margin="0,0,0,10"/>
+                    <ListBox Height="150">
+                        <ListBoxItem>save_1.lua</ListBoxItem>
+                        <ListBoxItem>save_2.lua</ListBoxItem>
+                        <ListBoxItem>save_3.lua</ListBoxItem>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </Grid>
+
+</UserControl>

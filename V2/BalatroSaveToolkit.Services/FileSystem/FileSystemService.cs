@@ -207,7 +207,7 @@ namespace BalatroSaveToolkit.Services.FileSystem
         }
 
         /// <inheritdoc/>
-        public async Task<long> GetAvailableDiskSpaceAsync(string path)
+        public static async Task<long> GetAvailableDiskSpaceAsync(string path)
         {
             var driveInfo = new DriveInfo(Path.GetPathRoot(path));
             return await Task.FromResult(driveInfo.AvailableFreeSpace);

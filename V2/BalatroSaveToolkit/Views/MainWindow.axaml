@@ -3,11 +3,12 @@
         xmlns:vm="using:BalatroSaveToolkit.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:rxui="using:Avalonia.ReactiveUI"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="BalatroSaveToolkit.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="BalatroSaveToolkit">
+        Title="{Binding WindowTitle}">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -15,7 +16,32 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding WindowTitle}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Header area -->
+        <Grid Grid.Row="0" Background="#252525" Height="60" ColumnDefinitions="Auto,*,Auto" Margin="0">
+            <TextBlock Grid.Column="0" Text="Balatro Save Toolkit" VerticalAlignment="Center"
+                       Margin="20,0,0,0" FontSize="24" FontWeight="Bold"/>
 
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,20,0">
+                <Button Content="Settings" Margin="5" />
+                <Button Content="Theme" Margin="5" Command="{Binding ToggleThemeCommand}" />
+            </StackPanel>
+        </Grid>
 
+        <!-- Main content area - Will host the current page -->
+        <rxui:RoutedViewHost Grid.Row="1" Router="{Binding Router}" PageTransition="{x:Null}">
+            <rxui:RoutedViewHost.DefaultContent>
+                <TextBlock Text="Welcome to Balatro Save Toolkit"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           FontSize="24" />
+            </rxui:RoutedViewHost.DefaultContent>
+        </rxui:RoutedViewHost>
+
+        <!-- Status area -->
+        <Grid Grid.Row="2" Background="#252525" Height="30">
+            <TextBlock Text="Ready" Margin="20,0,0,0" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding IsGameRunning, StringFormat='Game Status: {0}'}"
+                       HorizontalAlignment="Right" Margin="0,0,20,0" VerticalAlignment="Center" />
+        </Grid>
+    </Grid>
 </Window>

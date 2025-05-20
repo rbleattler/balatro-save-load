@@ -38,3 +38,4 @@ Migrate the user interface from WPF to Avalonia while maintaining the same look 
 ## Dependencies
 - FT001: Project Setup and Infrastructure
 - FT002: Core Services Implementation
+

@@ -42,3 +42,4 @@ This epic covers the complete migration of the Balatro Save and Load Tool from W
 ## Dependencies
 
 - None
+

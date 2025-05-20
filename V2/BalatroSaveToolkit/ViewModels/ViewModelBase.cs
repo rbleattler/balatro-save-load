@@ -2,17 +2,17 @@
 
 namespace BalatroSaveToolkit.ViewModels
 {
+  /// <summary>
+  /// Base class for all ViewModels in the application.
+  /// Inherits from the core ViewModelBase.
+  /// </summary>
+  internal class ViewModelBase : Core.ViewModels.ViewModelBase
+  {
     /// <summary>
-    /// Base class for all ViewModels in the application.
-    /// Inherits from the core ViewModelBase.
+    /// Initializes a new instance of the <see cref="ViewModelBase"/> class.
     /// </summary>
-    public class ViewModelBase : Core.ViewModels.ViewModelBase
+    protected ViewModelBase() : base()
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ViewModelBase"/> class.
-        /// </summary>
-        protected ViewModelBase() : base()
-        {
-        }
     }
+  }
 }

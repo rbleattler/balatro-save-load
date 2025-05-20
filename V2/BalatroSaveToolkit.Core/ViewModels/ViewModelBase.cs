@@ -97,7 +97,7 @@ namespace BalatroSaveToolkit.Core.ViewModels
         /// <param name="execute">The action to execute.</param>
         /// <param name="canExecute">Optional observable to determine if the command can execute.</param>
         /// <returns>A command.</returns>
-        protected ReactiveCommandWrapper<Unit, Unit> CreateCommand(
+        protected static ReactiveCommandWrapper<Unit, Unit> CreateCommand(
             Action execute,
             IObservable<bool>? canExecute = null)
         {
@@ -111,7 +111,7 @@ namespace BalatroSaveToolkit.Core.ViewModels
         /// <param name="execute">The action to execute.</param>
         /// <param name="canExecute">Optional observable to determine if the command can execute.</param>
         /// <returns>A command.</returns>
-        protected ReactiveCommandWrapper<T, Unit> CreateCommand<T>(
+        protected static ReactiveCommandWrapper<T, Unit> CreateCommand<T>(
             Action<T> execute,
             IObservable<bool>? canExecute = null)
         {
@@ -124,7 +124,7 @@ namespace BalatroSaveToolkit.Core.ViewModels
         /// <param name="execute">The function to execute.</param>
         /// <param name="canExecute">Optional observable to determine if the command can execute.</param>
         /// <returns>A command.</returns>
-        protected ReactiveCommandWrapper<Unit, Unit> CreateAsyncCommand(
+        protected static ReactiveCommandWrapper<Unit, Unit> CreateAsyncCommand(
             Func<Task> execute,
             IObservable<bool>? canExecute = null)
         {
@@ -138,7 +138,7 @@ namespace BalatroSaveToolkit.Core.ViewModels
         /// <param name="execute">The function to execute.</param>
         /// <param name="canExecute">Optional observable to determine if the command can execute.</param>
         /// <returns>A command.</returns>
-        protected ReactiveCommandWrapper<T, Unit> CreateAsyncCommand<T>(
+        protected static ReactiveCommandWrapper<T, Unit> CreateAsyncCommand<T>(
             Func<T, Task> execute,
             IObservable<bool>? canExecute = null)
         {
@@ -153,7 +153,7 @@ namespace BalatroSaveToolkit.Core.ViewModels
         /// <param name="execute">The function to execute.</param>
         /// <param name="canExecute">Optional observable to determine if the command can execute.</param>
         /// <returns>A command.</returns>
-        protected ReactiveCommandWrapper<TParam, TResult> CreateAsyncCommand<TParam, TResult>(
+        protected static ReactiveCommandWrapper<TParam, TResult> CreateAsyncCommand<TParam, TResult>(
             Func<TParam, Task<TResult>> execute,
             IObservable<bool>? canExecute = null)
         {

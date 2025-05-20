@@ -1,88 +1,113 @@
 # Balatro Save and Load Tool - Architecture Overview
 
-## Introduction
+## Project Structure
 
-This document provides a comprehensive overview of the Balatro Save and Load Tool architecture, focusing on the V2 migration from WPF to Avalonia. The migration aims to make the application cross-platform compatible (Windows, macOS, Linux) while improving architecture, modularity, and user experience.
+The Balatro Save and Load Tool is organized as a multi-project solution following a modular, layered architecture. The solution is structured to separate concerns and ensure maintainability, testability, and extensibility. This document provides an overview of the architecture and the responsibilities of each project.
 
-## Architecture Principles
+## Solution Projects
 
-The application follows these core architectural principles:
+The solution consists of the following projects:
 
-1. **Separation of Concerns** - Clear separation between UI, business logic, and data access
-2. **MVVM Pattern** - Model-View-ViewModel architecture for UI organization
-3. **Reactive Programming** - Using ReactiveUI for responsive, event-driven interactions
-4. **Dependency Injection** - Services are registered and injected to promote loose coupling
-5. **Cross-Platform Design** - Platform-specific code is isolated and abstracted
-6. **Testability** - Services and components are designed to be testable
+### BalatroSaveToolkit.Core
 
-## Solution Structure
+**Purpose**: Contains the core domain logic, interfaces, and abstractions that are platform-independent.
 
-The solution is organized into the following projects:
+**Responsibilities**:
 
-- **BalatroSaveToolkit.Core** - Core interfaces, models, and platform-agnostic services
-- **BalatroSaveToolkit.UI** - Avalonia UI implementation using MVVM pattern
-- **BalatroSaveToolkit.Desktop** - Desktop application entry point and platform-specific code
+- Core domain models and entities
+- Interface definitions for services
+- Common utilities and helpers
+- Command infrastructure (ReactiveCommandWrapper)
 
-## Service Layer
+**Key Components**:
 
-The service layer provides the core functionality of the application through a set of interfaces and their implementations:
+- Service interfaces (IFileSystemService, ISettingsService, etc.)
+- Shared models and DTOs
+- Command infrastructure
 
-1. **IFileSystemService** - Handles file I/O operations with platform-specific implementations
-2. **ISettingsService** - Manages application settings across sessions
-3. **IThemeService** - Provides theme management and OS theme detection
-4. **IGameProcessService** - Monitors and interacts with the Balatro game process
-5. **INavigationService** - Manages application navigation between views
-6. **IDialogService** - Handles application dialogs and user prompts
+### BalatroSaveToolkit.Services
 
-## UI Architecture
+**Purpose**: Implements the service interfaces defined in the Core project.
 
-The UI follows the MVVM pattern with ReactiveUI integration:
+**Responsibilities**:
 
-1. **Views** - Avalonia XAML-based UI components
-2. **ViewModels** - Classes that expose data and commands to the views
-3. **Models** - Data structures representing application entities
+- Concrete service implementations
+- Business logic
+- Data access and persistence
+- Game process interaction
 
-Navigation is implemented using ReactiveUI's routing capabilities, allowing for a flexible, testable navigation system.
+**Key Components**:
 
-## Command Infrastructure
+- FileSystemService - Handles file system operations
+- SettingsService - Manages application settings
+- ThemeService - Manages UI theming
+- GameProcessService - Interacts with the Balatro game process
+- NavigationService - Handles navigation between views (SINGLE IMPLEMENTATION HERE)
 
-Commands utilize a ReactiveCommand wrapper to provide:
+### BalatroSaveToolkit.UI
 
-1. Consistent error handling
-2. Loading state tracking
-3. Execution tracking
-4. Automatic UI thread dispatching
+**Purpose**: Contains the UI layer built with Avalonia.
+
+**Responsibilities**:
+
+- Views and ViewModels
+- UI-specific logic
+- User interactions
+- Styling and theming
+
+**Key Components**:
+
+- App entry point
+- MainWindow and other views
+- ViewModels
+- Styles and resources
+
+### BalatroSaveToolkit.Desktop
+
+**Purpose**: Platform-specific desktop application project.
+
+**Responsibilities**:
+
+- Platform-specific initialization
+- Dependency registration
+- Application bootstrapping
+
+**Key Components**:
+
+- Platform-specific implementations
+- Main entry point
+- Dependency injection configuration
+
+## Architecture Patterns
+
+The application follows these architectural patterns:
+
+1. **MVVM (Model-View-ViewModel)**: Separates UI from business logic
+2. **Dependency Injection**: Services are registered and injected where needed
+3. **Reactive Programming**: Using ReactiveUI for reactive UI development
+4. **Command Pattern**: Using ReactiveCommand for encapsulating actions
+
+## Service Localization
+
+To avoid duplicated service implementations:
+
+1. All service interfaces should be defined in the Core project
+2. Service implementations should be placed in the Services project
+3. Services should be registered in the Desktop project's DI container
+4. ViewModels should receive services via constructor injection
+
+## Navigation System
+
+Navigation between views is handled by a single Navigation Service:
+
+1. **Interface**: `INavigationService` (defined in Core)
+2. **Implementation**: `NavigationService` (implemented in Services)
+3. **Registration**: Registered as a singleton in the DI container
+4. **Usage**: Injected into ViewModels that need navigation capabilities
 
 ## Data Flow
 
-1. User interacts with Views
-2. Views trigger commands in ViewModels
-3. ViewModels use Services to perform operations
-4. Services return data to ViewModels
-5. ViewModels update observable properties
-6. Views react to property changes through data binding
-
-## Cross-Platform Strategy
-
-The application achieves cross-platform compatibility through:
-
-1. **Platform Abstraction** - Core interfaces with platform-specific implementations
-2. **Dependency Injection** - Platform-specific services are registered at startup
-3. **Avalonia UI** - Cross-platform UI framework replacing WPF
-4. **Platform Detection** - Runtime detection of operating system for behavior switching
-
-## Future Expansion
-
-The architecture is designed to accommodate future enhancements:
-
-1. Additional game support beyond Balatro
-2. Plugin system for extensibility
-3. Advanced save management features
-4. Cloud synchronization capabilities
-
-## Diagrams
-
-For visual representations of the architecture, see:
-
-- [Component Diagram](component-diagram.md)
-- [Service Interaction Diagram](service-interaction.md)
+1. **User Input**: Captured in Views
+2. **Commands**: Execute business logic via ViewModels
+3. **Services**: Perform operations and return results
+4. **State Updates**: Propagated via ReactiveUI properties and observables

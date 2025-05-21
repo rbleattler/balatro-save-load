@@ -64,7 +64,8 @@
                         <ListBox Grid.Row="2"
                                  ItemsSource="{Binding SaveFiles}"
                                  SelectedItem="{Binding SelectedSaveFile}"
-                                 MinHeight="200" MaxHeight="350">
+                                 MinHeight="200" MaxHeight="350"
+                                 DoubleTapped="SaveFilesListBox_DoubleTapped">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Grid ColumnDefinitions="Auto,*,Auto">
@@ -98,14 +99,4 @@
             </StackPanel>
         </ScrollViewer>
     </Grid>
-</UserControl>
-                        <ListBoxItem>save_1.lua</ListBoxItem>
-                        <ListBoxItem>save_2.lua</ListBoxItem>
-                        <ListBoxItem>save_3.lua</ListBoxItem>
-                    </ListBox>
-                </StackPanel>
-            </Border>
-        </StackPanel>
-    </Grid>
-
 </UserControl>

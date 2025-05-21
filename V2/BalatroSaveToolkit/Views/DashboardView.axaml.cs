@@ -1,5 +1,8 @@
 using Avalonia.ReactiveUI;
+using Avalonia.Input;
+using Avalonia.Controls;
 using BalatroSaveToolkit.ViewModels;
+using BalatroSaveToolkit.Views;
 using ReactiveUI;
 
 namespace BalatroSaveToolkit.Views
@@ -20,6 +23,14 @@ namespace BalatroSaveToolkit.Views
             {
                 // Handle view activation/deactivation here
             });
+        }
+
+        private void SaveFilesListBox_DoubleTapped(object? sender, RoutedEventArgs e)
+        {
+            if (sender is ListBox listBox && listBox.SelectedItem is SaveFileViewModel saveFile)
+            {
+                ViewModel?.ViewSaveContentCommand.Execute(saveFile).Subscribe();
+            }
         }
     }
 }

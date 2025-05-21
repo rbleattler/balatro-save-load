@@ -1,3 +1,7 @@
+---
+applyTo: "**"
+---
+
 # Balatro Save and Load Tool - Migration Project
 
 ## Project Overview
@@ -19,7 +23,7 @@ This repository contains a migration project to convert the Balatro Save and Loa
 
 ## Work Management System
 
-All work is handled via the work management system using hierarchical items (Epics, Features, User Stories, Tasks). Always work on the highest priority tasks as indicated in the progress summary.
+All work is handled via the work management system using hierarchical items (Epics, Features, User Stories, Tasks). Always work on the highest priority tasks as indicated in the progress summary. **YOU MUST** Follow the guidance in `work-management/README.md` for creating and managing work items.
 
 ## Rules for Contributors
 

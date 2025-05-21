@@ -20,7 +20,6 @@ using BalatroSaveToolkit.Theme;
 using BalatroSaveToolkit.ViewModels;
 using BalatroSaveToolkit.Views;
 using ReactiveUI;
-using Splat;
 
 namespace BalatroSaveToolkit;
 
@@ -126,6 +125,7 @@ internal partial class App : Application
         Locator.CurrentMutable.Register(() => new MainWindow(), typeof(IViewFor<MainWindowViewModel>));
         Locator.CurrentMutable.Register(() => new DashboardView(), typeof(IViewFor<DashboardViewModel>));
         Locator.CurrentMutable.Register(() => new ThemeSettingsView(), typeof(IViewFor<ThemeSettingsViewModel>));
+        Locator.CurrentMutable.Register(() => new SaveContentView(), typeof(IViewFor<SaveContentViewModel>));
     }    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "We know this code uses reflection")]
     private static void DisableAvaloniaDataAnnotationValidation()
     {

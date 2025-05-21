@@ -52,6 +52,7 @@ namespace BalatroSaveToolkit.ViewModels
                 this.WhenAnyValue(x => x.SelectedSaveFile).Select(x => x != null));
             LoadSaveCommand = ReactiveCommand.CreateFromTask(LoadSaveAsync,
                 this.WhenAnyValue(x => x.SelectedSaveFile).Select(x => x != null));
+            ViewSaveContentCommand = ReactiveCommand.Create<SaveFileViewModel>(OnViewSaveContent);
 
             this.WhenActivated((CompositeDisposable disposables) =>
             {
@@ -119,7 +120,8 @@ namespace BalatroSaveToolkit.ViewModels
             get => _saveFiles;
             set => this.RaiseAndSetIfChanged(ref _saveFiles, value);
         }
-          /// <summary>
+
+        /// <summary>
         /// Gets or sets the selected save file.
         /// </summary>
         public SaveFileViewModel? SelectedSaveFile
@@ -127,7 +129,8 @@ namespace BalatroSaveToolkit.ViewModels
             get => _selectedSaveFile;
             set => this.RaiseAndSetIfChanged(ref _selectedSaveFile, value);
         }
-          /// <summary>
+
+        /// <summary>
         /// Gets the command to refresh save files.
         /// </summary>
         public ReactiveCommand<Unit, Unit>? RefreshSaveFilesCommand { get; }
@@ -140,7 +143,14 @@ namespace BalatroSaveToolkit.ViewModels
         /// <summary>
         /// Gets the command to load the selected save file.
         /// </summary>
-        public ReactiveCommand<Unit, Unit>? LoadSaveCommand { get; }        private async Task RefreshSaveFilesAsync()
+        public ReactiveCommand<Unit, Unit>? LoadSaveCommand { get; }
+
+        /// <summary>
+        /// Gets the command to view the content of the selected save file.
+        /// </summary>
+        public ReactiveCommand<SaveFileViewModel, Unit> ViewSaveContentCommand { get; }
+
+        private async Task RefreshSaveFilesAsync()
         {
             if (_fileSystemService == null)
                 return;
@@ -185,7 +195,9 @@ namespace BalatroSaveToolkit.ViewModels
             {
                 _loggingService?.Error("Security exception when loading save files", ex);
             }
-        }        private async Task CreateBackupAsync()
+        }
+
+        private async Task CreateBackupAsync()
         {
             if (SelectedSaveFile == null || _fileSystemService == null)
                 return;
@@ -232,7 +244,9 @@ namespace BalatroSaveToolkit.ViewModels
         private async Task LoadSaveAsync()
         {
             if (SelectedSaveFile == null || _fileSystemService == null)
-                return;            // Get confirmation before proceeding
+                return;
+
+            // Get confirmation before proceeding
             bool confirmed = _notificationService != null && await _notificationService.ShowConfirmationAsync(
                 "Confirm Restore",
                 $"Are you sure you want to restore the save file to Profile {SelectedSaveFile.ProfileNumber}?\n" +
@@ -288,6 +302,12 @@ namespace BalatroSaveToolkit.ViewModels
                 _notificationService?.ShowError("Security Error",
                     $"Security error when restoring save file: {ex.Message}");
             }
+        }
+
+        private void OnViewSaveContent(SaveFileViewModel? saveFile)
+        {
+            if (saveFile == null) return;
+            HostScreen.Router.Navigate.Execute(new SaveContentViewModel { FilePath = saveFile.FilePath });
         }
 
         private static int DetermineProfileNumber(string filePath)

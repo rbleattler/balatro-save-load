@@ -1,18 +1,292 @@
+using System;
+using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform.Storage;
+using BalatroSaveToolkit.ViewModels;
 
 namespace BalatroSaveToolkit.Views
 {
     public partial class SaveContentView : UserControl
     {
+        private SaveContentViewModel ViewModel => DataContext as SaveContentViewModel;
+        private TextBox ContentTextBox => this.FindControl<TextBox>("ContentTextBox");
+        private TextBlock StatusTextBlock => this.FindControl<TextBlock>("StatusTextBlock");
+
         public SaveContentView()
         {
             InitializeComponent();
+            AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
         }
 
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
+        }
+
+        private void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            // Handle Ctrl+C to copy selection or all text
+            if (e.Key == Key.C && e.KeyModifiers == KeyModifiers.Control)
+            {
+                // If there's a selection, let the TextBox handle it
+                // If there's no selection, copy all text
+                if (string.IsNullOrEmpty(ContentTextBox?.SelectedText))
+                {
+                    CopyContentToClipboard(ContentTextBox?.Text);
+                    UpdateStatus("All content copied to clipboard");
+                    e.Handled = true; // Prevent default handling
+                }
+            }
+            // Handle Ctrl+F for find
+            else if (e.Key == Key.F && e.KeyModifiers == KeyModifiers.Control)
+            {
+                Find_Click(this, new RoutedEventArgs());
+                e.Handled = true;
+            }
+        }
+
+        private void CopySelected_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(ContentTextBox?.SelectedText))
+            {
+                CopyContentToClipboard(ContentTextBox.SelectedText);
+                UpdateStatus("Selected text copied to clipboard");
+            }
+        }
+
+        private void CopyAll_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel?.HasContent == true && !string.IsNullOrEmpty(ContentTextBox?.Text))
+            {
+                CopyContentToClipboard(ContentTextBox.Text);
+                UpdateStatus("All content copied to clipboard");
+            }
+        }
+
+        private async void CopyContentToClipboard(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return;
+
+            try
+            {
+                await Application.Current.Clipboard.SetTextAsync(text);
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Error copying to clipboard: {ex.Message}");
+            }
+        }
+
+        private void FontSizeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ComboBox comboBox && comboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                if (int.TryParse(selectedItem.Content?.ToString(), out var fontSize) && ContentTextBox != null)
+                {
+                    ContentTextBox.FontSize = fontSize;
+                }
+            }
+        }
+
+        private async void Find_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel?.HasContent != true || string.IsNullOrEmpty(ContentTextBox?.Text))
+                return;
+
+            // Create a find dialog
+            var findDialog = new Window
+            {
+                Title = "Find Text",
+                Width = 300,
+                Height = 120,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                SizeToContent = SizeToContent.Height,
+                CanResize = false
+            };
+
+            // Set the owner if we're in a desktop app
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                findDialog.ShowInTaskbar = false;
+                findDialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                findDialog.Owner = desktop.MainWindow;
+            }
+
+            var grid = new Grid();
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+            var searchPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(10)
+            };
+
+            var searchLabel = new TextBlock
+            {
+                Text = "Search for:",
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 0, 10, 0)
+            };
+
+            var searchTextBox = new TextBox
+            {
+                Width = 200,
+                Margin = new Thickness(0, 0, 0, 0)
+            };
+
+            searchPanel.Children.Add(searchLabel);
+            searchPanel.Children.Add(searchTextBox);
+
+            var buttonPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(10)
+            };
+
+            var findButton = new Button
+            {
+                Content = "Find",
+                Width = 80,
+                Margin = new Thickness(0, 0, 10, 0)
+            };
+
+            var cancelButton = new Button
+            {
+                Content = "Cancel",
+                Width = 80
+            };
+
+            buttonPanel.Children.Add(findButton);
+            buttonPanel.Children.Add(cancelButton);
+
+            Grid.SetRow(searchPanel, 0);
+            Grid.SetRow(buttonPanel, 1);
+
+            grid.Children.Add(searchPanel);
+            grid.Children.Add(buttonPanel);
+
+            findDialog.Content = grid;
+
+            findButton.Click += (s, args) =>
+            {
+                var searchText = searchTextBox.Text;
+                if (!string.IsNullOrEmpty(searchText) && ContentTextBox != null)
+                {
+                    var startIndex = ContentTextBox.CaretIndex;
+                    if (startIndex >= ContentTextBox.Text.Length)
+                        startIndex = 0;
+
+                    var index = ContentTextBox.Text.IndexOf(searchText, startIndex, StringComparison.OrdinalIgnoreCase);
+                    if (index == -1 && startIndex > 0)
+                    {
+                        index = ContentTextBox.Text.IndexOf(searchText, 0, StringComparison.OrdinalIgnoreCase);
+                    }
+
+                    if (index != -1)
+                    {
+                        ContentTextBox.Focus();
+                        ContentTextBox.SelectionStart = index;
+                        ContentTextBox.SelectionEnd = index + searchText.Length;
+                        ContentTextBox.CaretIndex = index + searchText.Length;
+
+                        // Ensure the selection is visible
+                        ContentTextBox.BringIntoView(new Rect(ContentTextBox.CaretIndex, 0, 1, 1));
+
+                        UpdateStatus($"Found '{searchText}'");
+                        findDialog.Close();
+                    }
+                    else
+                    {
+                        UpdateStatus($"Text '{searchText}' not found");
+                    }
+                }
+            };
+
+            cancelButton.Click += (s, args) => findDialog.Close();
+
+            searchTextBox.KeyDown += (s, args) =>
+            {
+                if (args.Key == Key.Enter)
+                {
+                    findButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                    args.Handled = true;
+                }
+                else if (args.Key == Key.Escape)
+                {
+                    findDialog.Close();
+                    args.Handled = true;
+                }
+            };
+
+            // Set initial focus to the search box
+            findDialog.Opened += (s, args) => searchTextBox.Focus();
+
+            await findDialog.ShowDialog(GetTopLevel());
+        }
+
+        private async void SaveAs_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel?.HasContent != true)
+                return;
+
+            TopLevel topLevel = GetTopLevel();
+            if (topLevel == null) return;
+
+            var filePickerSaveOptions = new FilePickerSaveOptions
+            {
+                Title = "Save Balatro Save Data",
+                DefaultExtension = "lua",
+                FileTypeChoices = new[]
+                {
+                    new FilePickerFileType("Lua Files (*.lua)") { Patterns = new[] { "*.lua" } },
+                    new FilePickerFileType("Text Files (*.txt)") { Patterns = new[] { "*.txt" } },
+                    new FilePickerFileType("All Files (*.*)") { Patterns = new[] { "*.*" } }
+                }
+            };
+
+            var file = await topLevel.StorageProvider.SaveFilePickerAsync(filePickerSaveOptions);
+            if (file != null)
+            {
+                try
+                {
+                    using var stream = await file.OpenWriteAsync();
+                    using var writer = new System.IO.StreamWriter(stream);
+
+                    var content = string.IsNullOrEmpty(ContentTextBox?.SelectedText)
+                        ? ContentTextBox?.Text
+                        : ContentTextBox?.SelectedText;
+
+                    if (!string.IsNullOrEmpty(content))
+                    {
+                        await writer.WriteAsync(content);
+                        UpdateStatus($"Content saved to {file.Name}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    UpdateStatus($"Error saving file: {ex.Message}");
+                }
+            }
+        }
+
+        private void UpdateStatus(string message)
+        {
+            if (StatusTextBlock != null)
+            {
+                StatusTextBlock.Text = message;
+            }
+        }
+
+        private TopLevel GetTopLevel()
+        {
+            return TopLevel.GetTopLevel(this);
         }
     }
 }

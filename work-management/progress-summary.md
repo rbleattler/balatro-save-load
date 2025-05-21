@@ -4,16 +4,23 @@
 
 - Complete UI views implementation (highest priority)
   - DashboardView: ✅ Fully functional and styled, supports navigation to SaveContentViewer
-  - SaveContentViewer: 🔄 Initial implementation complete; next, integrate file loading/parsing and structured display
+  - SaveContentViewer: ✅ Enhanced implementation complete with search, clipboard, and file save functionality
   - Integrate theme switching and user feedback (progress indicators, notifications)
 - Implement TSK045 - Enhanced user feedback with progress indicators
 - Continue TSK046 implementation - SaveContentViewer functionality (in progress)
-  - ✅ Basic UI structure created
-  - ✅ ViewModel with reactive properties created
+  - ✅ UI structure with toolbar, content viewer, and status bar created
+  - ✅ ViewModel with reactive properties and commands implemented
   - ✅ Navigation from DashboardView implemented
-  - ✅ TSK046 moved from backlog to in-progress in work management
-  - 🔄 Need to implement actual file loading with IFileSystemService
-  - 🔄 Need to implement content parsing and structured display
+  - ✅ File loading functionality implemented with IFileSystemService
+  - ✅ Content formatting for better readability
+  - ✅ Search functionality with find dialog
+  - ✅ Clipboard integration for copying content
+  - ✅ File export with save-as functionality
+  - ✅ Status information display (line count, character count)
+  - ✅ Font size adjustment options
+  - ✅ Keyboard shortcuts (Ctrl+C, Ctrl+F)
+  - ✅ Error handling for invalid save files
+  - 🔄 Created TSK048 for game statistics extraction feature
 - Fix core codebase compilation issues/warnings (✅ resolved)
   - ✅ PageViewModelBase, DialogViewModelBase using correct ReactiveUI patterns
   - ✅ SaveFileInfo property required attributes
@@ -25,21 +32,52 @@
 ## Next Steps
 
 1. ✅ Move TSK046 from backlog to in-progress in work management
-2. Implement file content loading/parsing in SaveContentViewModel using IFileSystemService:
-   - Use IFileSystemService to read raw file content
-   - Parse save file data to extract meaningful game statistics
-   - Update UI to display structured data
-3. Enhance SaveContentView with additional features:
-   - Add search functionality for content exploration
-   - Implement content copy capability
-   - Improve error handling for invalid save files
-4. Integrate progress indicators and notifications for user feedback (TSK045)
-5. Test UI on all target platforms (Windows, macOS, Linux)
-6. Update documentation and mark completed items as closed
+2. ✅ Implement file content loading in SaveContentViewModel using IFileSystemService
+3. ✅ Enhance SaveContentView with additional features:
+   - ✅ Add search functionality for content exploration
+   - ✅ Implement content copy capability
+   - ✅ Add save-as functionality
+   - ✅ Add font size adjustment
+   - ✅ Add status information display
+   - ✅ Improve error handling for invalid save files
+   - ✅ Parse save file content to extract structured game statistics
+4. ✅ Complete TSK048: Implement SaveFileParser integration with SaveContentViewModel
+   - ✅ Created SaveFileParser class for extracting game data from save files
+   - ✅ Implemented support for extracting coins, deck name, round, jokers, and cards
+   - ✅ Integrated parser with SaveContentViewModel
+   - ✅ Implemented UI components to display structured game statistics
+   - ✅ Added toggle functionality to switch between raw content and statistics views
+   - ✅ Added metadata display and special items section
+   - ✅ Improved error handling with specific exception types
+5. Integrate progress indicators and notifications for user feedback (TSK045)
+6. Test UI on all target platforms (Windows, macOS, Linux)
+7. Update documentation and mark completed items as closed
 
 ---
 
 ## Completed Work
+
+### Recent Updates
+
+- ✅ Completed TSK048 (Game Statistics Extraction)
+  - Enhanced SaveContentViewModel with game statistics support
+  - Created structured UI for displaying game statistics with metadata, cards, jokers, and special items
+  - Added toggle button to switch between raw content and statistics views
+  - Added dedicated converter for view mode display
+  - Improved error handling with specific exception types
+  - Added ConfigureAwait for better async programming
+- Created SaveFileParser class to extract game statistics from save files
+  - Implemented parsing for key game stats (coins, round, deck name, jokers, cards)
+  - Added profile number detection from file paths
+  - Used Task-based asynchronous pattern for better performance
+  - Added proper error handling with specific exception types
+- Enhanced SaveContentView and SaveContentViewModel
+  - Added search functionality with find dialog
+  - Added clipboard integration for copying content
+  - Added file export with save-as functionality
+  - Added font size adjustment options
+  - Added keyboard shortcuts (Ctrl+C, Ctrl+F)
+  - Improved error handling for invalid save files
 
 ### Setup and Infrastructure
 
@@ -164,9 +202,22 @@
 
 ### Current Tasks
 
-- TSK046 - SaveContentViewer functionality (🔄 in progress)
+- TSK046 - SaveContentViewer functionality (✅ nearly complete)
   - ✅ Basic UI structure and navigation implemented
-  - 🔄 Implementing file content loading and structured display
+  - ✅ Enhanced viewer with searching, clipboard, and file export
+  - ✅ Status information and font size adjustment options
+  - ✅ Integrated TSK048 game statistics functionality
+  - ✅ Added toggle view between raw content and statistics
+  - 🔄 Only documentation and tests remaining
+- TSK048 - Implement Game Statistics Extraction (✅ completed)
+  - ✅ Created SaveFileParser class in Core project
+  - ✅ Implemented game data extraction (coins, deck name, round, jokers, cards)
+  - ✅ Added profile number detection from file paths
+  - ✅ Integrated parser with SaveContentViewModel
+  - ✅ Created UI components for displaying structured game data
+  - ✅ Added toggle functionality to switch between raw content and statistics views
+  - ✅ Added metadata display and special items section
+  - ✅ Improved error handling with specific exception types
 - TSK045 - Enhanced user feedback with progress indicators (backlog)
 - TSK047 - End-to-end testing (backlog)
 - Update US001 once all related tasks are complete

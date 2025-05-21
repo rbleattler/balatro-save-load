@@ -90,8 +90,7 @@ internal partial class App : Application
 
         // Create host screen for routing
         var hostScreen = new HostScreen();
-        Locator.CurrentMutable.RegisterConstant<IScreen>(hostScreen);        // Register ViewModels
-        Locator.CurrentMutable.Register(() => new MainWindowViewModel());
+        Locator.CurrentMutable.RegisterConstant<IScreen>(hostScreen);        // Register ViewModels        Locator.CurrentMutable.Register(() => new MainWindowViewModel());
 
         // Use null checks to avoid possible null reference exceptions
         Locator.CurrentMutable.Register(() => {
@@ -99,6 +98,14 @@ internal partial class App : Application
             return screen != null
                 ? new DashboardViewModel(screen)
                 : new DashboardViewModel(new HostScreen());
+        });
+
+        // Register SaveContentViewModel
+        Locator.CurrentMutable.Register(() => {
+            var screen = Locator.Current.GetService<IScreen>();
+            return new SaveContentViewModel {
+                // Screen property would be set when navigating to this view
+            };
         });
 
         Locator.CurrentMutable.Register(() => {

@@ -30,6 +30,19 @@ All work items are stored as Markdown files following this pattern:
 
 The project includes scripts to help manage work items efficiently. These scripts are available in both Bash (for Linux/macOS) and PowerShell (for Windows) formats and are located in the `/work-management/scripts/` directory.
 
+### Script Overview
+
+- **new_work_item.sh / New-WorkItem.ps1**: Create new work items with proper formatting and ID assignment.
+- **move_to_open.sh / Move-ToOpen.ps1**: Move work items from backlog to open, update status, and parent references.
+- **move_to_closed.sh / Move-ToClosed.ps1**: Move work items from open to closed, update status, and parent references.
+- **clean_backlog.sh / Clean-Backlog.ps1**: Remove duplicate work items from backlog if they exist in open or closed.
+- **consolidate_work_items.sh / Consolidate-WorkItems.ps1**: Consolidate duplicate work items with the same ID but different names, merging content and standardizing filenames.
+- **find_duplicates.sh / Find-Duplicates.ps1**: Detect duplicate or near-duplicate work items by ID, name, or content similarity.
+- **work_status_report.sh / Get-WorkStatusReport.ps1**: Generate a status report of all work items, including counts and completion percentage.
+- **get_workitem.sh / Get-WorkItem.ps1**: Retrieve a work item by ID from the workspace.
+
+All scripts are self-documented and provide usage instructions via comments or help output. Use the Bash or PowerShell version as appropriate for your platform.
+
 ### Creating Work Items
 
 - **`new_work_item.sh`** / **`New-WorkItem.ps1`**: Creates new work items with proper formatting and automatically assigns the next available ID.

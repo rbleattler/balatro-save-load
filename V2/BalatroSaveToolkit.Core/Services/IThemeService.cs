@@ -11,7 +11,7 @@ namespace BalatroSaveToolkit.Core.Services
         /// <summary>
         /// Event fired when the theme changes.
         /// </summary>
-        event EventHandler<ThemeVariant> ThemeChanged;
+        event EventHandler<ThemeChangedEventArgs> ThemeChanged;
 
         /// <summary>
         /// Gets the current theme.

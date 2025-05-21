@@ -3,6 +3,8 @@ using System.Reactive;
 using System.Threading.Tasks;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using BalatroSaveToolkit.Core.Services;
+using Splat;
 
 namespace BalatroSaveToolkit.ViewModels
 {
@@ -26,10 +28,13 @@ namespace BalatroSaveToolkit.ViewModels
         [Reactive]
         public string? ErrorMessage { get; set; }
 
+        private readonly IFileSystemService _fileSystemService;
+
         public ReactiveCommand<Unit, Unit> LoadContentCommand { get; }
 
         public SaveContentViewModel()
         {
+            _fileSystemService = Locator.Current.GetService<IFileSystemService>()!;
             LoadContentCommand = ReactiveCommand.CreateFromTask(LoadContentAsync);
         }
 
@@ -44,10 +49,7 @@ namespace BalatroSaveToolkit.ViewModels
             ErrorMessage = null;
             try
             {
-                // TODO: Inject and use IFileSystemService for real file loading
-                // For now, simulate loading
-                await Task.Delay(300); // Simulate IO
-                // RawContent = await fileSystemService.GetSaveFileContentAsync(FilePath);
+                RawContent = await _fileSystemService.GetSaveFileContentAsync(FilePath);
                 DisplayContent = RawContent; // TODO: Format for display
             }
             catch (Exception ex)

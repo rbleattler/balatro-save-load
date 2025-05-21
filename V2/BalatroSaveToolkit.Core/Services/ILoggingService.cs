@@ -44,12 +44,11 @@ namespace BalatroSaveToolkit.Core.Services
         /// </summary>
         /// <param name="message">The message to log.</param>
         /// <param name="exception">The exception to log.</param>
-        void Warning(string message, Exception exception);
-
-        /// <summary>
+        void Warning(string message, Exception exception);        /// <summary>
         /// Logs an error message.
         /// </summary>
         /// <param name="message">The message to log.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:Identifiers should not match keywords", Justification = "Standard logging method name")]
         void Error(string message);
 
         /// <summary>
@@ -57,6 +56,7 @@ namespace BalatroSaveToolkit.Core.Services
         /// </summary>
         /// <param name="message">The message to log.</param>
         /// <param name="exception">The exception to log.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:Identifiers should not match keywords", Justification = "Standard logging method name")]
         void Error(string message, Exception exception);
     }
 }

@@ -1,5 +1,8 @@
 using System;
+using System.IO;
+using System.Security;
 using System.Threading.Tasks;
+using ReactiveUI;
 
 namespace BalatroSaveToolkit.Core.ViewModels
 {
@@ -19,7 +22,7 @@ namespace BalatroSaveToolkit.Core.ViewModels
         public string Title
         {
             get => _title;
-            protected set => SetProperty(ref _title, value);
+            protected set => this.RaiseAndSetIfChanged(ref _title, value);
         }
 
         /// <summary>
@@ -28,7 +31,7 @@ namespace BalatroSaveToolkit.Core.ViewModels
         public bool IsBusy
         {
             get => _isBusy;
-            protected set => SetProperty(ref _isBusy, value);
+            protected set => this.RaiseAndSetIfChanged(ref _isBusy, value);
         }
 
         /// <summary>
@@ -37,7 +40,7 @@ namespace BalatroSaveToolkit.Core.ViewModels
         public string StatusMessage
         {
             get => _statusMessage;
-            protected set => SetProperty(ref _statusMessage, value);
+            protected set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
         }
 
         /// <summary>
@@ -46,13 +49,14 @@ namespace BalatroSaveToolkit.Core.ViewModels
         public bool HasError
         {
             get => _hasError;
-            protected set => SetProperty(ref _hasError, value);
+            protected set => this.RaiseAndSetIfChanged(ref _hasError, value);
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PageViewModelBase"/> class.
         /// </summary>
-        protected PageViewModelBase()
+        /// <param name="hostScreen">The screen that will host this ViewModel</param>
+        protected PageViewModelBase(IScreen hostScreen) : base(hostScreen)
         {
         }
 
@@ -109,6 +113,8 @@ namespace BalatroSaveToolkit.Core.ViewModels
         /// <returns>A task that represents the asynchronous operation.</returns>
         protected async Task ExecuteWithBusyStateAsync(Func<Task> operation)
         {
+            ArgumentNullException.ThrowIfNull(operation);
+
             if (IsBusy)
             {
                 return;
@@ -119,11 +125,28 @@ namespace BalatroSaveToolkit.Core.ViewModels
 
             try
             {
-                await operation();
+                await operation().ConfigureAwait(false);
+            }
+            catch (InvalidOperationException ex)
+            {
+                SetErrorStatus($"Operation error: {ex.Message}");
+            }
+            catch (IOException ex)
+            {
+                SetErrorStatus($"File error: {ex.Message}");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                SetErrorStatus($"Access error: {ex.Message}");
+            }
+            catch (SecurityException ex)
+            {
+                SetErrorStatus($"Security error: {ex.Message}");
             }
             catch (Exception ex)
             {
                 SetErrorStatus($"Error: {ex.Message}");
+                throw; // Rethrow other exceptions
             }
             finally
             {
@@ -139,6 +162,8 @@ namespace BalatroSaveToolkit.Core.ViewModels
         /// <returns>The result of the operation.</returns>
         protected async Task<T> ExecuteWithBusyStateAsync<T>(Func<Task<T>> operation)
         {
+            ArgumentNullException.ThrowIfNull(operation);
+
             if (IsBusy)
             {
                 return default!;
@@ -149,12 +174,32 @@ namespace BalatroSaveToolkit.Core.ViewModels
 
             try
             {
-                return await operation();
+                return await operation().ConfigureAwait(false);
+            }
+            catch (InvalidOperationException ex)
+            {
+                SetErrorStatus($"Operation error: {ex.Message}");
+                return default!;
+            }
+            catch (IOException ex)
+            {
+                SetErrorStatus($"File error: {ex.Message}");
+                return default!;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                SetErrorStatus($"Access error: {ex.Message}");
+                return default!;
+            }
+            catch (SecurityException ex)
+            {
+                SetErrorStatus($"Security error: {ex.Message}");
+                return default!;
             }
             catch (Exception ex)
             {
                 SetErrorStatus($"Error: {ex.Message}");
-                return default!;
+                throw; // Rethrow other exceptions
             }
             finally
             {

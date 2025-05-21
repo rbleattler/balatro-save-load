@@ -20,7 +20,7 @@ namespace BalatroSaveToolkit.Core.ViewModels
         public string Title
         {
             get => _title;
-            protected set => SetProperty(ref _title, value);
+            protected set => this.RaiseAndSetIfChanged(ref _title, value);
         }
 
         /// <summary>
@@ -29,20 +29,21 @@ namespace BalatroSaveToolkit.Core.ViewModels
         public bool IsOpen
         {
             get => _isOpen;
-            set => SetProperty(ref _isOpen, value);
+            set => this.RaiseAndSetIfChanged(ref _isOpen, value);
         }
 
         /// <summary>
         /// Gets the command to close the dialog.
         /// </summary>
-        public ReactiveCommandWrapper<Unit, Unit> CloseCommand { get; }
+        public ReactiveCommand<Unit, Unit> CloseCommand { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DialogViewModelBase"/> class.
         /// </summary>
-        protected DialogViewModelBase()
+        /// <param name="hostScreen">The screen that will host this ViewModel</param>
+        protected DialogViewModelBase(IScreen hostScreen) : base(hostScreen)
         {
-            CloseCommand = CreateCommand(() => Close());
+            CloseCommand = ReactiveCommand.Create(() => Close());
         }
 
         /// <summary>

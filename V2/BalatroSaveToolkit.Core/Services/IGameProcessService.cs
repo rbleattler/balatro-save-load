@@ -10,7 +10,7 @@ namespace BalatroSaveToolkit.Core.Services
         /// <summary>
         /// Event fired when the Balatro process status changes.
         /// </summary>
-        event EventHandler<bool> BalatroProcessStatusChanged;
+        event EventHandler<GameProcessStatusEventArgs> BalatroProcessStatusChanged;
 
         /// <summary>
         /// Gets whether the Balatro process is currently running.

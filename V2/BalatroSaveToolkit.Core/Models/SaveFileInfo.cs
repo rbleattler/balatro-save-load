@@ -10,7 +10,7 @@ namespace BalatroSaveToolkit.Core.Services
         /// <summary>
         /// Gets or sets the full path to the save file.
         /// </summary>
-        public string FilePath { get; set; }
+        public required string FilePath { get; set; }
 
         /// <summary>
         /// Gets or sets the timestamp when the save was created.

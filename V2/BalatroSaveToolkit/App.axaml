@@ -9,14 +9,12 @@
 
     <Application.DataTemplates>
         <local:ViewLocator/>
-    </Application.DataTemplates>
-
-    <Application.Resources>
-        <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
-        <converters:GameStatusConverter x:Key="GameStatusConverter"/>
-        <converters:NotNullConverter x:Key="NotNullConverter"/>
-
+    </Application.DataTemplates>    <Application.Resources>
         <ResourceDictionary>
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+            <converters:GameStatusConverter x:Key="GameStatusConverter"/>
+            <converters:NotNullConverter x:Key="NotNullConverter"/>
+
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://BalatroSaveToolkit/Resources/IconResources.axaml"/>
             </ResourceDictionary.MergedDictionaries>

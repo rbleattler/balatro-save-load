@@ -7,6 +7,7 @@ InnoSetup/Output
 **\build_output.txt
 **\errors.txt
 **\warnings.txt
+.scratch
 
 # User-specific files
 *.rsuser

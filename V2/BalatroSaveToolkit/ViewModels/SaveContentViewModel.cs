@@ -41,7 +41,7 @@ namespace BalatroSaveToolkit.ViewModels
         [Reactive]
         public bool IsStatisticsViewActive { get; set; }
 
-        [Reactive]
+        // This shouldn't be marked as [Reactive] since it has no setter and is derived from another property
         public bool HasGameStats => GameStats != null;
 
         private readonly IFileSystemService _fileSystemService;

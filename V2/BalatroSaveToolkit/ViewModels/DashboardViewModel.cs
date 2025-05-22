@@ -58,12 +58,11 @@ namespace BalatroSaveToolkit.ViewModels
             {
                 // Subscribe to game process status changes
                 if (_gameProcessService != null)
-                {
-                    _gameProcessService.BalatroProcessStatusChanged += (sender, isRunning) =>
+                {                    _gameProcessService.BalatroProcessStatusChanged += (sender, args) =>
                     {
-                        IsGameRunning = isRunning;
-                        GameVersion = isRunning ? "Running" : "Not running";
-                        _loggingService?.Info($"Game status changed: {(isRunning ? "Running" : "Not running")}");
+                        IsGameRunning = args.IsRunning;
+                        GameVersion = args.IsRunning ? "Running" : "Not running";
+                        _loggingService?.Info($"Game status changed: {(args.IsRunning ? "Running" : "Not running")}");
                     };
 
                     // Check current status
@@ -302,12 +301,11 @@ namespace BalatroSaveToolkit.ViewModels
                 _notificationService?.ShowError("Security Error",
                     $"Security error when restoring save file: {ex.Message}");
             }
-        }
-
-        private void OnViewSaveContent(SaveFileViewModel? saveFile)
+        }        private void OnViewSaveContent(SaveFileViewModel? saveFile)
         {
             if (saveFile == null) return;
-            HostScreen.Router.Navigate.Execute(new SaveContentViewModel { FilePath = saveFile.FilePath });
+            var saveContentPageViewModel = new SaveContentPageViewModel(HostScreen, saveFile.FilePath);
+            HostScreen.Router.Navigate.Execute(saveContentPageViewModel);
         }
 
         private static int DetermineProfileNumber(string filePath)

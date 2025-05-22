@@ -8,20 +8,18 @@ namespace BalatroSaveToolkit.Services.Game
     /// <summary>
     /// Implementation of the game process service with platform-specific detection.
     /// </summary>
-    public class GameProcessService : IGameProcessService
+    public class GameProcessService : IGameProcessService, IDisposable
     {
-        private Timer _processCheckTimer;
+        private Timer? _processCheckTimer;
         private bool _isBalatroRunning;
         private readonly TimeSpan _checkInterval = TimeSpan.FromSeconds(2);
 
-        private WindowsProcessDetector _windowsDetector;
-        private MacOsProcessDetector _macOsDetector;
-        private LinuxProcessDetector _linuxDetector;
-
-        /// <summary>
+        private WindowsProcessDetector? _windowsDetector;
+        private MacOsProcessDetector? _macOsDetector;
+        private LinuxProcessDetector? _linuxDetector;        /// <summary>
         /// Event fired when the Balatro process status changes.
         /// </summary>
-        public event EventHandler<bool> BalatroProcessStatusChanged;
+        public event EventHandler<GameProcessStatusEventArgs> BalatroProcessStatusChanged = delegate { };
 
         /// <summary>
         /// Gets whether the Balatro process is currently running.
@@ -52,6 +50,25 @@ namespace BalatroSaveToolkit.Services.Game
         {
             _processCheckTimer?.Dispose();
             _processCheckTimer = null;
+        }        /// <summary>
+        /// Disposes resources used by the service.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Protected implementation of Dispose pattern.
+        /// </summary>
+        /// <param name="disposing">Whether this is being called from Dispose() or the finalizer.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                StopProcessCheck();
+            }
         }
 
         private void InitializePlatformDetector()
@@ -74,7 +91,7 @@ namespace BalatroSaveToolkit.Services.Game
             }
         }
 
-        private void CheckProcess(object state)
+        private void CheckProcess(object? state)
         {
             bool isRunning = false;
 
@@ -82,28 +99,33 @@ namespace BalatroSaveToolkit.Services.Game
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    isRunning = _windowsDetector.IsBalatroRunning();
+                    isRunning = _windowsDetector?.IsBalatroRunning() ?? false;
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    isRunning = _macOsDetector.IsBalatroRunning();
+                    isRunning = _macOsDetector?.IsBalatroRunning() ?? false;
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-                    isRunning = _linuxDetector.IsBalatroRunning();
+                    isRunning = _linuxDetector?.IsBalatroRunning() ?? false;
                 }
 
                 // Only raise the event if the status has changed
                 if (isRunning != _isBalatroRunning)
                 {
                     _isBalatroRunning = isRunning;
-                    BalatroProcessStatusChanged?.Invoke(this, _isBalatroRunning);
+                    BalatroProcessStatusChanged?.Invoke(this, new GameProcessStatusEventArgs(isRunning));
                 }
             }
-            catch (Exception)
+            catch (InvalidOperationException ex)
             {
-                // Ignore exceptions during process checking
-                // This ensures that temporary issues don't break the application
+                // Log the exception but don't crash the app
+                System.Diagnostics.Debug.WriteLine($"Error checking process status: {ex.Message}");
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                // Catch specific exceptions but not critical ones
+                System.Diagnostics.Debug.WriteLine($"Unexpected error checking process: {ex.Message}");
             }
         }
     }

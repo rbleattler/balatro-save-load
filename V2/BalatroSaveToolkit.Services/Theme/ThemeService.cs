@@ -22,7 +22,7 @@ namespace BalatroSaveToolkit.Services.Theme
         /// <summary>
         /// Event fired when the theme changes.
         /// </summary>
-        public event EventHandler<ThemeVariant>? ThemeChanged;
+        public event EventHandler<ThemeChangedEventArgs> ThemeChanged = delegate { };
 
         /// <summary>
         /// Gets the current theme.
@@ -33,6 +33,15 @@ namespace BalatroSaveToolkit.Services.Theme
         /// Gets whether the system is currently in dark mode.
         /// </summary>
         public bool IsSystemInDarkMode { get; private set; }
+
+        /// <summary>
+        /// Gets or sets whether to follow the system theme.
+        /// </summary>
+        public bool FollowSystemTheme
+        {
+            get => _followSystemTheme;
+            set => SetFollowSystemTheme(value);
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ThemeService"/> class.
@@ -88,7 +97,7 @@ namespace BalatroSaveToolkit.Services.Theme
                 if (_currentTheme != newTheme)
                 {
                     _currentTheme = newTheme;
-                    ThemeChanged?.Invoke(this, _currentTheme);
+                    ThemeChanged?.Invoke(this, new ThemeChangedEventArgs(_currentTheme));
                 }
             }
         }
@@ -108,7 +117,7 @@ namespace BalatroSaveToolkit.Services.Theme
                 if (_currentTheme != systemTheme)
                 {
                     _currentTheme = systemTheme;
-                    ThemeChanged?.Invoke(this, _currentTheme);
+                    ThemeChanged?.Invoke(this, new ThemeChangedEventArgs(_currentTheme));
                 }
             }
             else
@@ -117,7 +126,7 @@ namespace BalatroSaveToolkit.Services.Theme
                 if (_currentTheme != userTheme)
                 {
                     _currentTheme = userTheme;
-                    ThemeChanged?.Invoke(this, _currentTheme);
+                    ThemeChanged?.Invoke(this, new ThemeChangedEventArgs(_currentTheme));
                 }
             }
         }
@@ -135,7 +144,7 @@ namespace BalatroSaveToolkit.Services.Theme
                 if (_currentTheme != newTheme)
                 {
                     _currentTheme = newTheme;
-                    ThemeChanged?.Invoke(this, _currentTheme);
+                    ThemeChanged?.Invoke(this, new ThemeChangedEventArgs(_currentTheme));
                 }
             }
         }

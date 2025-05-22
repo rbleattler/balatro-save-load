@@ -3,18 +3,55 @@ using System.Reactive;
 using BalatroSaveToolkit.Core.Services;
 using ReactiveUI;
 using Avalonia.Styling;
+using Splat;
 
 namespace BalatroSaveToolkit.ViewModels
-{
-    /// <summary>
+{    /// <summary>
     /// View model for theme selection and management.
     /// </summary>
-    public class ThemeSettingsViewModel : ReactiveObject
+    class ThemeSettingsViewModel : ViewModelBase
     {
         private readonly IThemeService _themeService;
         private readonly ISettingsService _settingsService;
         private bool _useDarkTheme;
         private bool _followSystemTheme;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ThemeSettingsViewModel"/> class.
+    /// </summary>
+    /// <param name="themeService">The theme service.</param>
+    /// <param name="settingsService">The settings service.</param>
+    /// <param name="hostScreen">The screen that will host this ViewModel.</param>
+    public ThemeSettingsViewModel(IThemeService themeService, ISettingsService settingsService, IScreen hostScreen)
+        : base(hostScreen)
+    {
+        _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
+        _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+
+        // Initialize properties
+        _useDarkTheme = _themeService.CurrentTheme == ThemeVariant.Dark;
+        _followSystemTheme = _themeService.FollowSystemTheme;
+
+        // Initialize command
+        ApplyThemeCommand = ReactiveCommand.Create(() =>
+        {
+            ApplyTheme();
+            return Unit.Default;
+        });
+
+        // Monitor property changes but don't auto-apply
+        this.WhenAnyValue(x => x.UseDarkTheme)
+            .Subscribe(value =>
+            {
+                _settingsService.UseDarkTheme = value;
+            });
+
+        this.WhenAnyValue(x => x.FollowSystemTheme)
+            .Subscribe(value =>
+            {
+                _settingsService.UseSystemTheme = value;
+            });
+    }
 
         /// <summary>
         /// Gets or sets whether to use the dark theme.
@@ -39,38 +76,7 @@ namespace BalatroSaveToolkit.ViewModels
         /// </summary>
         public ReactiveCommand<Unit, Unit> ApplyThemeCommand { get; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ThemeSettingsViewModel"/> class.
-        /// </summary>
-        /// <param name="themeService">The theme service.</param>
-        /// <param name="settingsService">The settings service.</param>
-        public ThemeSettingsViewModel(IThemeService themeService, ISettingsService settingsService)
-        {
-            _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
-            _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
-
-            // Initialize from settings
-            _useDarkTheme = _settingsService.UseDarkTheme;
-            _followSystemTheme = _settingsService.UseSystemTheme;            // Create commands with return value - ReactiveUI requires Unit.Default as a return value
-            ApplyThemeCommand = ReactiveCommand.Create(() =>
-            {
-                ApplyTheme();
-                return Unit.Default;
-            });
-
-            // Monitor property changes but don't auto-apply
-            this.WhenAnyValue(x => x.UseDarkTheme)
-                .Subscribe(value =>
-                {
-                    _settingsService.UseDarkTheme = value;
-                });
-
-            this.WhenAnyValue(x => x.FollowSystemTheme)
-                .Subscribe(value =>
-                {
-                    _settingsService.UseSystemTheme = value;
-                });
-        }        private void ApplyTheme()
+        private void ApplyTheme()
         {
             try
             {

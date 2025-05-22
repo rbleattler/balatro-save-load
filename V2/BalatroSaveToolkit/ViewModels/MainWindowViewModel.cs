@@ -11,11 +11,10 @@ using ReactiveUI;
 using Splat;
 
 namespace BalatroSaveToolkit.ViewModels
-{
-    /// <summary>
+{    /// <summary>
     /// ViewModel for the main window.
     /// </summary>
-    internal class MainWindowViewModel : ReactiveObject, IScreen, IActivatableViewModel
+    internal sealed class MainWindowViewModel : ReactiveObject, IScreen, IActivatableViewModel
     {
         private readonly IThemeService? _themeService;
         private readonly IGameProcessService? _gameProcessService;
@@ -58,10 +57,9 @@ namespace BalatroSaveToolkit.ViewModels
 
                 // Subscribe to Balatro process status changes
                 if (_gameProcessService != null)
-                {
-                    _gameProcessService.BalatroProcessStatusChanged += (sender, isRunning) =>
+                {                    _gameProcessService.BalatroProcessStatusChanged += (sender, args) =>
                     {
-                        IsGameRunning = isRunning;
+                        IsGameRunning = args.IsRunning;
                     };
 
                     // Start the process check
@@ -148,9 +146,8 @@ namespace BalatroSaveToolkit.ViewModels
         private void NavigateToSettings()
         {
             if (_themeService != null && _settingsService != null)
-            {
-                var settingsViewModel = new ThemeSettingsViewModel(_themeService, _settingsService);
-                Router.Navigate.Execute(settingsViewModel);
+            {                var settingsPageViewModel = new ThemeSettingsPageViewModel(this, _themeService, _settingsService);
+                Router.Navigate.Execute(settingsPageViewModel);
             }
         }
 

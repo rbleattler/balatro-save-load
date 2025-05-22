@@ -101,9 +101,7 @@ namespace BalatroSaveToolkit.Services.Notifications
         {
             _loggingService?.Error($"Error: {title} - {message}");
             _notificationManager?.Show(new Notification(title, message, NotificationType.Error, TimeSpan.FromMilliseconds(durationMs)));
-        }
-
-        /// <summary>
+        }        /// <summary>
         /// Shows a confirmation dialog.
         /// </summary>
         /// <param name="title">The title of the dialog.</param>
@@ -111,26 +109,58 @@ namespace BalatroSaveToolkit.Services.Notifications
         /// <returns>True if confirmed, false otherwise.</returns>
         public async Task<bool> ShowConfirmationAsync(string title, string message)
         {
-            _loggingService?.Info($"Confirmation dialog: {title} - {message}");
-
-            var window = Locator.Current.GetService<Window>();
+            _loggingService?.Info($"Confirmation dialog: {title} - {message}");            var window = Locator.Current.GetService<Window>();
             if (window == null)
             {
                 return false;
             }
 
-            var dialog = new TaskDialog
+            // Create a simple confirmation dialog using Window API
+            var dialog = new Window
             {
                 Title = title,
-                Content = new TextBlock { Text = message },
-                Buttons = {
-                    new TaskDialogButton { Text = "Yes", IsDefault = true },
-                    new TaskDialogButton { Text = "No", IsCancel = true }
-                }
+                Width = 400,
+                Height = 150,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Content = new StackPanel()
             };
 
-            var result = await dialog.ShowAsync();
-            return result?.Text == "Yes";
+            var contentPanel = (StackPanel)dialog.Content!;
+            contentPanel.Children.Add(new TextBlock { Text = message, Margin = new Avalonia.Thickness(10) });
+
+            var buttonPanel = new StackPanel
+            {
+                Orientation = Avalonia.Layout.Orientation.Horizontal,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                Margin = new Avalonia.Thickness(10)
+            };
+
+            var yesButton = new Button { Content = "Yes", Margin = new Avalonia.Thickness(5, 0) };
+            yesButton.Tag = true;
+
+            var noButton = new Button { Content = "No", Margin = new Avalonia.Thickness(5, 0) };
+            noButton.Tag = false;
+
+            buttonPanel.Children.Add(yesButton);
+            buttonPanel.Children.Add(noButton);
+            contentPanel.Children.Add(buttonPanel);            // Set up button event handlers
+            var dialogResult = new TaskCompletionSource<bool>();
+
+            yesButton.Click += (s, e) =>
+            {
+                dialogResult.SetResult(true);
+                dialog.Close();
+            };
+
+            noButton.Click += (s, e) =>
+            {
+                dialogResult.SetResult(false);
+                dialog.Close();
+            };
+
+            // Show dialog
+            await dialog.ShowDialog(window).ConfigureAwait(false);
+            return await dialogResult.Task.ConfigureAwait(false);
         }
     }
 }

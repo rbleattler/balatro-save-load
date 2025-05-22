@@ -1,6 +1,7 @@
 using Avalonia.ReactiveUI;
 using Avalonia.Input;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using BalatroSaveToolkit.ViewModels;
 using BalatroSaveToolkit.Views;
 using ReactiveUI;

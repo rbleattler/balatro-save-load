@@ -12,7 +12,7 @@ namespace BalatroSaveToolkit.Views
     /// <summary>
     /// View for theme settings.
     /// </summary>
-    public partial class ThemeSettingsView : ReactiveUserControl<ThemeSettingsViewModel>
+    partial class ThemeSettingsView : ReactiveUserControl<ThemeSettingsViewModel>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ThemeSettingsView"/> class.
@@ -25,11 +25,14 @@ namespace BalatroSaveToolkit.Views
             if (DataContext == null)
             {
                 var themeService = Locator.Current.GetService<IThemeService>();
-                var settingsService = Locator.Current.GetService<ISettingsService>();
-
-                if (themeService != null && settingsService != null)
+                var settingsService = Locator.Current.GetService<ISettingsService>();                if (themeService != null && settingsService != null)
                 {
-                    DataContext = new ThemeSettingsViewModel(themeService, settingsService);
+                    // Get the host screen
+                    var hostScreen = Locator.Current.GetService<IScreen>();
+                    if (hostScreen != null)
+                    {
+                        DataContext = new ThemeSettingsViewModel(themeService, settingsService, hostScreen);
+                    }
                 }
             }
         }

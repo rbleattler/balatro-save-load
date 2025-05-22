@@ -300,5 +300,32 @@ namespace BalatroSaveToolkit.Services.FileSystem
         {
             return await File.ReadAllTextAsync(filePath);
         }
+
+        /// <inheritdoc/>
+        public string BackupSaveFile(int profileNumber)
+        {
+            var backupPath = GetBackupFilePath(profileNumber, DateTime.Now);
+            var currentPath = GetCurrentSaveFilePath(profileNumber);
+            if (!File.Exists(currentPath))
+            {
+                throw new FileNotFoundException("Save file not found", currentPath);
+            }
+            var data = File.ReadAllBytes(currentPath);
+            File.WriteAllBytes(backupPath, data);
+            return backupPath;
+        }
+
+        /// <inheritdoc/>
+        public bool RestoreSaveFile(string backupFilePath, int profileNumber)
+        {
+            if (!File.Exists(backupFilePath))
+            {
+                return false;
+            }
+            var data = File.ReadAllBytes(backupFilePath);
+            var currentPath = GetCurrentSaveFilePath(profileNumber);
+            File.WriteAllBytes(currentPath, data);
+            return true;
+        }
     }
 }

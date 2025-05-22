@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BalatroSaveToolkit.Core", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BalatroSaveToolkit.Services", "BalatroSaveToolkit.Services\BalatroSaveToolkit.Services.csproj", "{0D2DE02C-E8E6-45A8-A58E-CE6872B9ED41}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BalatroSaveToolkit.Tests", "BalatroSaveToolkit.Tests\BalatroSaveToolkit.Tests.csproj", "{423FBD11-F718-4F8F-AC6D-5C40411B1996}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,9 +30,5 @@ Global
 		{0D2DE02C-E8E6-45A8-A58E-CE6872B9ED41}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D2DE02C-E8E6-45A8-A58E-CE6872B9ED41}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D2DE02C-E8E6-45A8-A58E-CE6872B9ED41}.Release|Any CPU.Build.0 = Release|Any CPU
-		{423FBD11-F718-4F8F-AC6D-5C40411B1996}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{423FBD11-F718-4F8F-AC6D-5C40411B1996}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{423FBD11-F718-4F8F-AC6D-5C40411B1996}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{423FBD11-F718-4F8F-AC6D-5C40411B1996}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

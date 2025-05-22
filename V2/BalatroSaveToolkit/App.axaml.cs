@@ -20,10 +20,11 @@ using BalatroSaveToolkit.Theme;
 using BalatroSaveToolkit.ViewModels;
 using BalatroSaveToolkit.Views;
 using ReactiveUI;
+using Splat;
 
 namespace BalatroSaveToolkit;
 
-internal partial class App : Application
+internal sealed partial class App : Application
 {
     public override void Initialize()
     {
@@ -41,10 +42,9 @@ internal partial class App : Application
         var themeService = Locator.Current.GetService<IThemeService>();
         if (themeService != null)
         {
-            themeService.Initialize();
-            themeService.ThemeChanged += (sender, theme) =>
+            themeService.Initialize();            themeService.ThemeChanged += (sender, args) =>
             {
-                ThemeManager.ApplyTheme(this, theme == Avalonia.Styling.ThemeVariant.Dark);
+                ThemeManager.ApplyTheme(this, args.Theme == Avalonia.Styling.ThemeVariant.Dark);
             };
 
             // Apply initial theme
@@ -86,11 +86,13 @@ internal partial class App : Application
         Locator.CurrentMutable.RegisterConstant<IThemeService>(themeService);
         Locator.CurrentMutable.RegisterConstant<IGameProcessService>(gameProcessService);
         Locator.CurrentMutable.RegisterConstant<ILoggingService>(loggingService);
-        Locator.CurrentMutable.RegisterConstant<INotificationService>(notificationService);
-
-        // Create host screen for routing
+        Locator.CurrentMutable.RegisterConstant<INotificationService>(notificationService);        // Create host screen for routing
         var hostScreen = new HostScreen();
-        Locator.CurrentMutable.RegisterConstant<IScreen>(hostScreen);        // Register ViewModels        Locator.CurrentMutable.Register(() => new MainWindowViewModel());
+        Locator.CurrentMutable.RegisterConstant<IScreen>(hostScreen);
+
+        // Create and register the MainWindowViewModel (using RegisterConstant to fix CA1812 warning)
+        var mainWindowViewModel = new MainWindowViewModel();
+        Locator.CurrentMutable.RegisterConstant(mainWindowViewModel);
 
         // Use null checks to avoid possible null reference exceptions
         Locator.CurrentMutable.Register(() => {
@@ -106,14 +108,13 @@ internal partial class App : Application
             return new SaveContentViewModel {
                 // Screen property would be set when navigating to this view
             };
-        });
-
-        Locator.CurrentMutable.Register(() => {
+        });        Locator.CurrentMutable.Register(() => {
             var themeService = Locator.Current.GetService<IThemeService>();
             var settingsService = Locator.Current.GetService<ISettingsService>();
+            var hostScreen = Locator.Current.GetService<IScreen>();
 
-            if (themeService != null && settingsService != null)
-                return new ThemeSettingsViewModel(themeService, settingsService);
+            if (themeService != null && settingsService != null && hostScreen != null)
+                return new ThemeSettingsViewModel(themeService, settingsService, hostScreen);
 
             throw new InvalidOperationException("Required services not available for ThemeSettingsViewModel");
         });
@@ -149,7 +150,7 @@ internal partial class App : Application
 }
 
 // Simple host screen implementation for ReactiveUI routing
-internal class HostScreen : IScreen
+internal sealed class HostScreen : IScreen
 {
     public RoutingState Router { get; } = new RoutingState();
 }

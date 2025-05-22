@@ -1,4 +1,5 @@
 ﻿using BalatroSaveToolkit.Core.ViewModels;
+using ReactiveUI;
 
 namespace BalatroSaveToolkit.ViewModels
 {
@@ -11,7 +12,8 @@ namespace BalatroSaveToolkit.ViewModels
     /// <summary>
     /// Initializes a new instance of the <see cref="ViewModelBase"/> class.
     /// </summary>
-    protected ViewModelBase() : base()
+    /// <param name="hostScreen">The screen that will host this ViewModel</param>
+    protected ViewModelBase(IScreen hostScreen) : base(hostScreen)
     {
     }
   }

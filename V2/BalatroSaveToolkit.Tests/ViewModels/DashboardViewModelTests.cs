@@ -24,7 +24,7 @@ namespace BalatroSaveToolkit.Tests.ViewModels
         {
             // Store original Splat resolver for cleanup
             _originalResolver = Locator.CurrentMutable;
-            _originalDependencyResolver = Locator.Current;
+            _originalDependencyResolver = (IDependencyResolver?)Locator.Current!;
 
             // Create a new dependency resolver for testing
             var resolver = new ModernDependencyResolver();

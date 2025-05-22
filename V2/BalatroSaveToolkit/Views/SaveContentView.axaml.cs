@@ -14,8 +14,10 @@ namespace BalatroSaveToolkit.Views
     public partial class SaveContentView : UserControl
     {
         private SaveContentViewModel ViewModel => DataContext as SaveContentViewModel;
-        private TextBox ContentTextBox => this.FindControl<TextBox>("ContentTextBox");
-        private TextBlock StatusTextBlock => this.FindControl<TextBlock>("StatusTextBlock");
+
+        // Use accessor methods instead of properties to avoid name conflicts with auto-generated fields
+        private TextBox GetContentTextBox() => this.FindControl<TextBox>("ContentTextBox");
+        private TextBlock GetStatusTextBlock() => this.FindControl<TextBlock>("StatusTextBlock");
 
         public SaveContentView()
         {
@@ -35,9 +37,10 @@ namespace BalatroSaveToolkit.Views
             {
                 // If there's a selection, let the TextBox handle it
                 // If there's no selection, copy all text
-                if (string.IsNullOrEmpty(ContentTextBox?.SelectedText))
+                var contentTextBox = GetContentTextBox();
+                if (string.IsNullOrEmpty(contentTextBox?.SelectedText))
                 {
-                    CopyContentToClipboard(ContentTextBox?.Text);
+                    CopyContentToClipboard(contentTextBox?.Text);
                     UpdateStatus("All content copied to clipboard");
                     e.Handled = true; // Prevent default handling
                 }
@@ -52,18 +55,20 @@ namespace BalatroSaveToolkit.Views
 
         private void CopySelected_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(ContentTextBox?.SelectedText))
+            var contentTextBox = GetContentTextBox();
+            if (!string.IsNullOrEmpty(contentTextBox?.SelectedText))
             {
-                CopyContentToClipboard(ContentTextBox.SelectedText);
+                CopyContentToClipboard(contentTextBox.SelectedText);
                 UpdateStatus("Selected text copied to clipboard");
             }
         }
 
         private void CopyAll_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel?.HasContent == true && !string.IsNullOrEmpty(ContentTextBox?.Text))
+            var contentTextBox = GetContentTextBox();
+            if (ViewModel?.HasContent == true && !string.IsNullOrEmpty(contentTextBox?.Text))
             {
-                CopyContentToClipboard(ContentTextBox.Text);
+                CopyContentToClipboard(contentTextBox.Text);
                 UpdateStatus("All content copied to clipboard");
             }
         }
@@ -74,7 +79,11 @@ namespace BalatroSaveToolkit.Views
 
             try
             {
-                await Application.Current.Clipboard.SetTextAsync(text);
+                var topLevel = TopLevel.GetTopLevel(this);
+                if (topLevel != null)
+                {
+                    await topLevel.Clipboard.SetTextAsync(text);
+                }
             }
             catch (Exception ex)
             {
@@ -86,19 +95,19 @@ namespace BalatroSaveToolkit.Views
         {
             if (sender is ComboBox comboBox && comboBox.SelectedItem is ComboBoxItem selectedItem)
             {
-                if (int.TryParse(selectedItem.Content?.ToString(), out var fontSize) && ContentTextBox != null)
+                var contentTextBox = GetContentTextBox();
+                if (int.TryParse(selectedItem.Content?.ToString(), out var fontSize) && contentTextBox != null)
                 {
-                    ContentTextBox.FontSize = fontSize;
+                    contentTextBox.FontSize = fontSize;
                 }
             }
         }
 
         private async void Find_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel?.HasContent != true || string.IsNullOrEmpty(ContentTextBox?.Text))
-                return;
-
-            // Create a find dialog
+            var contentTextBox = GetContentTextBox();
+            if (ViewModel?.HasContent != true || string.IsNullOrEmpty(contentTextBox?.Text))
+                return;            // Create a find dialog
             var findDialog = new Window
             {
                 Title = "Find Text",
@@ -107,14 +116,12 @@ namespace BalatroSaveToolkit.Views
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 SizeToContent = SizeToContent.Height,
                 CanResize = false
-            };
-
-            // Set the owner if we're in a desktop app
-            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            };            // Set dialog properties
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime)
             {
                 findDialog.ShowInTaskbar = false;
                 findDialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                findDialog.Owner = desktop.MainWindow;
+                // In Avalonia we don't need to set the owner explicitly for ShowDialog
             }
 
             var grid = new Grid();
@@ -123,14 +130,14 @@ namespace BalatroSaveToolkit.Views
 
             var searchPanel = new StackPanel
             {
-                Orientation = Orientation.Horizontal,
+                Orientation = Avalonia.Layout.Orientation.Horizontal,
                 Margin = new Thickness(10)
             };
 
             var searchLabel = new TextBlock
             {
                 Text = "Search for:",
-                VerticalAlignment = VerticalAlignment.Center,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
                 Margin = new Thickness(0, 0, 10, 0)
             };
 
@@ -145,8 +152,8 @@ namespace BalatroSaveToolkit.Views
 
             var buttonPanel = new StackPanel
             {
-                Orientation = Orientation.Horizontal,
-                HorizontalAlignment = HorizontalAlignment.Right,
+                Orientation = Avalonia.Layout.Orientation.Horizontal,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
                 Margin = new Thickness(10)
             };
 
@@ -172,32 +179,31 @@ namespace BalatroSaveToolkit.Views
             grid.Children.Add(searchPanel);
             grid.Children.Add(buttonPanel);
 
-            findDialog.Content = grid;
-
-            findButton.Click += (s, args) =>
+            findDialog.Content = grid;            findButton.Click += (s, args) =>
             {
                 var searchText = searchTextBox.Text;
-                if (!string.IsNullOrEmpty(searchText) && ContentTextBox != null)
+                var contentTextBox = GetContentTextBox();
+                if (!string.IsNullOrEmpty(searchText) && contentTextBox != null)
                 {
-                    var startIndex = ContentTextBox.CaretIndex;
-                    if (startIndex >= ContentTextBox.Text.Length)
+                    var startIndex = contentTextBox.CaretIndex;
+                    if (startIndex >= contentTextBox.Text.Length)
                         startIndex = 0;
 
-                    var index = ContentTextBox.Text.IndexOf(searchText, startIndex, StringComparison.OrdinalIgnoreCase);
+                    var index = contentTextBox.Text.IndexOf(searchText, startIndex, StringComparison.OrdinalIgnoreCase);
                     if (index == -1 && startIndex > 0)
                     {
-                        index = ContentTextBox.Text.IndexOf(searchText, 0, StringComparison.OrdinalIgnoreCase);
+                        index = contentTextBox.Text.IndexOf(searchText, 0, StringComparison.OrdinalIgnoreCase);
                     }
 
                     if (index != -1)
                     {
-                        ContentTextBox.Focus();
-                        ContentTextBox.SelectionStart = index;
-                        ContentTextBox.SelectionEnd = index + searchText.Length;
-                        ContentTextBox.CaretIndex = index + searchText.Length;
+                        contentTextBox.Focus();
+                        contentTextBox.SelectionStart = index;
+                        contentTextBox.SelectionEnd = index + searchText.Length;
+                        contentTextBox.CaretIndex = index + searchText.Length;
 
                         // Ensure the selection is visible
-                        ContentTextBox.BringIntoView(new Rect(ContentTextBox.CaretIndex, 0, 1, 1));
+                        contentTextBox.BringIntoView(new Rect(contentTextBox.CaretIndex, 0, 1, 1));
 
                         UpdateStatus($"Found '{searchText}'");
                         findDialog.Close();
@@ -226,12 +232,26 @@ namespace BalatroSaveToolkit.Views
             };
 
             // Set initial focus to the search box
-            findDialog.Opened += (s, args) => searchTextBox.Focus();
-
-            await findDialog.ShowDialog(GetTopLevel());
-        }
-
-        private async void SaveAs_Click(object sender, RoutedEventArgs e)
+            findDialog.Opened += (s, args) => searchTextBox.Focus();            var topLevel = GetTopLevel();
+            if (topLevel is Window parentWindow)
+            {
+                await findDialog.ShowDialog(parentWindow);
+            }
+            else
+            {
+                // If we can't get a proper Window reference, try to get the main window
+                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop &&
+                    desktop.MainWindow != null)
+                {
+                    await findDialog.ShowDialog(desktop.MainWindow);
+                }
+                else
+                {
+                    // Log error - no parent window found
+                    throw new InvalidOperationException("Cannot show dialog: No parent window found");
+                }
+            }
+        }        private async void SaveAs_Click(object sender, RoutedEventArgs e)
         {
             if (ViewModel?.HasContent != true)
                 return;
@@ -259,9 +279,10 @@ namespace BalatroSaveToolkit.Views
                     using var stream = await file.OpenWriteAsync();
                     using var writer = new System.IO.StreamWriter(stream);
 
-                    var content = string.IsNullOrEmpty(ContentTextBox?.SelectedText)
-                        ? ContentTextBox?.Text
-                        : ContentTextBox?.SelectedText;
+                    var contentTextBox = GetContentTextBox();
+                    var content = string.IsNullOrEmpty(contentTextBox?.SelectedText)
+                        ? contentTextBox?.Text
+                        : contentTextBox?.SelectedText;
 
                     if (!string.IsNullOrEmpty(content))
                     {
@@ -274,13 +295,12 @@ namespace BalatroSaveToolkit.Views
                     UpdateStatus($"Error saving file: {ex.Message}");
                 }
             }
-        }
-
-        private void UpdateStatus(string message)
+        }        private void UpdateStatus(string message)
         {
-            if (StatusTextBlock != null)
+            var statusTextBlock = GetStatusTextBlock();
+            if (statusTextBlock != null)
             {
-                StatusTextBlock.Text = message;
+                statusTextBlock.Text = message;
             }
         }
 

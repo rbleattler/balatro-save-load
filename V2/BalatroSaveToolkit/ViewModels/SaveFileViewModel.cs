@@ -8,7 +8,7 @@ namespace BalatroSaveToolkit.ViewModels
     /// <summary>
     /// ViewModel for a save file.
     /// </summary>
-    internal class SaveFileViewModel : ReactiveObject
+    public class SaveFileViewModel : ReactiveObject
     {
         private readonly ObservableAsPropertyHelper<string> _displayName;
         private readonly ObservableAsPropertyHelper<string> _formattedFileSize;

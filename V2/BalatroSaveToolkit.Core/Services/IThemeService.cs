@@ -24,6 +24,11 @@ namespace BalatroSaveToolkit.Core.Services
         bool IsSystemInDarkMode { get; }
 
         /// <summary>
+        /// Gets or sets whether to follow the system theme.
+        /// </summary>
+        bool FollowSystemTheme { get; }
+
+        /// <summary>
         /// Sets the theme to light or dark.
         /// </summary>
         /// <param name="isDark">True for dark theme, false for light theme.</param>

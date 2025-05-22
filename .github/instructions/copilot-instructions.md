@@ -21,9 +21,6 @@ This repository contains a migration project to convert the Balatro Save and Loa
 - **DI Container**: Splat
 - **Target Platforms**: Windows, macOS, Linux
 
-## Work Management System
-
-All work is handled via the work management system using hierarchical items (Epics, Features, User Stories, Tasks). Always work on the highest priority tasks as indicated in the progress summary. **YOU MUST** Follow the guidance in `work-management/README.md` for creating and managing work items.
 
 ## Rules for Contributors
 
@@ -34,5 +31,3 @@ All work is handled via the work management system using hierarchical items (Epi
 5. Write cross-platform compatible code
 6. Update documentation when adding features or making architectural changes
 7. Use the scripts in `V2/scripts` for building and testing
-
-**MANDATORY**: After completing work items, update `work-management/progress-summary.md` with your changes so the next contributor can continue seamlessly.

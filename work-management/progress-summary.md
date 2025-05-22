@@ -19,6 +19,7 @@
   - ✅ Fixed ReactiveUI routing with proper wrapper ViewModels for navigation
   - ✅ Fixed dependency injection using Splat's IReadonlyDependencyResolver
 - Implement TSK045 - Enhanced user feedback with progress indicators
+- ✅ Completed TSK050 - Codebase cleanup (removed backup files, evaluated wrapper views)
 - Continue TSK046 implementation - SaveContentViewer functionality (in progress)
   - ✅ UI structure with toolbar, content viewer, and status bar created
   - ✅ ViewModel with reactive properties and commands implemented
@@ -48,7 +49,13 @@
 
 ## Recent Code Fixes
 
-1. Addressed code analysis warnings (TSK049):
+1. Completed codebase cleanup (TSK050):
+   - Removed backup files (.bak) that were no longer needed
+   - Evaluated wrapper views (SaveContentPageView, ThemeSettingsPageView) and confirmed they are properly integrated with ReactiveUI navigation
+   - Verified no BalatroSaveToolkit.UI directory exists in the codebase
+   - Confirmed build succeeds after cleanup
+
+2. Addressed code analysis warnings (TSK049):
    - Marked internal classes as sealed (SaveContentPageViewModel, ThemeSettingsPageViewModel, MainWindowViewModel, App, HostScreen)
    - Fixed MainWindowViewModel instantiation warning by using RegisterConstant instead of Register in Splat container
    - Excluded tests project from solution temporarily to focus on core functionality
@@ -97,17 +104,24 @@
    - ✅ Added toggle functionality to switch between raw content and statistics views
    - ✅ Added metadata display and special items section
    - ✅ Improved error handling with specific exception types
-5. Integrate progress indicators and notifications for user feedback (TSK045)
-6. Test UI on all target platforms (Windows, macOS, Linux)
-7. Update documentation and mark completed items as closed
-8. Address remaining CA1852 warnings by marking classes as sealed where appropriate
-9. Address CA1812 warning for MainWindowViewModel by ensuring it's properly instantiated
+5. ✅ Complete TSK050 - Codebase cleanup (removed .bak files, evaluated wrapper views)
+6. Integrate progress indicators and notifications for user feedback (TSK045)
+7. Test UI on all target platforms (Windows, macOS, Linux)
+8. Update documentation and mark completed items as closed
+9. Address remaining CA1852 warnings by marking classes as sealed where appropriate
+10. Address CA1812 warning for MainWindowViewModel by ensuring it's properly instantiated
 
 ---
 
 ## Completed Work
 
 ### Recent Updates
+
+- ✅ Completed TSK050 - Codebase Cleanup:
+  - Removed backup (.bak) files that were no longer needed
+  - Evaluated wrapper views (SaveContentPageView, ThemeSettingsPageView) and confirmed they're properly integrated with ReactiveUI navigation
+  - Verified no BalatroSaveToolkit.UI directory exists in the codebase
+  - Successfully built solution after cleanup
 
 - ✅ Fixed ReactiveUI navigation and routing issues:
   - Implemented proper wrapper ViewModels (SaveContentPageViewModel, ThemeSettingsPageViewModel)

@@ -1,0 +1,43 @@
+# TSK049 - Address Code Analysis Warnings
+
+**ID**: TSK049
+**Type**: Task
+**Status**: Closed
+**Parent**: US001
+**Created**: 2025-05-20
+**Closed**: 2025-05-22
+
+## Description
+
+Address remaining code analysis warnings in the codebase, particularly CA1852 and CA1812 warnings.
+
+## Requirements
+
+1. Mark internal classes that have no subtypes as `sealed` (CA1852)
+2. Fix MainWindowViewModel instantiation warning (CA1812)
+3. Review other potential code analysis warnings
+
+## Tasks
+
+- [x] Mark SaveContentPageViewModel as sealed
+- [x] Mark ThemeSettingsPageViewModel as sealed
+- [x] Mark MainWindowViewModel as sealed
+- [x] Mark App class as sealed
+- [x] Mark HostScreen class as sealed
+- [x] Fix the MainWindowViewModel instantiation warning
+- [x] Run code analysis again to verify all warnings are fixed
+
+## Dependencies
+
+- None
+
+## Notes
+
+This task is focused on addressing code quality issues rather than functional issues. These warnings do not affect the runtime behavior but should be fixed to improve code quality and maintainability.
+
+The warnings are:
+
+- CA1852: Type can be sealed because it has no subtypes in its containing assembly and is not externally visible
+- CA1812: Class is apparently never instantiated
+
+**Result:** All relevant classes have been marked as sealed and the instantiation warning for MainWindowViewModel has been resolved. No further CA1852 or CA1812 warnings remain after a clean build.

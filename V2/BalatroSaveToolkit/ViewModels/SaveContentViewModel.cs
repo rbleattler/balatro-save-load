@@ -63,6 +63,11 @@ namespace BalatroSaveToolkit.ViewModels
             ToggleViewCommand = ReactiveCommand.Create(ToggleView);
         }
 
+        private MainWindowViewModel? GetMainWindowViewModel()
+        {
+            return Locator.Current.GetService<MainWindowViewModel>();
+        }
+
         private void ToggleView()
         {
             IsStatisticsViewActive = !IsStatisticsViewActive;
@@ -71,9 +76,13 @@ namespace BalatroSaveToolkit.ViewModels
 
         private async Task LoadContentAsync()
         {
+            var mainWindow = GetMainWindowViewModel();
+            mainWindow?.ShowProgress();
             if (string.IsNullOrWhiteSpace(FilePath))
             {
                 ErrorMessage = "No file selected.";
+                mainWindow?.AddNotification("No file selected.");
+                mainWindow?.HideProgress();
                 return;
             }
             IsLoading = true;
@@ -115,54 +124,56 @@ namespace BalatroSaveToolkit.ViewModels
                 }
                 catch (FormatException ex)
                 {
-                    // Don't fail the whole operation if parsing fails, just log the error
                     GameStats = null;
-                    // Add the error to status info but don't show it as the main error
                     ErrorMessage = $"Failed to parse game statistics: {ex.Message}";
+                    mainWindow?.AddNotification(ErrorMessage);
                 }
                 catch (ArgumentException ex)
                 {
                     GameStats = null;
                     ErrorMessage = $"Failed to parse game statistics: {ex.Message}";
+                    mainWindow?.AddNotification(ErrorMessage);
                 }
 
                 UpdateStatusInfo();
+                mainWindow?.AddNotification("Save file loaded successfully.");
             }
             catch (System.IO.IOException ex)
             {
                 ErrorMessage = $"Failed to load save content: {ex.Message}";
                 HasContent = false;
                 GameStats = null;
+                mainWindow?.AddNotification(ErrorMessage);
             }
             catch (UnauthorizedAccessException ex)
             {
                 ErrorMessage = $"Access denied: {ex.Message}";
                 HasContent = false;
                 GameStats = null;
+                mainWindow?.AddNotification(ErrorMessage);
             }
-            // For specific security exceptions
             catch (System.Security.SecurityException ex)
             {
                 ErrorMessage = $"Security error: {ex.Message}";
                 HasContent = false;
                 GameStats = null;
+                mainWindow?.AddNotification(ErrorMessage);
             }
-            // For all other exceptions - we need this to handle potentially unknown errors
             catch (Exception ex) when (
-                // Filter to exclude exceptions we've already caught
                 !(ex is System.IO.IOException) &&
                 !(ex is UnauthorizedAccessException) &&
                 !(ex is System.Security.SecurityException))
             {
-                // Log the exception or send to a logging service
                 System.Diagnostics.Debug.WriteLine($"Unexpected error in LoadContentAsync: {ex}");
                 ErrorMessage = $"An unexpected error occurred: {ex.Message}";
                 HasContent = false;
                 GameStats = null;
+                mainWindow?.AddNotification(ErrorMessage);
             }
             finally
             {
                 IsLoading = false;
+                mainWindow?.HideProgress();
             }
         }
 

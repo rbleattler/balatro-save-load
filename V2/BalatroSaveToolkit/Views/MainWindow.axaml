@@ -25,8 +25,15 @@
             <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,20,0">
                 <Button Content="Settings" Margin="5" />
                 <Button Content="Theme" Margin="5" Command="{Binding ToggleThemeCommand}" />
+                <Button Content="Demo Progress" Margin="5" Command="{Binding DemoProgressCommand}" />
             </StackPanel>
         </Grid>
+
+        <!-- ProgressBar for long-running operations -->
+        <ProgressBar Grid.Row="0" Grid.ColumnSpan="3" Height="4" Margin="0,56,0,0"
+                      IsVisible="{Binding IsBusy}"
+                      IsIndeterminate="{Binding IsBusy}"
+                      Foreground="#FFB300" Background="#333"/>
 
         <!-- Main content area - Will host the current page -->
         <rxui:RoutedViewHost Grid.Row="1" Router="{Binding Router}" PageTransition="{x:Null}">
@@ -36,6 +43,18 @@
                            FontSize="24" />
             </rxui:RoutedViewHost.DefaultContent>
         </rxui:RoutedViewHost>
+
+        <!-- Notification area -->
+        <ItemsControl Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right"
+                      Margin="0,20,20,0" ItemsSource="{Binding Notifications}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="#FFB300" CornerRadius="4" Padding="10" Margin="0,0,0,10">
+                        <TextBlock Text="{Binding}" Foreground="Black" FontWeight="Bold"/>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
 
         <!-- Status area -->
         <Grid Grid.Row="2" Background="#252525" Height="30">

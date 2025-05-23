@@ -1,26 +1,28 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using BalatroSaveToolkit.Core.Services;
 using BalatroSaveToolkit.Tests.Mocks;
 using BalatroSaveToolkit.ViewModels;
 using ReactiveUI;
 using Splat;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BalatroSaveToolkit.Tests.ViewModels
-{
-    /// <summary>
+{    /// <summary>
     /// Tests for the DashboardViewModel.
     /// </summary>
-    public class DashboardViewModelTests : IDisposable
+    [TestClass]
+    public class DashboardViewModelTests
     {
-        private readonly MockFileSystemService _fileSystemService;
-        private readonly MockNotificationService _notificationService;
-        private readonly IMutableDependencyResolver _originalResolver;
-        private readonly IDependencyResolver _originalDependencyResolver;
+        private MockFileSystemService _fileSystemService;
+        private MockNotificationService _notificationService;
+        private IMutableDependencyResolver _originalResolver;
+        private IDependencyResolver _originalDependencyResolver;
 
-        public DashboardViewModelTests()
+        [TestInitialize]
+        public void TestInitialize()
         {
             // Store original Splat resolver for cleanup
             _originalResolver = Locator.CurrentMutable;
@@ -47,26 +49,22 @@ namespace BalatroSaveToolkit.Tests.ViewModels
             {
                 "/mock/balatro/backups/profile1_20250520_120000.sav",
                 "/mock/balatro/backups/profile2_20250520_120000.sav"
-            });
-
-            _fileSystemService.SetupCurrentSaveFile(1, "/mock/balatro/saves/profile1.sav");
+            });            _fileSystemService.SetupCurrentSaveFile(1, "/mock/balatro/saves/profile1.sav");
             _fileSystemService.SetupCurrentSaveFile(2, "/mock/balatro/saves/profile2.sav");
         }
 
-        [Fact]
+        [TestMethod]
         public async Task RefreshSaveFilesCommand_Should_PopulateSaveFiles()
         {
             // Arrange
             var sut = new DashboardViewModel(Locator.Current.GetService<IScreen>());
 
             // Act
-            await sut.RefreshSaveFilesCommand.Execute();
-
-            // Assert
-            Assert.Equal(2, sut.SaveFiles.Count);
+            await sut.RefreshSaveFilesCommand.Execute();            // Assert
+            Assert.AreEqual(2, sut.SaveFiles.Count);
         }
 
-        [Fact]
+        [TestMethod]
         public async Task CreateBackupCommand_Should_CreateBackup_AndNotifyUser()
         {
             // Arrange
@@ -78,12 +76,11 @@ namespace BalatroSaveToolkit.Tests.ViewModels
             await sut.CreateBackupCommand.Execute();
 
             // Assert
-            Assert.Single(_notificationService.Notifications);
-            Assert.Equal("Success", _notificationService.Notifications[0].Type);
-            Assert.Contains("Backup Created", _notificationService.Notifications[0].Title);
+            Assert.AreEqual(1, _notificationService.Notifications.Count);
+            Assert.AreEqual("Success", _notificationService.Notifications[0].Type);            Assert.IsTrue(_notificationService.Notifications[0].Title.Contains("Backup Created"));
         }
 
-        [Fact]
+        [TestMethod]
         public async Task LoadSaveCommand_Should_PromptForConfirmation()
         {
             // Arrange
@@ -98,11 +95,10 @@ namespace BalatroSaveToolkit.Tests.ViewModels
             await sut.LoadSaveCommand.Execute();
 
             // Assert
-            Assert.Contains(_notificationService.Notifications,
-                n => n.Type == "Confirmation" && n.Title == "Confirm Restore");
+            Assert.IsTrue(_notificationService.Notifications.Any(                n => n.Type == "Confirmation" && n.Title == "Confirm Restore"));
         }
 
-        [Fact]
+        [TestMethod]
         public async Task LoadSaveCommand_Should_NotRestoreSave_WhenUserCancels()
         {
             // Arrange
@@ -117,11 +113,11 @@ namespace BalatroSaveToolkit.Tests.ViewModels
             await sut.LoadSaveCommand.Execute();
 
             // Assert
-            Assert.DoesNotContain(_notificationService.Notifications,
-                n => n.Type == "Success" && n.Title == "Save Restored");
+            Assert.IsFalse(_notificationService.Notifications.Any(                n => n.Type == "Success" && n.Title == "Save Restored"));
         }
 
-        public void Dispose()
+        [TestCleanup]
+        public void TestCleanup()
         {
             // Restore original Splat resolver
             Locator.SetLocator(_originalDependencyResolver);
@@ -131,17 +127,5 @@ namespace BalatroSaveToolkit.Tests.ViewModels
     internal class TestScreen : IScreen
     {
         public RoutingState Router { get; } = new RoutingState();
-    }
-
-    internal class MockLoggingService : ILoggingService
-    {
-        public void Debug(string message) { }
-        public void Debug(string message, Exception exception) { }
-        public void Info(string message) { }
-        public void Info(string message, Exception exception) { }
-        public void Warning(string message) { }
-        public void Warning(string message, Exception exception) { }
-        public void Error(string message) { }
-        public void Error(string message, Exception exception) { }
     }
 }

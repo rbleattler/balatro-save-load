@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using Avalonia.Styling;
+using Avalonia.Threading;
 using BalatroSaveToolkit.Core.Services;
 
 namespace BalatroSaveToolkit.Services.Theme
@@ -15,9 +16,8 @@ namespace BalatroSaveToolkit.Services.Theme
         private ThemeVariant _currentTheme;
         private bool _isInitialized;
 
+        // Only keep Windows detector since we're only supporting system theme on Windows
         private WindowsThemeDetector? _windowsThemeDetector;
-        private MacOsThemeDetector? _macOsThemeDetector;
-        private LinuxThemeDetector? _linuxThemeDetector;
 
         /// <summary>
         /// Event fired when the theme changes.
@@ -31,11 +31,13 @@ namespace BalatroSaveToolkit.Services.Theme
 
         /// <summary>
         /// Gets whether the system is currently in dark mode.
+        /// Only accurate on Windows - defaults to user preference on other platforms.
         /// </summary>
         public bool IsSystemInDarkMode { get; private set; }
 
         /// <summary>
         /// Gets or sets whether to follow the system theme.
+        /// Only supported on Windows - other platforms will use user preference.
         /// </summary>
         public bool FollowSystemTheme
         {
@@ -64,11 +66,11 @@ namespace BalatroSaveToolkit.Services.Theme
                 return;
             }
 
-            // Detect initial system theme
+            // Detect initial system theme (only works on Windows)
             UpdateSystemThemeState();
 
             // Set initial theme
-            if (_followSystemTheme)
+            if (_followSystemTheme && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 _currentTheme = IsSystemInDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
             }
@@ -77,8 +79,11 @@ namespace BalatroSaveToolkit.Services.Theme
                 _currentTheme = _settingsService.UseDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light;
             }
 
-            // Start monitoring for system theme changes based on the platform
-            StartSystemThemeMonitoring();
+            // Start monitoring for system theme changes only on Windows
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                StartSystemThemeMonitoring();
+            }
 
             _isInitialized = true;
         }
@@ -91,19 +96,20 @@ namespace BalatroSaveToolkit.Services.Theme
         {
             _settingsService.UseDarkTheme = isDark;
 
-            if (!_followSystemTheme)
+            if (!_followSystemTheme || !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var newTheme = isDark ? ThemeVariant.Dark : ThemeVariant.Light;
                 if (_currentTheme != newTheme)
                 {
                     _currentTheme = newTheme;
-                    ThemeChanged?.Invoke(this, new ThemeChangedEventArgs(_currentTheme));
+                    RaiseThemeChangedEvent();
                 }
             }
         }
 
         /// <summary>
         /// Sets the theme to follow the system theme.
+        /// Only effective on Windows.
         /// </summary>
         /// <param name="followSystem">True to follow system theme, false to use the application's setting.</param>
         public void SetFollowSystemTheme(bool followSystem)
@@ -111,13 +117,13 @@ namespace BalatroSaveToolkit.Services.Theme
             _followSystemTheme = followSystem;
             _settingsService.UseSystemTheme = followSystem;
 
-            if (followSystem)
+            if (followSystem && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var systemTheme = IsSystemInDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
                 if (_currentTheme != systemTheme)
                 {
                     _currentTheme = systemTheme;
-                    ThemeChanged?.Invoke(this, new ThemeChangedEventArgs(_currentTheme));
+                    RaiseThemeChangedEvent();
                 }
             }
             else
@@ -126,31 +132,33 @@ namespace BalatroSaveToolkit.Services.Theme
                 if (_currentTheme != userTheme)
                 {
                     _currentTheme = userTheme;
-                    ThemeChanged?.Invoke(this, new ThemeChangedEventArgs(_currentTheme));
+                    RaiseThemeChangedEvent();
                 }
             }
         }
 
         /// <summary>
         /// Updates the system theme state by detecting the current system theme.
+        /// Only effective on Windows.
         /// </summary>
         internal void UpdateSystemThemeState()
         {
             IsSystemInDarkMode = DetectSystemTheme();
 
-            if (_followSystemTheme)
+            if (_followSystemTheme && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var newTheme = IsSystemInDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
                 if (_currentTheme != newTheme)
                 {
                     _currentTheme = newTheme;
-                    ThemeChanged?.Invoke(this, new ThemeChangedEventArgs(_currentTheme));
+                    RaiseThemeChangedEvent();
                 }
             }
         }
 
         /// <summary>
         /// Detects the system theme based on the current platform.
+        /// Only actually detects on Windows; other platforms just use user preference.
         /// </summary>
         /// <returns>True if the system is using a dark theme, false otherwise.</returns>
         private bool DetectSystemTheme()
@@ -159,35 +167,21 @@ namespace BalatroSaveToolkit.Services.Theme
             {
                 return DetectWindowsTheme();
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                return DetectMacOsTheme();
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                return DetectLinuxTheme();
-            }
 
-            // Default to light theme if platform is not supported
-            return false;
+            // For macOS and Linux, just use the user preference instead of system detection
+            return _settingsService.UseDarkTheme;
         }
 
         /// <summary>
         /// Starts monitoring system theme changes based on the current platform.
+        /// Only Windows will actually monitor system theme.
         /// </summary>
         private void StartSystemThemeMonitoring()
         {
+            // Only monitor Windows theme changes
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 StartWindowsThemeMonitoring();
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                StartMacOsThemeMonitoring();
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                StartLinuxThemeMonitoring();
             }
         }
 
@@ -198,7 +192,7 @@ namespace BalatroSaveToolkit.Services.Theme
                 _windowsThemeDetector ??= new WindowsThemeDetector(this);
                 return _windowsThemeDetector.IsDarkModeEnabled();
             }
-            catch
+            catch (Exception ex) when (ex is not OutOfMemoryException)
             {
                 // Fallback to settings if detection fails
                 return _settingsService.UseDarkTheme;
@@ -207,48 +201,39 @@ namespace BalatroSaveToolkit.Services.Theme
 
         private void StartWindowsThemeMonitoring()
         {
-            _windowsThemeDetector ??= new WindowsThemeDetector(this);
-            _windowsThemeDetector.StartMonitoring();
-        }
-
-        private bool DetectMacOsTheme()
-        {
             try
             {
-                _macOsThemeDetector ??= new MacOsThemeDetector(this);
-                return _macOsThemeDetector.IsDarkModeEnabled();
+                _windowsThemeDetector ??= new WindowsThemeDetector(this);
+                _windowsThemeDetector.StartMonitoring();
             }
-            catch
+            catch (Exception ex) when (ex is not OutOfMemoryException)
             {
-                // Fallback to settings if detection fails
-                return _settingsService.UseDarkTheme;
+                // Just log the error and continue without monitoring
+                System.Diagnostics.Debug.WriteLine($"Failed to start Windows theme monitoring: {ex.Message}");
             }
         }
 
-        private void StartMacOsThemeMonitoring()
+        /// <summary>
+        /// Raises the ThemeChanged event ensuring it runs on the UI thread.
+        /// </summary>
+        private void RaiseThemeChangedEvent()
         {
-            _macOsThemeDetector ??= new MacOsThemeDetector(this);
-            _macOsThemeDetector.StartMonitoring();
-        }
+            if (ThemeChanged == null)
+                return;
 
-        private bool DetectLinuxTheme()
-        {
-            try
+            // If we're on the UI thread, invoke directly
+            if (Dispatcher.UIThread.CheckAccess())
             {
-                _linuxThemeDetector ??= new LinuxThemeDetector(this);
-                return _linuxThemeDetector.IsDarkModeEnabled();
+                ThemeChanged.Invoke(this, new ThemeChangedEventArgs(_currentTheme));
             }
-            catch
+            else
             {
-                // Fallback to settings if detection fails
-                return _settingsService.UseDarkTheme;
+                // Otherwise, dispatch to the UI thread
+                Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    ThemeChanged.Invoke(this, new ThemeChangedEventArgs(_currentTheme));
+                });
             }
-        }
-
-        private void StartLinuxThemeMonitoring()
-        {
-            _linuxThemeDetector ??= new LinuxThemeDetector(this);
-            _linuxThemeDetector.StartMonitoring();
         }
     }
 }

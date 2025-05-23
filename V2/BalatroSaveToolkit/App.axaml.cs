@@ -67,10 +67,7 @@ internal sealed partial class App : Application
 
         base.OnFrameworkInitializationCompleted();
     }    private static void ConfigureServices()
-    {
-        // Create services
-        var viewStackService = new ViewStackService();
-        var navigationService = new NavigationService(viewStackService);
+    {        // Create core services
         var fileSystemService = FileSystemServiceFactory.Create();
         var settingsService = new SettingsService(fileSystemService);
         var themeService = new ThemeService(settingsService);
@@ -78,17 +75,21 @@ internal sealed partial class App : Application
         var loggingService = new Services.Logging.LoggingService();
         var notificationService = new Services.Notifications.NotificationService();
 
-        // Register services
+        // Create host screen for ReactiveUI routing
+        var hostScreen = new HostScreen();
+        Locator.CurrentMutable.RegisterConstant<IScreen>(hostScreen);
+
+        // Register core services
         Locator.CurrentMutable.RegisterConstant<IFileSystemService>(fileSystemService);
         Locator.CurrentMutable.RegisterConstant<ISettingsService>(settingsService);
-        Locator.CurrentMutable.RegisterConstant<IViewStackService>(viewStackService);
-        Locator.CurrentMutable.RegisterConstant<INavigationService>(navigationService);
         Locator.CurrentMutable.RegisterConstant<IThemeService>(themeService);
         Locator.CurrentMutable.RegisterConstant<IGameProcessService>(gameProcessService);
         Locator.CurrentMutable.RegisterConstant<ILoggingService>(loggingService);
-        Locator.CurrentMutable.RegisterConstant<INotificationService>(notificationService);        // Create host screen for routing
-        var hostScreen = new HostScreen();
-        Locator.CurrentMutable.RegisterConstant<IScreen>(hostScreen);
+        Locator.CurrentMutable.RegisterConstant<INotificationService>(notificationService);
+
+        // Register navigation service using ReactiveUI routing
+        var navigationService = new Services.Navigation.NavigationService(hostScreen);
+        Locator.CurrentMutable.RegisterConstant<INavigationService>(navigationService);
 
         // Create and register the MainWindowViewModel (using RegisterConstant to fix CA1812 warning)
         var mainWindowViewModel = new MainWindowViewModel();

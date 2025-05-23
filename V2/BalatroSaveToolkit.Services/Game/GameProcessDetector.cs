@@ -1,27 +1,16 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace BalatroSaveToolkit.Services.Game
 {
     /// <summary>
-    /// Windows-specific implementation of game process detection.
+    /// Cross-platform implementation of game process detection using System.Diagnostics.Process.
     /// </summary>
-    public class WindowsProcessDetector
+    public class GameProcessDetector
     {
-        private static readonly string[] KnownProcessNames = { "balatro", "balatro.exe", "love", "lovec" };
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WindowsProcessDetector"/> class.
-        /// </summary>
-        public WindowsProcessDetector()
-        {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                throw new PlatformNotSupportedException("This detector is only supported on Windows.");
-            }
-        }
+        private static readonly string[] KnownProcessNames = { "balatro", "love", "lovec" };
+        private static readonly int CurrentProcessId = Environment.ProcessId;
 
         /// <summary>
         /// Checks if the Balatro game is running.
@@ -37,9 +26,11 @@ namespace BalatroSaveToolkit.Services.Game
                 foreach (var processName in KnownProcessNames)
                 {
                     var matchingProcesses = processes.Where(p =>
-                        p.ProcessName.Equals(processName, StringComparison.OrdinalIgnoreCase) ||
-                        p.ProcessName.Equals(System.IO.Path.GetFileNameWithoutExtension(processName),
-                                          StringComparison.OrdinalIgnoreCase)).ToList();
+                        p.Id != CurrentProcessId && // Don't detect our own process
+                        !IsOwnToolkitProcess(p) && // Don't detect other instances of our toolkit
+                        (p.ProcessName.Equals(processName, StringComparison.OrdinalIgnoreCase) ||
+                         p.ProcessName.Equals(System.IO.Path.GetFileNameWithoutExtension(processName),
+                                              StringComparison.OrdinalIgnoreCase))).ToList();
 
                     if (matchingProcesses.Any())
                     {
@@ -51,7 +42,7 @@ namespace BalatroSaveToolkit.Services.Game
                             {
                                 try
                                 {
-                                    // Check command line arguments or window title for Balatro
+                                    // Check if this LÖVE process is running Balatro
                                     if (IsLoveProcessRunningBalatro(process))
                                     {
                                         return true;
@@ -80,19 +71,43 @@ namespace BalatroSaveToolkit.Services.Game
             }
         }
 
-        private bool IsLoveProcessRunningBalatro(Process process)
+        /// <summary>
+        /// Checks if a process is our own toolkit to avoid false positives.
+        /// </summary>
+        /// <param name="process">The process to check.</param>
+        /// <returns>True if this is our toolkit process, false otherwise.</returns>
+        private static bool IsOwnToolkitProcess(Process process)
         {
             try
             {
-                // Check window title
+                // Check if the process name contains indicators of our toolkit
+                var processName = process.ProcessName.ToLowerInvariant();
+                return processName.Contains("balatrosave") ||
+                       processName.Contains("toolkit") ||
+                       (!string.IsNullOrEmpty(process.MainWindowTitle) &&
+                        process.MainWindowTitle.IndexOf("BalatroSaveToolkit", StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Checks if a LÖVE process is running Balatro by examining its window title.
+        /// </summary>
+        /// <param name="process">The LÖVE process to check.</param>
+        /// <returns>True if the process is running Balatro, false otherwise.</returns>
+        private static bool IsLoveProcessRunningBalatro(Process process)
+        {
+            try
+            {
+                // Check window title for Balatro
                 if (!string.IsNullOrEmpty(process.MainWindowTitle) &&
                     process.MainWindowTitle.IndexOf("balatro", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     return true;
                 }
-
-                // Additional checks could be added here
-                // For example, we could check command line arguments but that requires additional privileges
 
                 return false;
             }

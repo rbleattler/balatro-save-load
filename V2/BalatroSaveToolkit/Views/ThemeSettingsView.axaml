@@ -13,10 +13,16 @@
 
   <Border Padding="20">
     <StackPanel Spacing="15">
-      <TextBlock Text="Theme Settings" FontSize="20" FontWeight="Bold" />
+      <TextBlock Text="Theme Settings" FontSize="20" FontWeight="Bold" />      <CheckBox IsChecked="{Binding FollowSystemTheme}"
+                Content="Follow system theme"
+                IsEnabled="{Binding IsWindowsPlatform}"
+                ToolTip.Tip="System theme detection is only available on Windows platforms." />
 
-      <CheckBox IsChecked="{Binding FollowSystemTheme}"
-                Content="Follow system theme" />
+      <TextBlock Text="Note: System theme detection only works on Windows"
+                Opacity="0.6"
+                FontSize="12"
+                IsVisible="{Binding !IsWindowsPlatform}"
+                Margin="0,5,0,5" />
 
       <Grid IsEnabled="{Binding !FollowSystemTheme}">
         <Grid.ColumnDefinitions>

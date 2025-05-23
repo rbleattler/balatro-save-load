@@ -13,18 +13,16 @@ using BalatroSaveToolkit.Core.ViewModels;
 using ReactiveUI;
 using Splat;
 
-namespace BalatroSaveToolkit.ViewModels
-{    /// <summary>
+namespace BalatroSaveToolkit.ViewModels {
+    /// <summary>
     /// ViewModel for the main window.
     /// </summary>
-    internal sealed class MainWindowViewModel : ReactiveObject, IScreen, IActivatableViewModel
-    {
+    internal sealed class MainWindowViewModel : ReactiveObject, IScreen, IActivatableViewModel {
         private readonly IThemeService? _themeService;
         private readonly IGameProcessService? _gameProcessService;
         private readonly IFileSystemService? _fileSystemService;
         private readonly ISettingsService? _settingsService;
 
-        private string _windowTitle = "Balatro Save Toolkit";
         private bool _isGameRunning;
         private RoutingState _router;
         private bool _isBusy;
@@ -32,9 +30,8 @@ namespace BalatroSaveToolkit.ViewModels
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindowViewModel"/> class.
         /// </summary>
-        public MainWindowViewModel()
-        {
-            // Initialize services from service locator
+        public MainWindowViewModel() {
+            // Initialize services from the service locator
             _themeService = Locator.Current.GetService<IThemeService>();
             _gameProcessService = Locator.Current.GetService<IGameProcessService>();
             _fileSystemService = Locator.Current.GetService<IFileSystemService>();
@@ -46,69 +43,86 @@ namespace BalatroSaveToolkit.ViewModels
 
             // Initialize commands - ensure all commands use the UI thread scheduler
             ToggleThemeCommand = ReactiveCommand.Create(ToggleTheme, outputScheduler: RxApp.MainThreadScheduler);
-            NavigateToSettingsCommand = ReactiveCommand.Create(NavigateToSettings, outputScheduler: RxApp.MainThreadScheduler);
+            NavigateToSettingsCommand =
+                ReactiveCommand.Create(NavigateToSettings, outputScheduler: RxApp.MainThreadScheduler);
             NavigateToHomeCommand = ReactiveCommand.Create(NavigateToHome, outputScheduler: RxApp.MainThreadScheduler);
             NavigateBackCommand = ReactiveCommand.CreateFromObservable(
-                () => Router.NavigateBack,
-                Router.NavigationStack.WhenAnyValue(x => x.Count).Select(count => count > 0).ObserveOn(RxApp.MainThreadScheduler),
-                RxApp.MainThreadScheduler);            DemoProgressCommand = ReactiveCommand.CreateFromTask(async () =>
-            {
-                await Dispatcher.UIThread.InvokeAsync(() => AddNotification("Demo operation started..."));
-                await Dispatcher.UIThread.InvokeAsync(ShowProgress);
-                await Task.Delay(2500).ConfigureAwait(false);
-                await Dispatcher.UIThread.InvokeAsync(HideProgress);
-                await Dispatcher.UIThread.InvokeAsync(() => AddNotification("Demo operation complete!"));
-            },
-            // Explicitly set up the canExecute to run on the UI thread
-            Observable.Return(true).ObserveOn(RxApp.MainThreadScheduler),
-            outputScheduler: RxApp.MainThreadScheduler);
+                                                                       () => Router.NavigateBack,
+                                                                       Router.NavigationStack.WhenAnyValue(x => x.Count)
+                                                                             .Select(count => count > 0)
+                                                                             .ObserveOn(RxApp.MainThreadScheduler),
+                                                                       RxApp.MainThreadScheduler
+                                                                      );
+            DemoProgressCommand = ReactiveCommand.CreateFromTask(
+                                                                 async () => {
+                                                                     await Dispatcher.UIThread
+                                                                         .InvokeAsync(() => AddNotification(
+                                                                                      "Demo operation started..."
+                                                                                     )
+                                                                             );
+                                                                     await Dispatcher.UIThread
+                                                                         .InvokeAsync(ShowProgress);
+                                                                     await Task.Delay(2500).ConfigureAwait(false);
+                                                                     await Dispatcher.UIThread
+                                                                         .InvokeAsync(HideProgress);
+                                                                     await Dispatcher.UIThread
+                                                                         .InvokeAsync(() => AddNotification(
+                                                                                      "Demo operation complete!"
+                                                                                     )
+                                                                             );
+                                                                 },
+                                                                 // Explicitly set up the canExecute to run on the UI thread
+                                                                 Observable.Return(true)
+                                                                           .ObserveOn(RxApp.MainThreadScheduler),
+                                                                 outputScheduler: RxApp.MainThreadScheduler
+                                                                );
 
             // Show a demo notification and progress bar on startup for demonstration
-            Task.Run(async () =>
-            {
-                await Task.Delay(500).ConfigureAwait(false);
-                await Dispatcher.UIThread.InvokeAsync(() => AddNotification("Welcome! This is a demo notification."));
-                await Dispatcher.UIThread.InvokeAsync(ShowProgress);
-                await Task.Delay(2000).ConfigureAwait(false);
-                await Dispatcher.UIThread.InvokeAsync(HideProgress);
-            });
+            Task.Run(async () => {
+                         await Task.Delay(500).ConfigureAwait(false);
+                         await Dispatcher.UIThread.InvokeAsync(() => AddNotification(
+                                                                    "Welcome! This is a demo notification."
+                                                                   )
+                                                              );
+                         await Dispatcher.UIThread.InvokeAsync(ShowProgress);
+                         await Task.Delay(2000).ConfigureAwait(false);
+                         await Dispatcher.UIThread.InvokeAsync(HideProgress);
+                     }
+                    );
 
             // Configure activation
-            this.WhenActivated(disposables =>
-            {
-                // Register for cleanup
-                Disposable.Create(() => { /* Cleanup when deactivated */ })
-                    .DisposeWith(disposables);                // Subscribe to Balatro process status changes
-                if (_gameProcessService != null)
-                {                    _gameProcessService.BalatroProcessStatusChanged += (sender, args) =>
-                    {
-                        // Always update UI properties on the UI thread
-                        Dispatcher.UIThread.Post(() => IsGameRunning = args.IsRunning);
-                    };
+            this.WhenActivated(disposables => {
+                                   // Register for cleanup
+                                   Disposable.Create(() => {
+                                                         /* Cleanup when deactivated */
+                                                     }
+                                                    )
+                                             .DisposeWith(disposables); // Subscribe to Balatro process status changes
+                                   if (_gameProcessService != null) {
+                                       _gameProcessService.BalatroProcessStatusChanged += (sender, args) => {
+                                           // Always update UI properties on the UI thread
+                                           Dispatcher.UIThread.Post(() => IsGameRunning = args.IsRunning);
+                                       };
 
-                    // Start the process check
-                    _gameProcessService.StartProcessCheck();
-                }
+                                       // Start the process check
+                                       _gameProcessService.StartProcessCheck();
+                                   }
 
-                // Navigate to Dashboard as the initial view
-                NavigateToHome();
-            });
+                                   // Navigate to Dashboard as the initial view
+                                   NavigateToHome();
+                               }
+                              );
         }
 
         /// <summary>
         /// Gets the window title.
         /// </summary>
-        public string WindowTitle
-        {
-            get => _windowTitle;
-            private set => this.RaiseAndSetIfChanged(ref _windowTitle, value);
-        }
+        public string WindowTitle { get; } = "Balatro Save Toolkit";
 
         /// <summary>
         /// Gets or sets a value indicating whether the game is running.
         /// </summary>
-        public bool IsGameRunning
-        {
+        public bool IsGameRunning {
             get => _isGameRunning;
             private set => this.RaiseAndSetIfChanged(ref _isGameRunning, value);
         }
@@ -116,8 +130,7 @@ namespace BalatroSaveToolkit.ViewModels
         /// <summary>
         /// Gets or sets a value indicating whether the application is busy.
         /// </summary>
-        public bool IsBusy
-        {
+        public bool IsBusy {
             get => _isBusy;
             set => this.RaiseAndSetIfChanged(ref _isBusy, value);
         }
@@ -165,16 +178,13 @@ namespace BalatroSaveToolkit.ViewModels
         /// <summary>
         /// Toggles between dark and light themes.
         /// </summary>
-        private void ToggleTheme()
-        {
-            if (_themeService != null)
-            {
+        private void ToggleTheme() {
+            if (_themeService != null) {
                 bool isDark = _themeService.CurrentTheme.Key == ThemeVariant.Dark.Key;
                 _themeService.SetTheme(!isDark);
 
                 // Update settings if available
-                if (_settingsService != null)
-                {
+                if (_settingsService != null) {
                     // Since we don't have direct access to SaveSettings, let's use a common approach
                     // of setting properties which should trigger save on property change
                     _settingsService.UseDarkTheme = !isDark;
@@ -186,10 +196,10 @@ namespace BalatroSaveToolkit.ViewModels
         /// <summary>
         /// Navigates to the settings view.
         /// </summary>
-        private void NavigateToSettings()
-        {
-            if (_themeService != null && _settingsService != null)
-            {                var settingsPageViewModel = new ThemeSettingsPageViewModel(this, _themeService, _settingsService);
+        private void NavigateToSettings() {
+            if (_themeService != null &&
+                _settingsService != null) {
+                var settingsPageViewModel = new ThemeSettingsPageViewModel(this, _themeService, _settingsService);
                 Router.Navigate.Execute(settingsPageViewModel);
             }
         }
@@ -197,8 +207,7 @@ namespace BalatroSaveToolkit.ViewModels
         /// <summary>
         /// Navigates to the dashboard/home view.
         /// </summary>
-        private void NavigateToHome()
-        {
+        private void NavigateToHome() {
             var dashboardViewModel = new DashboardViewModel(this);
             Router.Navigate.Execute(dashboardViewModel);
         }
@@ -206,8 +215,7 @@ namespace BalatroSaveToolkit.ViewModels
         /// <summary>
         /// Shows progress by setting IsBusy to true.
         /// </summary>
-        public void ShowProgress()
-        {
+        public void ShowProgress() {
             if (!Dispatcher.UIThread.CheckAccess())
                 Dispatcher.UIThread.Post(() => IsBusy = true);
             else
@@ -217,8 +225,7 @@ namespace BalatroSaveToolkit.ViewModels
         /// <summary>
         /// Hides progress by setting IsBusy to false.
         /// </summary>
-        public void HideProgress()
-        {
+        public void HideProgress() {
             if (!Dispatcher.UIThread.CheckAccess())
                 Dispatcher.UIThread.Post(() => IsBusy = false);
             else
@@ -229,17 +236,17 @@ namespace BalatroSaveToolkit.ViewModels
         /// Adds a notification message.
         /// </summary>
         /// <param name="message">The notification message.</param>
-        public void AddNotification(string message)
-        {
+        public void AddNotification(string message) {
             void add() {
                 Notifications.Add(message);
                 // Optionally auto-remove after a delay
-                Task.Run(async () =>
-                {
-                    await Task.Delay(4000).ConfigureAwait(false);
-                    RemoveNotification(message);
-                });
+                Task.Run(async () => {
+                             await Task.Delay(4000).ConfigureAwait(false);
+                             RemoveNotification(message);
+                         }
+                        );
             }
+
             if (!Dispatcher.UIThread.CheckAccess())
                 Dispatcher.UIThread.Post(add);
             else
@@ -250,11 +257,8 @@ namespace BalatroSaveToolkit.ViewModels
         /// Removes a notification message.
         /// </summary>
         /// <param name="message">The notification message.</param>
-        public void RemoveNotification(string message)
-        {
-            void remove() {
-                Notifications.Remove(message);
-            }
+        public void RemoveNotification(string message) {
+            void remove() { Notifications.Remove(message); }
             if (!Dispatcher.UIThread.CheckAccess())
                 Dispatcher.UIThread.Post(remove);
             else

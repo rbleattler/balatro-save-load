@@ -31,6 +31,12 @@ namespace BalatroSaveToolkit.Core.Services
         Task ClearHistoryAsync();
 
         /// <summary>
+        /// Navigate to the initial view, clearing any existing navigation history
+        /// </summary>
+        /// <returns>Task representing the navigation operation</returns>
+        Task NavigateToInitialViewAsync();
+
+        /// <summary>
         /// Observable for the current ViewModel
         /// </summary>
         IObservable<IRoutableViewModel> CurrentViewModel { get; }

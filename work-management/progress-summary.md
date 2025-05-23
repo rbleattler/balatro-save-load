@@ -18,6 +18,9 @@
   - ✅ Fixed Avalonia UI XAML syntax issues for compatibility with Avalonia runtime
   - ✅ Fixed ReactiveUI routing with proper wrapper ViewModels for navigation
   - ✅ Fixed dependency injection using Splat's IReadonlyDependencyResolver
+  - ✅ Fixed ReactiveUI thread safety issue for theme button and other UI operations
+    - Added thread marshaling to UI thread using RxApp.MainThreadScheduler
+    - Fixed "Call from invalid thread" exceptions when interacting with UI elements
 - Implement TSK045 - Enhanced user feedback with progress indicators
 - ✅ Completed TSK050 - Codebase cleanup (removed backup files, evaluated wrapper views)
 - Continue TSK046 implementation - SaveContentViewer functionality (in progress)
@@ -45,11 +48,26 @@
 - ✅ Fix event signature in ThemeService and GameProcessService
 - Implement TSK047 - End-to-end testing
 - Update US001 once all related tasks are complete
-- ✅ Completed TSK049 - Code analysis warnings (CA1852, CA1812)
+- ✅ Completed TSK049 - Consolidated game process detection into single cross-platform implementation
+- ✅ Completed TSK050 - Consolidated NavigationService implementations and cleaned up system theme detection
+  - Successfully consolidated two redundant NavigationService implementations into single ReactiveUI-based approach
+  - Removed old NavigationService and ViewStackService implementations
+  - Removed LinuxThemeDetector and MacOsThemeDetector (kept Windows-only theme detection by design)
+  - Updated App.axaml.cs to use unified ReactiveUI-based NavigationService
+  - Reduced codebase by 300+ lines and improved build (120 vs 168 warnings)
+  - Updated NavigationServiceExtensions to use ReactiveUI approach correctly
+- 📋 Created TSK051 - Consolidate Test Mock Services (minor optimization)
+  - Move inline MockLoggingService to dedicated Tests/Mocks folder for consistency
 
 ## Recent Code Fixes
 
-1. Completed codebase cleanup (TSK050):
+1. Fixed ReactiveUI thread safety issue (TSK051):
+   - Added proper thread marshaling for ReactiveCommands and observables using RxApp.MainThreadScheduler
+   - Fixed "Call from invalid thread" exceptions when using the theme button
+   - Added ThemeService thread safety to ensure event handlers execute on the UI thread
+   - Added comprehensive error handling for cross-thread operations
+
+2. Completed codebase cleanup (TSK050):
    - Removed backup files (.bak) that were no longer needed
    - Evaluated wrapper views (SaveContentPageView, ThemeSettingsPageView) and confirmed they are properly integrated with ReactiveUI navigation
    - Verified no BalatroSaveToolkit.UI directory exists in the codebase
@@ -116,6 +134,13 @@
 ## Completed Work
 
 ### Recent Updates
+
+- ✅ Fixed ReactiveUI Thread Safety Issues (TSK051):
+  - Fixed "Call from invalid thread" exception that occurred when clicking the theme button
+  - Added proper thread marshaling using RxApp.MainThreadScheduler for ReactiveCommand
+  - Added dispatcher checks in ThemeService to ensure UI updates happen on the UI thread
+  - Created a thread-safe event raising mechanism for ThemeChanged events
+  - Added comprehensive error handling for cross-thread operations
 
 - ✅ Completed TSK050 - Codebase Cleanup:
   - Removed backup (.bak) files that were no longer needed

@@ -1,16 +1,16 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BalatroSaveToolkit.Tests.Mocks;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BalatroSaveToolkit.Tests.Services
 {
     /// <summary>
     /// Tests for the MockFileSystemService to ensure it behaves as expected.
     /// </summary>
-    public class MockFileSystemServiceTests
-    {
-        [Fact]
+    [TestClass]
+    public class MockFileSystemServiceTests    {
+        [TestMethod]
         public async Task GetSavedBackupFilesAsync_ShouldReturn_ConfiguredFiles()
         {
             // Arrange
@@ -27,11 +27,11 @@ namespace BalatroSaveToolkit.Tests.Services
             var result = await sut.GetSavedBackupFilesAsync();
 
             // Assert
-            Assert.Equal(expectedFiles.Count, result.Count);
-            Assert.Equal(expectedFiles, result);
+            Assert.AreEqual(expectedFiles.Count, result.Count);
+            CollectionAssert.AreEqual(expectedFiles, result);
         }
 
-        [Fact]
+        [TestMethod]
         public void BackupSaveFile_ShouldAdd_ToBackupFiles()
         {
             // Arrange
@@ -44,12 +44,12 @@ namespace BalatroSaveToolkit.Tests.Services
             var backupPath = sut.BackupSaveFile(1);
 
             // Assert
-            Assert.NotNull(backupPath);
-            Assert.NotEmpty(backupPath);
-            Assert.Contains("/mock/balatro/backups/profile1_", backupPath);
+            Assert.IsNotNull(backupPath);
+            Assert.IsTrue(backupPath.Length > 0);
+            Assert.IsTrue(backupPath.Contains("/mock/balatro/backups/profile1_"));
         }
 
-        [Fact]
+        [TestMethod]
         public async Task SaveBackupAsync_ShouldReturn_BackupPath()
         {
             // Arrange
@@ -61,12 +61,12 @@ namespace BalatroSaveToolkit.Tests.Services
             var backupPath = await sut.SaveBackupAsync(2);
 
             // Assert
-            Assert.NotNull(backupPath);
-            Assert.NotEmpty(backupPath);
-            Assert.Contains("/mock/balatro/backups/profile2_", backupPath);
+            Assert.IsNotNull(backupPath);
+            Assert.IsTrue(backupPath.Length > 0);
+            Assert.IsTrue(backupPath.Contains("/mock/balatro/backups/profile2_"));
         }
 
-        [Fact]
+        [TestMethod]
         public void RestoreSaveFile_ShouldReturn_False_WhenBackupNotFound()
         {
             // Arrange
@@ -77,10 +77,10 @@ namespace BalatroSaveToolkit.Tests.Services
             var result = sut.RestoreSaveFile("/mock/backups/nonexistent.sav", 1);
 
             // Assert
-            Assert.False(result);
+            Assert.IsFalse(result);
         }
 
-        [Fact]
+        [TestMethod]
         public async Task GetSaveFileContentAsync_ShouldReturn_ConfiguredContent()
         {
             // Arrange
@@ -92,10 +92,10 @@ namespace BalatroSaveToolkit.Tests.Services
             var result = await sut.GetSaveFileContentAsync("/mock/saves/profile1.sav");
 
             // Assert
-            Assert.Equal(expectedContent, result);
+            Assert.AreEqual(expectedContent, result);
         }
 
-        [Fact]
+        [TestMethod]
         public void OpenSaveDirectory_ShouldSet_SaveDirectoryOpened()
         {
             // Arrange
@@ -105,7 +105,7 @@ namespace BalatroSaveToolkit.Tests.Services
             sut.OpenSaveDirectory();
 
             // Assert
-            Assert.True(sut.SaveDirectoryOpened);
+            Assert.IsTrue(sut.SaveDirectoryOpened);
         }
     }
 }

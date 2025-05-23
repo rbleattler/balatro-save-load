@@ -1,22 +1,18 @@
 using System;
-using System.Runtime.InteropServices;
 using System.Threading;
 using BalatroSaveToolkit.Core.Services;
 
 namespace BalatroSaveToolkit.Services.Game
 {
     /// <summary>
-    /// Implementation of the game process service with platform-specific detection.
+    /// Implementation of the game process service with cross-platform detection.
     /// </summary>
     public class GameProcessService : IGameProcessService, IDisposable
     {
         private Timer? _processCheckTimer;
         private bool _isBalatroRunning;
         private readonly TimeSpan _checkInterval = TimeSpan.FromSeconds(2);
-
-        private WindowsProcessDetector? _windowsDetector;
-        private MacOsProcessDetector? _macOsDetector;
-        private LinuxProcessDetector? _linuxDetector;        /// <summary>
+        private readonly GameProcessDetector _processDetector;/// <summary>
         /// Event fired when the Balatro process status changes.
         /// </summary>
         public event EventHandler<GameProcessStatusEventArgs> BalatroProcessStatusChanged = delegate { };
@@ -24,14 +20,12 @@ namespace BalatroSaveToolkit.Services.Game
         /// <summary>
         /// Gets whether the Balatro process is currently running.
         /// </summary>
-        public bool IsBalatroRunning => _isBalatroRunning;
-
-        /// <summary>
+        public bool IsBalatroRunning => _isBalatroRunning;        /// <summary>
         /// Initializes a new instance of the <see cref="GameProcessService"/> class.
         /// </summary>
         public GameProcessService()
         {
-            InitializePlatformDetector();
+            _processDetector = new GameProcessDetector();
         }
 
         /// <summary>
@@ -69,46 +63,13 @@ namespace BalatroSaveToolkit.Services.Game
             {
                 StopProcessCheck();
             }
-        }
-
-        private void InitializePlatformDetector()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                _windowsDetector = new WindowsProcessDetector();
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                _macOsDetector = new MacOsProcessDetector();
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                _linuxDetector = new LinuxProcessDetector();
-            }
-            else
-            {
-                throw new PlatformNotSupportedException("The current platform is not supported.");
-            }
-        }
-
-        private void CheckProcess(object? state)
+        }        private void CheckProcess(object? state)
         {
             bool isRunning = false;
 
             try
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    isRunning = _windowsDetector?.IsBalatroRunning() ?? false;
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    isRunning = _macOsDetector?.IsBalatroRunning() ?? false;
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    isRunning = _linuxDetector?.IsBalatroRunning() ?? false;
-                }
+                isRunning = _processDetector.IsBalatroRunning();
 
                 // Only raise the event if the status has changed
                 if (isRunning != _isBalatroRunning)

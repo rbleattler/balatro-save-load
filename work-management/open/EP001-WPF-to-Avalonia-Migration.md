@@ -20,6 +20,7 @@ This epic covers the complete migration of the Balatro Save and Load Tool from W
 
 ## Features
 
+- FT006 - Closed
 - FT001: Project Setup and Infrastructure
 - FT002: Core Services Implementation
 - FT003: UI Migration
@@ -42,4 +43,7 @@ This epic covers the complete migration of the Balatro Save and Load Tool from W
 ## Dependencies
 
 - None
+
+
+
 

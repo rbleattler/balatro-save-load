@@ -1,5 +1,7 @@
 using BalatroSaveToolkit.Core.Services;
+using BalatroSaveToolkit.Services.Navigation;
 using Microsoft.Extensions.DependencyInjection;
+using ReactiveUI;
 
 namespace BalatroSaveToolkit.Services
 {
@@ -15,8 +17,15 @@ namespace BalatroSaveToolkit.Services
         /// <returns>The service collection for chaining.</returns>
         public static IServiceCollection AddNavigationServices(this IServiceCollection services)
         {
-            services.AddSingleton<IViewStackService, ViewStackService>();
-            services.AddSingleton<INavigationService, NavigationService>();
+            services.AddSingleton<INavigationService>(provider =>
+            {
+                var hostScreen = provider.GetService<IScreen>();
+                if (hostScreen == null)
+                {
+                    throw new System.InvalidOperationException("IScreen must be registered before adding navigation services");
+                }
+                return new Navigation.NavigationService(hostScreen);
+            });
 
             return services;
         }

@@ -1,16 +1,16 @@
 using System;
 using System.Threading;
 using BalatroSaveToolkit.ViewModels;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BalatroSaveToolkit.Tests.ViewModels
 {
     /// <summary>
     /// Unit tests for the SaveFileViewModel.
     /// </summary>
+    [TestClass]
     public class SaveFileViewModelTests
-    {
-        [Fact]
+    {        [TestMethod]
         public void DisplayName_ShouldFormat_ProfileNumberAndTimestamp()
         {
             // Arrange
@@ -27,10 +27,10 @@ namespace BalatroSaveToolkit.Tests.ViewModels
             var displayName = sut.DisplayName;
 
             // Assert
-            Assert.Equal("Profile 2 - 2025-05-20 13:45:30", displayName);
+            Assert.AreEqual("Profile 2 - 2025-05-20 13:45:30", displayName);
         }
 
-        [Fact]
+        [TestMethod]
         public void FormattedFileSize_ShouldFormat_Bytes()
         {
             // Arrange
@@ -46,10 +46,10 @@ namespace BalatroSaveToolkit.Tests.ViewModels
             var formattedSize = sut.FormattedFileSize;
 
             // Assert
-            Assert.Equal("512 B", formattedSize);
+            Assert.AreEqual("512 B", formattedSize);
         }
 
-        [Fact]
+        [TestMethod]
         public void FormattedFileSize_ShouldFormat_KiloBytes()
         {
             // Arrange
@@ -65,10 +65,10 @@ namespace BalatroSaveToolkit.Tests.ViewModels
             var formattedSize = sut.FormattedFileSize;
 
             // Assert
-            Assert.Equal("2.00 KB", formattedSize);
+            Assert.AreEqual("2.00 KB", formattedSize);
         }
 
-        [Fact]
+        [TestMethod]
         public void FormattedFileSize_ShouldFormat_MegaBytes()
         {
             // Arrange
@@ -84,10 +84,10 @@ namespace BalatroSaveToolkit.Tests.ViewModels
             var formattedSize = sut.FormattedFileSize;
 
             // Assert
-            Assert.Equal("3.00 MB", formattedSize);
+            Assert.AreEqual("3.00 MB", formattedSize);
         }
 
-        [Fact]
+        [TestMethod]
         public void ChangingProperties_ShouldUpdate_DerivedProperties()
         {
             // Arrange
@@ -113,10 +113,10 @@ namespace BalatroSaveToolkit.Tests.ViewModels
             Thread.Sleep(50);
 
             // Assert
-            Assert.NotEqual(initialDisplayName, sut.DisplayName);
-            Assert.NotEqual(initialFormattedSize, sut.FormattedFileSize);
-            Assert.Equal("Profile 3 - 2025-05-20 15:30:00", sut.DisplayName);
-            Assert.Equal("3.00 MB", sut.FormattedFileSize);
+            Assert.AreNotEqual(initialDisplayName, sut.DisplayName);
+            Assert.AreNotEqual(initialFormattedSize, sut.FormattedFileSize);
+            Assert.AreEqual("Profile 3 - 2025-05-20 15:30:00", sut.DisplayName);
+            Assert.AreEqual("3.00 MB", sut.FormattedFileSize);
         }
     }
 }

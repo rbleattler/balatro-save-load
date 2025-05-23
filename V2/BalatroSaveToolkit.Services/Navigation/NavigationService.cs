@@ -2,6 +2,7 @@ using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using BalatroSaveToolkit.Core.Services;
+using BalatroSaveToolkit.Core.ViewModels;
 using ReactiveUI;
 using Splat;
 
@@ -49,6 +50,18 @@ namespace BalatroSaveToolkit.Services.Navigation
             {
                 _hostScreen.Router.NavigateAndReset.Execute(currentViewModel);
             }
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc/>
+        public Task NavigateToInitialViewAsync()
+        {
+            // Get the initial view model (first one registered in the IoC container)
+            var initialViewModel = Locator.Current.GetServices<IRoutableViewModel>().FirstOrDefault()
+                ?? throw new InvalidOperationException("Unable to resolve any routable ViewModels");
+
+            // Navigate and reset the stack to just this view
+            _hostScreen.Router.NavigateAndReset.Execute(initialViewModel);
             return Task.CompletedTask;
         }
 

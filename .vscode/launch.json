@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug BalatroSaveToolkit",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/V2/BalatroSaveToolkit/bin/Debug/net9.0/BalatroSaveToolkit.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}/V2/BalatroSaveToolkit",
+      "stopAtEntry": false,
+      "console": "internalConsole"
+    }
+  ]
+}

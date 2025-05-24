@@ -12,7 +12,6 @@
     <PublishTrimmed>true</PublishTrimmed>    <TrimMode>partial</TrimMode>
 
     <!-- Make internal classes visible to test assembly -->
-    <InternalsVisibleTo Include="BalatroSaveToolkit.Tests" />
 
     <AssemblyName>BalatroSaveToolkit</AssemblyName>
     <ApplicationIcon>Assets\save-and-load.ico</ApplicationIcon>
@@ -21,6 +20,9 @@
     <Description>Cross-platform save and load tool for Balatro</Description>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+  <!-- <ItemGroup>
+    <InternalsVisibleTo Include="BalatroSaveToolkit.Tests" />
+  </ItemGroup> -->
   <ItemGroup>
     <Folder Include="Models\" />
     <AvaloniaResource Include="Theme\**\*.axaml" />

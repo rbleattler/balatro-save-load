@@ -9,7 +9,7 @@ param(
   [switch] $Build,
   [Parameter()]
   [ValidateSet("Debug", "Release")]
-  [string] $Configuration,
+  [string] $Configuration = "Debug",
   [int] $WarnLevel = 4
 )
 begin {
@@ -90,7 +90,7 @@ process {
   if ($Build) {
     Write-Verbose "Building solution..."
 
-    $rawOut = dotnet build BalatroSaveToolkit.sln #--configuration $Configuration --property WarningLevel=$WarnLevel
+    $rawOut = dotnet build BalatroSaveToolkit.sln --configuration $Configuration --property WarningLevel=$WarnLevel
     $rawOut | Out-File -FilePath $script:BuildOutput -Force
     errorsOnly $rawOut | Out-File -FilePath $script:ErrorOutput -Force
     warningsOnly $rawOut | Out-File -FilePath $script:WarningOutput -Force

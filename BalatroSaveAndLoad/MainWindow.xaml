@@ -5,29 +5,65 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BalatroSaveAndLoad"
         mc:Ignorable="d"
-        Title="Balatro Save And Load" Height="600" Width="500" Icon="/save-and-load.png"
-        MinWidth="500"
+        Title="Balatro Save And Load"
+        Height="640"
+        Width="{DynamicResource AppMinWidth}"
+        MinHeight="640"
+        MinWidth="{DynamicResource AppMinWidth}"
+        Icon="/save-and-load.png"
+        ThemeMode="System"
         ResizeMode="CanResizeWithGrip">
+    <Window.Resources>
+        <Style TargetType="StatusBar"
+               x:Key="ThemedStatusBar">
+            <Setter Property="Background"
+                    Value="Transparent"/>
+            <Setter Property="Foreground"
+                    Value="{DynamicResource {x:Static SystemColors.ControlTextBrush}}"/>
+        </Style>
+        <Style TargetType="TextBlock"
+               x:Key="StatusBarText">
+            <Setter Property="Background"
+                    Value="Transparent"/>
+            <Setter Property="Foreground"
+                    Value="{DynamicResource {x:Static SystemColors.ControlTextBrush}}"/>
+        </Style>
+    </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Key="T"
+                    Modifiers="Ctrl"
+                    Command="{Binding ToggleThemeCommand}"/>
+    </Window.InputBindings>
     <Border>
-        <DockPanel LastChildFill="True">
-            
+        <DockPanel LastChildFill="True"
+                   MinWidth="{DynamicResource AppMinWidth}"
+                   MinHeight="600">
+
             <!-- Main Content -->
             <Grid Margin="0,0,0,0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="80"/> <!-- Settings rows -->
-                    <RowDefinition Height="*"/>  <!-- List and controls -->
-                    <RowDefinition Height="40"/> <!-- Status bar -->
+                    <RowDefinition Height="80"/>
+                    <!-- Settings rows -->
+                    <RowDefinition Height="*"/>
+                    <!-- List and controls -->
+                    <RowDefinition Height="Auto"
+                                   MinHeight="20"/>
+                    <!-- Status bar -->
+                    <RowDefinition Height="Auto"
+                                   MinHeight="20"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*" MaxWidth="180"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- Settings Grid (row 0, spans all columns) -->
-                <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4">
+                <Grid Grid.Row="0"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="4">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="40"/>
                         <RowDefinition Height="40"/>
@@ -41,17 +77,32 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Auto Save Settings Row -->
-                    <ComboBox Grid.Row="0" Grid.Column="0" Margin="10,10,10,0" VerticalAlignment="Top"
-                              Name="ProfileComboBox" HorizontalAlignment="Left" Width="220">
+                    <ComboBox Grid.Row="0"
+                              Grid.Column="0"
+                              Margin="5,5,5,0"
+                              VerticalAlignment="Top"
+                              Name="ProfileComboBox"
+                              HorizontalAlignment="Left"
+                              MinWidth="220"
+                              Width="Auto">
                     </ComboBox>
-                    <CheckBox Grid.Row="0" Grid.Column="2" Name="AutoCheckBox" Content="Auto Save every"
-                              Height="24" Margin="0,10,0,0" VerticalAlignment="Top"
-                              Checked="CheckBox_Checked" HorizontalAlignment="Right" Width="130" />
-                    <ComboBox Grid.Row="0" Grid.Column="3" Name="MinuteComboBox"
-                              Margin="0,10,10,0"
+                    <CheckBox Grid.Row="0"
+                              Grid.Column="2"
+                              Name="AutoCheckBox"
+                              Content="Auto Save every"
+                              Height="24"
+                              Margin="0,10,5,0"
+                              VerticalAlignment="Top"
+                              Checked="CheckBox_Checked"
+                              HorizontalAlignment="Left"
+                              Width="Auto"/>
+                    <ComboBox Grid.Row="0"
+                              Grid.Column="3"
+                              Name="MinuteComboBox"
+                              Margin="5,5,5,0"
                               VerticalAlignment="Top"
                               HorizontalAlignment="Right"
-                              Width="105"
+                              Width="Auto"
                               SelectionChanged="MinuteComboBox_SelectionChanged"
                               IsEditable="True"
                               PreviewTextInput="MinuteComboBox_PreviewTextInput"
@@ -60,71 +111,112 @@
                     </ComboBox>
 
                     <!-- Auto Clean Settings Row -->
-                    <CheckBox Grid.Row="1" Grid.Column="2" Name="AutoCleanCheckBox" Content="Delete older than"
-                              Height="24" Margin="0,6,0,0" VerticalAlignment="Top"
-                              Checked="AutoCleanCheckBox_Checked" Unchecked="AutoCleanCheckBox_Unchecked"
-                              HorizontalAlignment="Right" Width="130" />
-                    <ComboBox Grid.Row="1" Grid.Column="3" Name="CleanupTimeComboBox"
-                              Margin="0,6,10,0"
+                    <CheckBox Grid.Row="1"
+                              Grid.Column="2"
+                              Name="AutoCleanCheckBox"
+                              Content="Delete older than"
+                              Height="24"
+                              Margin="0,6,5,0"
+                              VerticalAlignment="Top"
+                              Checked="AutoCleanCheckBox_Checked"
+                              Unchecked="AutoCleanCheckBox_Unchecked"
+                              HorizontalAlignment="Left"
+                              Width="Auto"/>
+                    <ComboBox Grid.Row="1"
+                              Grid.Column="3"
+                              Name="CleanupTimeComboBox"
+                              Margin="5,5,5,0"
                               VerticalAlignment="Top"
                               HorizontalAlignment="Right"
-                              Width="105"
+                              Width="Auto"
                               SelectionChanged="CleanupTimeComboBox_SelectionChanged">
                     </ComboBox>
                 </Grid>
 
                 <!-- ListBox for save files (row 1, spans all columns) -->
-                <ListBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5"
-                         Name="FileListBox" Margin="10,10,10,75"
+                <ListBox Grid.Row="1"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="5"
+                         Name="FileListBox"
+                         Margin="10,10,10,10"
+                         MinWidth="485"
+                         Width="Auto"
+                         Height="Auto"
+                         HorizontalAlignment="Left"
                          SelectionChanged="FileListBox_SelectionChanged"
+                         VerticalAlignment="Stretch"
                          SelectionMode="Extended"
                          KeyDown="FileListBox_KeyDown">
                     <ListBox.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Remove" Click="RemoveSave_Click"/>
+                            <MenuItem Header="Remove"
+                                      Click="RemoveSave_Click"/>
                         </ContextMenu>
                     </ListBox.ContextMenu>
                 </ListBox>
 
                 <!-- Controls below the ListBox (row 1, overlayed at bottom right) -->
-                <Button Grid.Row="1" Grid.Column="1"
-                        Content="Save" Margin="5,0,5,40" VerticalAlignment="Bottom" Click="Save_Button_Click"
-                        Height="22"
-                        IsEnabled="{Binding IsSaveEnabled}" />
-                <Button Grid.Row="1" Grid.Column="2"
-                        Content="Load" Margin="5,0,5,40"
-                        Click="Load_Button_Click" Height="22" VerticalAlignment="Bottom"
-                        Name="LoadButton" IsEnabled="False"
-                        Width="Auto" />
-                <Button Grid.Row="1" Grid.Column="3"
-                        Content="Open Saves Folder" Margin="5,0,10,40" Click="OpenSavesFolder_Click" Height="22"
-                        VerticalAlignment="Bottom" Width="Auto"
-                         />
-                <CheckBox Grid.Row="1" Grid.Column="0"
+                <CheckBox Grid.Row="2"
+                          Grid.Column="0"
                           Name="ShowDebugWindowCheckBox"
                           Content="Debug"
-                          Margin="10,0,10,42"
-                          VerticalAlignment="Bottom"                          
+                          Margin="10,0,0,5"
+                          VerticalAlignment="Bottom"
                           Checked="ShowDebugWindowCheckBox_Checked"
                           Unchecked="ShowDebugWindowCheckBox_Unchecked"/>
-
+                <Button Grid.Row="2"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="1"
+                        Content="Save"
+                        Margin="0,0,0,5"
+                        VerticalAlignment="Bottom"
+                        Click="Save_Button_Click"
+                        Height="Auto"
+                        Width="Auto"
+                        IsEnabled="{Binding IsSaveEnabled}"/>
+                <Button Grid.Row="2"
+                        Grid.Column="2"
+                        Grid.ColumnSpan="1"
+                        Content="Load"
+                        Margin="0,0,0,5"
+                        Click="Load_Button_Click"
+                        Height="Auto"
+                        Width="Auto"
+                        VerticalAlignment="Bottom"
+                        Name="LoadButton"
+                        IsEnabled="False"/>
+                <Button Grid.Row="2"
+                        Grid.Column="3"
+                        Grid.ColumnSpan="1"
+                        Content="Open Saves Folder"
+                        Margin="0,0,10,5"
+                        Click="OpenSavesFolder_Click"
+                        Height="Auto"
+                        Width="Auto"
+                        VerticalAlignment="Bottom"/>
                 <!-- StatusBar (row 2, spans all columns) -->
-                <StatusBar Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5"
+                <StatusBar Grid.Row="3"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="5"
                            Name="MainStatusBar"
                            VerticalAlignment="Bottom"
                            Visibility="Visible"
-                           Margin="10,0,10,10"
+                           Margin="10,5,10,10"
                            Height="30"
-                           Width="Auto">
-                    <StatusBarItem Width="Auto" Background="Transparent">
-                        <TextBlock Text="{Binding Status}"  />
+                           Width="Auto"
+                           Style="{StaticResource ThemedStatusBar}">
+                    <StatusBarItem Width="Auto">
+                        <TextBlock Text="{Binding Status}"
+                                   Style="{StaticResource StatusBarText}"/>
                     </StatusBarItem>
-                    <StatusBarItem HorizontalAlignment="Right" Background="Transparent"
+                    <StatusBarItem HorizontalAlignment="Right"
                                    Visibility="{Binding CountdownVisibility}">
-                        <TextBlock Text="{Binding CountdownText}"    />
+                        <TextBlock Text="{Binding CountdownText}"
+                                   Style="{StaticResource StatusBarText}"/>
                     </StatusBarItem>
-                    <StatusBarItem HorizontalAlignment="Right" Background="Transparent">
-                        <TextBlock Text="{Binding BalatroRunningStatus}"  />
+                    <StatusBarItem HorizontalAlignment="Right">
+                        <TextBlock Text="{Binding BalatroRunningStatus}"
+                                   Style="{StaticResource StatusBarText}"/>
                     </StatusBarItem>
                 </StatusBar>
             </Grid>

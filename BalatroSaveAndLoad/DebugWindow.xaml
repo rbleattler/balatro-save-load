@@ -3,11 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Debug Log"
         Height="400"
-        Width="600">
+        Width="600"
+        ThemeMode="System">
+    <Window.InputBindings>
+        <KeyBinding Key="T"
+                Modifiers="Ctrl"
+                Command="{Binding ToggleThemeCommand}"/>
+    </Window.InputBindings>
     <Grid>
         <ListBox Name="DebugListBox"
                  ItemsSource="{Binding DebugLog, RelativeSource={RelativeSource AncestorType=Window}}"
-                 Margin="10"
-                 />
+                 Margin="10"/>
     </Grid>
 </Window>

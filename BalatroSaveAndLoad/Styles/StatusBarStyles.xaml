@@ -1,0 +1,38 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style TargetType="StatusBar"
+           x:Key="ThemedStatusBar">
+        <Setter Property="Background"
+                Value="{DynamicResource {x:Static SystemColors.WindowBrush}}"/>
+        <Setter Property="Foreground"
+                Value="{DynamicResource {x:Static SystemColors.ControlTextBrush}}"/>
+    </Style>
+    <!-- <Style TargetType="TextBlock"
+           x:Key="StatusBarText">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=ThemeMode}"
+                         Value="System">
+                <Setter Property="Foreground"
+                        Value="#FFFFFF"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=ThemeMode}"
+                         Value="Dark">
+                <Setter Property="Foreground"
+                        Value="#FFFFFF"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=ThemeMode}"
+                         Value="Light">
+                <Setter Property="Foreground"
+                        Value="#000000"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=ThemeMode}"
+                         Value="None">
+                <Setter Property="Foreground"
+                        Value="Black"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style> -->
+
+</ResourceDictionary>
+

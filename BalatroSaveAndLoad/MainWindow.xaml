@@ -75,11 +75,21 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-
                     <!-- Auto Save Settings Row -->
+                    <Button Grid.Row="1"
+                            Grid.Column="0"
+                            Margin="10,5,5,0"
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Left"
+                            Width="Auto"
+                            Height="Auto"
+                            Content="🎨🔀"
+                            FontSize="16"
+                            Command="{Binding ToggleThemeCommand}"
+                            ToolTip="Toggle Theme (Ctrl+T)"/>
                     <ComboBox Grid.Row="0"
                               Grid.Column="0"
-                              Margin="5,5,5,0"
+                              Margin="10,5,5,0"
                               VerticalAlignment="Top"
                               Name="ProfileComboBox"
                               HorizontalAlignment="Left"
@@ -99,7 +109,7 @@
                     <ComboBox Grid.Row="0"
                               Grid.Column="3"
                               Name="MinuteComboBox"
-                              Margin="5,5,5,0"
+                              Margin="5,5,10,0"
                               VerticalAlignment="Top"
                               HorizontalAlignment="Right"
                               Width="Auto"
@@ -109,7 +119,6 @@
                               KeyDown="MinuteComboBox_KeyDown"
                               TextBoxBase.TextChanged="MinuteComboBox_TextChanged">
                     </ComboBox>
-
                     <!-- Auto Clean Settings Row -->
                     <CheckBox Grid.Row="1"
                               Grid.Column="2"
@@ -125,7 +134,7 @@
                     <ComboBox Grid.Row="1"
                               Grid.Column="3"
                               Name="CleanupTimeComboBox"
-                              Margin="5,5,5,0"
+                              Margin="5,5,10,0"
                               VerticalAlignment="Top"
                               HorizontalAlignment="Right"
                               Width="Auto"

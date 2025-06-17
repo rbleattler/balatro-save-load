@@ -7,9 +7,9 @@
         mc:Ignorable="d"
         Title="Balatro Save And Load"
         Height="640"
-        Width="500"
+        Width="{DynamicResource AppMinWidth}"
         MinHeight="640"
-        MinWidth="500"
+        MinWidth="{DynamicResource AppMinWidth}"
         Icon="/save-and-load.png"
         ThemeMode="System"
         ResizeMode="CanResizeWithGrip">
@@ -36,7 +36,7 @@
     </Window.InputBindings>
     <Border>
         <DockPanel LastChildFill="True"
-                   MinWidth="500"
+                   MinWidth="{DynamicResource AppMinWidth}"
                    MinHeight="600">
 
             <!-- Main Content -->
@@ -91,18 +91,17 @@
                               Name="AutoCheckBox"
                               Content="Auto Save every"
                               Height="24"
-                              Margin="0,10,0,0"
+                              Margin="0,10,5,0"
                               VerticalAlignment="Top"
                               Checked="CheckBox_Checked"
-                              HorizontalAlignment="Right"
-                              Width="130"/>
+                              HorizontalAlignment="Left"
+                              Width="Auto"/>
                     <ComboBox Grid.Row="0"
                               Grid.Column="3"
                               Name="MinuteComboBox"
-                              Margin="0,5,5,0"
+                              Margin="5,5,5,0"
                               VerticalAlignment="Top"
                               HorizontalAlignment="Right"
-                              MinWidth="105"
                               Width="Auto"
                               SelectionChanged="MinuteComboBox_SelectionChanged"
                               IsEditable="True"
@@ -117,19 +116,18 @@
                               Name="AutoCleanCheckBox"
                               Content="Delete older than"
                               Height="24"
-                              Margin="0,6,0,0"
+                              Margin="0,6,5,0"
                               VerticalAlignment="Top"
                               Checked="AutoCleanCheckBox_Checked"
                               Unchecked="AutoCleanCheckBox_Unchecked"
-                              HorizontalAlignment="Right"
-                              Width="130"/>
+                              HorizontalAlignment="Left"
+                              Width="Auto"/>
                     <ComboBox Grid.Row="1"
                               Grid.Column="3"
                               Name="CleanupTimeComboBox"
-                              Margin="0,5,5,0"
+                              Margin="5,5,5,0"
                               VerticalAlignment="Top"
                               HorizontalAlignment="Right"
-                              MinWidth="105"
                               Width="Auto"
                               SelectionChanged="CleanupTimeComboBox_SelectionChanged">
                     </ComboBox>
@@ -141,7 +139,7 @@
                          Grid.ColumnSpan="5"
                          Name="FileListBox"
                          Margin="10,10,10,10"
-                         MinWidth="465"
+                         MinWidth="485"
                          Width="Auto"
                          Height="Auto"
                          HorizontalAlignment="Left"
